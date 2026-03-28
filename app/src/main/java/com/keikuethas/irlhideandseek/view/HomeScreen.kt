@@ -25,7 +25,10 @@ import com.keikuethas.irlhideandseek.GeneralScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(innerPadding: PaddingValues, navController: NavController = rememberNavController()) {
+fun HomeScreen(
+    innerPadding: PaddingValues,
+    navController: NavController = rememberNavController()
+) {
 
     val name = remember { mutableStateOf("") }
     val gameID = remember { mutableStateOf("") }
@@ -37,23 +40,24 @@ fun HomeScreen(innerPadding: PaddingValues, navController: NavController = remem
             .padding(vertical = 100.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-            OutlinedTextField(
-                name.value,
-                onValueChange = { name.value = it },
-                placeholder = { Text("Отображаемое имя") },
-                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
-            )
+        OutlinedTextField(
+            name.value,
+            onValueChange = { name.value = it },
+            placeholder = { Text("Отображаемое имя") },
+            modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+        )
 
-            OutlinedTextField(
-                gameID.value,
-                onValueChange = { gameID.value = it },
-                placeholder = { Text("Идентификатор комнаты") },
-                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
-            )
+        OutlinedTextField(
+            gameID.value,
+            onValueChange = { gameID.value = it },
+            placeholder = { Text("Идентификатор комнаты") },
+            modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+        )
 
-        Box (Modifier, contentAlignment = Alignment.BottomCenter) {
+        Box(Modifier, contentAlignment = Alignment.BottomCenter) {
             ElevatedButton(onClick = {
                 //TODO: добавить проверку на существование комнаты (связь с сервером)
+                //Если комнаты нет, вывести диалог. окно с предл. создать комнату
                 navController.navigate(Lobby)
             }) { Text("Присоединиться") }
         }
