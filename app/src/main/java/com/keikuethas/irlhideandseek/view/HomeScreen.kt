@@ -19,11 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.keikuethas.irlhideandseek.GeneralScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(innerPadding: PaddingValues) {
+fun HomeScreen(innerPadding: PaddingValues, navController: NavController = rememberNavController()) {
 
     val name = remember { mutableStateOf("") }
     val gameID = remember { mutableStateOf("") }
@@ -50,7 +52,10 @@ fun HomeScreen(innerPadding: PaddingValues) {
             )
 
         Box (Modifier, contentAlignment = Alignment.BottomCenter) {
-            ElevatedButton(onClick = {}) { Text("Присоединиться") }
+            ElevatedButton(onClick = {
+                //TODO: добавить проверку на существование комнаты (связь с сервером)
+                navController.navigate(Lobby)
+            }) { Text("Присоединиться") }
         }
 
     }

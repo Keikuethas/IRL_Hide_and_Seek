@@ -15,7 +15,7 @@ fun AppNavigation(innerPadding: PaddingValues) {
     NavHost(navController, startDestination = Home) {
 
         composable<Home> {
-            HomeScreen(innerPadding)
+            HomeScreen(innerPadding, navController)
         }
 
         composable<Lobby>{

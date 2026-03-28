@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data object Home
 
 @Serializable
-data class Lobby(val role: PlayerRole)
+data object Lobby
 
 @Serializable
 data class Game(val role: PlayerRole)
