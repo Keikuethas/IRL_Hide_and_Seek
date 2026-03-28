@@ -1,5 +1,11 @@
+import org.gradle.kotlin.dsl.maven
+
 pluginManagement {
     repositories {
+        mavenCentral()
+        maven {
+            url = uri("https://maven.google.com/")
+        }
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -7,7 +13,6 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
-        mavenCentral()
         gradlePluginPortal()
     }
 }
