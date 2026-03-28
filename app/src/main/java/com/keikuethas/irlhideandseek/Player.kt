@@ -9,5 +9,4 @@ data class Player(
     val name: String,
     var role: PlayerRole = PlayerRole.Hider,
     val id: String = UUID.randomUUID().toString()
-) {
-}
+)

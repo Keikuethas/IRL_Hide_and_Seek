@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -66,10 +65,11 @@ fun LobbyScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // UPGRADE: сделать отображение игроков в виде таблицы
             itemsIndexed(
-                playerList, key = { index: Int, item: Player -> item.id },
-                itemContent = { index, item ->
-                    Text("${item.name} - ${item.role.toString()}")
+                playerList, key = { _: Int, item: Player -> item.id },
+                itemContent = { _, item ->
+                    Text("${item.name} - ${item.role}")
                 }
             )
         }
