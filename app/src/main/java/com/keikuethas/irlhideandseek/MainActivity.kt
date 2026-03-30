@@ -4,14 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.keikuethas.irlhideandseek.ui.theme.IRLHideAndSeekTheme
 import com.keikuethas.irlhideandseek.view.AppNavigation
@@ -35,8 +39,8 @@ class MainActivity : ComponentActivity() {
 fun GeneralScreen(screen: @Composable (PaddingValues) -> Unit) {
     IRLHideAndSeekTheme {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = { CenterAlignedTopAppBar(title = {Text("Hide and Seek")}) },
+            modifier = Modifier.fillMaxSize().background(Color.Blue),
+            topBar = { CenterAlignedTopAppBar(title = {Box {Text("Hide and Seek")}}) },
         ) { innerPadding ->
             screen(innerPadding)
         }
@@ -45,6 +49,4 @@ fun GeneralScreen(screen: @Composable (PaddingValues) -> Unit) {
 
 @Preview
 @Composable
-fun GeneralScreenPreview() {
-    GeneralScreen { }
-}
+fun GeneralScreenPreview() = GeneralScreen { }

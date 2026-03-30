@@ -3,10 +3,14 @@ package com.keikuethas.irlhideandseek.view
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,14 +44,19 @@ fun HomeScreen(
         OutlinedTextField(
             name.value,
             onValueChange = { name.value = it },
-            placeholder = { Text("Отображаемое имя") },
+            label = { Text("Отображаемое имя") },
             modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
         )
 
         OutlinedTextField(
             gameID.value,
             onValueChange = { gameID.value = it },
-            placeholder = { Text("Идентификатор комнаты") },
+            label = {
+                Row {
+                    Text("Идентификатор комнаты")
+                    Icon(Icons.Default.LocationOn, contentDescription = null)
+                }
+            },
             modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
         )
 
