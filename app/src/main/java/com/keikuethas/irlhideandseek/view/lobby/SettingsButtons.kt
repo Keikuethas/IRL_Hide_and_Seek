@@ -1,6 +1,5 @@
 package com.keikuethas.irlhideandseek.view.lobby
 
-import android.adservices.appsetid.AppSetId
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

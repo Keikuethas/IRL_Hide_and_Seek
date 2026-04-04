@@ -10,11 +10,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.keikuethas.irlhideandseek.R
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.mapview.MapView
-import androidx.activity.ComponentActivity
-import androidx.compose.ui.res.stringResource
 
 //NOTE: вайбкод
 @Composable
@@ -26,9 +23,6 @@ fun YandexMapView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val mapViewState = remember { mutableStateOf<MapView?>(null) }
 
-    if (mapViewState.value == null) {
-
-    }
 
     AndroidView(
         factory = { ctx ->

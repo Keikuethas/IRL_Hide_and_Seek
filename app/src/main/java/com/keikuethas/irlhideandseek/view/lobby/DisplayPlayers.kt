@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,7 +49,7 @@ fun DisplayPlayers(playerList: List<Player>, gameSettings: GameSettings) {
         LazyColumn(
             Modifier.scrollable(
                 orientation = Orientation.Vertical,
-                state = ScrollableState { it -> 0.01F * it }
+                state = ScrollableState { 0.01F * it }
             )
         ) {
             items(
