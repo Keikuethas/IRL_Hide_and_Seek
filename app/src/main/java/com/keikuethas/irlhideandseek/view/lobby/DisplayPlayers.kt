@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -52,9 +53,9 @@ fun DisplayPlayers(playerList: List<Player>, gameSettings: GameSettings) {
                 state = ScrollableState { it -> 0.01F * it }
             )
         ) {
-            itemsIndexed(
-                playerList, key = { _: Int, item: Player -> item.id },
-                itemContent = { _, item ->
+            items(
+                playerList, key = {item: Player -> item.id },
+                itemContent = {item ->
                     Row(
                         rowModifier,
                         horizontalArrangement = Arrangement.SpaceBetween

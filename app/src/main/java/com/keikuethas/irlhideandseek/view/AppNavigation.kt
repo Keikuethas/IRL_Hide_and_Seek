@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.keikuethas.irlhideandseek.view.game.GameScreen
 import com.keikuethas.irlhideandseek.view.lobby.LobbyScreen
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -23,8 +25,9 @@ fun AppNavigation(innerPadding: PaddingValues) {
             LobbyScreen(innerPadding, navController)
         }
 
-        composable<Game> {
-            GameScreen(innerPadding)
+        composable<Game> { backStackEntry ->
+            val role = backStackEntry.toRoute<Game>()
+            GameScreen(innerPadding, navController)
         }
     }
 }

@@ -1,14 +1,5 @@
 package com.keikuethas.irlhideandseek
 
-//todo
-//fixme
-
-//NOTE
-//CONCERN
-//FIXME
-//REFACTOR
-//TEMP
-//UPGRADE
 //DESCRIBE: описание должно обновляться по мере обновления класса
 /**
  * Класс, хранящий информацию о всех настройках игры (комнаты).
@@ -16,5 +7,9 @@ package com.keikuethas.irlhideandseek
  * @property playersCanChangeRole Может ли игрок изменять свою роль
  */
 data class GameSettings(val id: String, val hostId: String) {
+    // лобби
     var playersCanChangeRole: Boolean = true
+
+    // игра
+
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -41,6 +42,14 @@ fun SettingsButtons() {
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             SettingsButton(onClick = { }, Icons.Default.Place, "Карта")
+            SettingsButton(onClick = {}, Icons.Default.Add, "Бонусы")
+
+        }
+
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
             SettingsButton(onClick = { }, Icons.Default.Settings, "Настройки")
         }
     }
