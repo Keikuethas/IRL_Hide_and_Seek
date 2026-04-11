@@ -22,9 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.keikuethas.irlhideandseek.view.AbilitiesSettings
+import com.keikuethas.irlhideandseek.view.LobbySettings
+import com.keikuethas.irlhideandseek.view.MapSettings
+import com.keikuethas.irlhideandseek.view.RolesSettings
+import com.keikuethas.irlhideandseek.view.RulesSettings
 
 @Composable
-fun SettingsButtons() {
+fun SettingsButtons(navController: NavController) {
     // TODO: хост должен иметь возможность запретить
     //  просмотр правил для обычных игроков
     Column {
@@ -32,16 +38,16 @@ fun SettingsButtons() {
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            SettingsButton(onClick = {}, Icons.Default.Person, "Роли")
-            SettingsButton(onClick = {}, Icons.Default.Build, "Правила")
+            SettingsButton(navController, RolesSettings, Icons.Default.Person, "Роли")
+            SettingsButton(navController, RulesSettings, Icons.Default.Build, "Правила")
         }
 
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            SettingsButton(onClick = { }, Icons.Default.Place, "Карта")
-            SettingsButton(onClick = {}, Icons.Default.Add, "Бонусы")
+            SettingsButton(navController, MapSettings, Icons.Default.Place, "Карта")
+            SettingsButton(navController, AbilitiesSettings, Icons.Default.Add, "Бонусы")
 
         }
 
@@ -49,19 +55,22 @@ fun SettingsButtons() {
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            SettingsButton(onClick = { }, Icons.Default.Settings, "Настройки")
+            SettingsButton(navController, LobbySettings, Icons.Default.Settings, "Настройки")
         }
     }
 }
 
 @Composable
 fun SettingsButton(
-    onClick: () -> Unit,
+    navController: NavController,
+    destination: Any,
     imageVector: ImageVector = Icons.Default.Settings,
     text: String = ""
 ) {
     OutlinedButton(
-        onClick = onClick,
+        onClick = {
+            navController.navigate(destination)
+        },
         Modifier.wrapContentSize()
     ) {
         Row(Modifier.wrapContentSize()) {

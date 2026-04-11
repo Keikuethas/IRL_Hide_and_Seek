@@ -49,7 +49,7 @@ fun LobbyScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        SettingsButtons()
+        SettingsButtons(navController)
 
         Spacer(Modifier.height(20.dp))
 

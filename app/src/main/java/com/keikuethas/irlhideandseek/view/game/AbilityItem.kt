@@ -90,6 +90,7 @@ fun AbilityItem(ability: Ability, progress: Float = 0.5f) {
             }
         }
     }
+
 }
 
 fun Color.adjustLightness(delta: Float): Color { //refactor: убрать в отдельный файл
@@ -97,11 +98,13 @@ fun Color.adjustLightness(delta: Float): Color { //refactor: убрать в о�
     ColorUtils.colorToHSL(this.toArgb(), hsl)
     hsl[2] = (hsl[2] + delta).coerceIn(0f, 1f) // delta: +0.2 = светлее, -0.2 = темнее
     return Color(ColorUtils.HSLToColor(hsl))
+
+
 }
 
 @Preview
 @Composable
-fun AbilityItemPreview(count: Int = 5) {
+fun AbilityItemPreview(count: Int = 5, ability: Ability = Ability()) {
     Box(
         Modifier
             .fillMaxSize()
@@ -112,10 +115,8 @@ fun AbilityItemPreview(count: Int = 5) {
         ) {
             items(
                 count = count,
-                itemContent = { AbilityItem(Ability(), it / (count - 1).toFloat()) }
+                itemContent = { AbilityItem(ability, it / (count - 1).toFloat()) }
             )
         }
     }
 }
-
-//TODO: добавить превью для нескольких способностей

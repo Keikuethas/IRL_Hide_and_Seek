@@ -12,6 +12,11 @@ data object Lobby
 @Serializable
 data class Game(val role: PlayerRole)
 
+@Serializable data object RolesSettings
+@Serializable data object RulesSettings
+@Serializable data object MapSettings
+@Serializable data object AbilitiesSettings
+@Serializable data object LobbySettings
 /*
 * Описание экранов:
 * Home -> ввод имени и идентификатора комнаты, либо создание своей комнаты
