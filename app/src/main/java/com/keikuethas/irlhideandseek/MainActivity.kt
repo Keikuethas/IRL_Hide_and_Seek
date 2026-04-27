@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
 
         MapKitInitializer.initialize(this)
 
-        //NOTE: вайбкод
+        //vibecode
         // Запрос разрешений на геолокацию
         requestPermissions(
             arrayOf(
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    //NOTE: часть вайбкода
+    //часть vibecode
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
