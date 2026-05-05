@@ -2,7 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
     kotlin("plugin.serialization") version "2.2.0"
 }
 
@@ -53,6 +54,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -65,14 +68,12 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
-
-
     implementation("com.yandex.android:maps.mobile:4.7.0-lite") //for map
 
     // Навигация между окнами
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
-    // Анимация навигации
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.28.0")
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.51.1") // или kapt, если не используете KSP
 }
 
