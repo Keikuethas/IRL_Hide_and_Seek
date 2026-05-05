@@ -1,5 +1,6 @@
 package com.keikuethas.irlhideandseek.view
 
+import com.keikuethas.irlhideandseek.GameSettings
 import com.keikuethas.irlhideandseek.PlayerRole
 import kotlinx.serialization.Serializable
 
@@ -7,11 +8,12 @@ import kotlinx.serialization.Serializable
 data object Home
 
 @Serializable
-data object Lobby
+data class Lobby(val playerName: String, val roomName: String)
 
 @Serializable
-data class Game(val role: PlayerRole)
+data object Game
 
+//@Serializable data class RolesSettings(val gameSettings: GameSettings) //TEMP
 @Serializable data object RolesSettings
 @Serializable data object RulesSettings
 @Serializable data object MapSettings
