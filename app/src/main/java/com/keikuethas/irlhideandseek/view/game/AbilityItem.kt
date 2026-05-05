@@ -31,22 +31,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.keikuethas.irlhideandseek.Ability
+import com.keikuethas.irlhideandseek.SafeHouse
+import com.keikuethas.irlhideandseek.utils.adjustLightness
+import com.keikuethas.irlhideandseek.utils.makeGradientAbilityBrush
 
 @Composable
 fun AbilityItem(ability: Ability, progress: Float = 0.5f) {
 
-    // refactor: убрать в отдельный файл
-    val baseColor: Color = ability.color
-    val lightnessDelta = 0.4f
-    val gradientBrush = remember(baseColor, lightnessDelta) {
-        Brush.linearGradient(
-            colorStops = arrayOf(
-                progress to baseColor,
-                progress + (1f - progress) / 2 to baseColor.adjustLightness(-lightnessDelta),
-                1f to baseColor.adjustLightness(-lightnessDelta*2)
-            )
-        )
-    }
+    val gradientBrush = makeGradientAbilityBrush(ability, progress)
 
     Box(
         Modifier
@@ -74,11 +66,11 @@ fun AbilityItem(ability: Ability, progress: Float = 0.5f) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row {
-                        Icon(
-                            ability.icon,
-                            contentDescription = null
-                        )
-                        Text(ability.abilityType.toString())
+//                        Icon(
+//                            ability.icon,
+//                            contentDescription = null
+//                        )
+                        Text(ability.name)
                     }
                     Row {
                         Icon(Icons.Default.Refresh, contentDescription = null)
@@ -93,18 +85,9 @@ fun AbilityItem(ability: Ability, progress: Float = 0.5f) {
 
 }
 
-fun Color.adjustLightness(delta: Float): Color { //refactor: убрать в отдельный файл
-    val hsl = FloatArray(3)
-    ColorUtils.colorToHSL(this.toArgb(), hsl)
-    hsl[2] = (hsl[2] + delta).coerceIn(0f, 1f) // delta: +0.2 = светлее, -0.2 = темнее
-    return Color(ColorUtils.HSLToColor(hsl))
-
-
-}
-
 @Preview
 @Composable
-fun AbilityItemPreview(count: Int = 5, ability: Ability = Ability()) {
+fun AbilityItemPreview(count: Int = 5, ability: Ability = SafeHouse()) {
     Box(
         Modifier
             .fillMaxSize()
