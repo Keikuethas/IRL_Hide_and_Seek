@@ -31,8 +31,9 @@ import com.keikuethas.irlhideandseek.view.RulesSettings
 
 @Composable
 fun SettingsButtons(navController: NavController) {
-    // TODO: хост должен иметь возможность запретить
-    //  просмотр правил для обычных игроков
+
+    // UPGRADE: lazy grid
+
     Column {
         Row(
             Modifier.fillMaxWidth(),
@@ -47,14 +48,6 @@ fun SettingsButtons(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             SettingsButton(navController, MapSettings, Icons.Default.Place, "Карта")
-            SettingsButton(navController, AbilitiesSettings, Icons.Default.Add, "Бонусы")
-
-        }
-
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
             SettingsButton(navController, LobbySettings, Icons.Default.Settings, "Настройки")
         }
     }

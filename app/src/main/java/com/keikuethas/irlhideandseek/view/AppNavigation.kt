@@ -1,13 +1,11 @@
 package com.keikuethas.irlhideandseek.view
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.keikuethas.irlhideandseek.view.game.GameScreen
 import com.keikuethas.irlhideandseek.view.lobby.LobbyScreen
 import com.keikuethas.irlhideandseek.view.settings_screens.AbilitiesSettingsScreen
