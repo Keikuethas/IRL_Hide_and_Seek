@@ -3,11 +3,11 @@ package com.keikuethas.irlhideandseek.view.game
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.PointF
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -25,10 +25,12 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -43,17 +45,19 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.keikuethas.irlhideandseek.Ability
-import com.keikuethas.irlhideandseek.GeneralScreen
+import com.keikuethas.irlhideandseek.R
+import com.keikuethas.irlhideandseek.Shield
+import com.keikuethas.irlhideandseek.view.YandexMapView
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
+import com.yandex.runtime.image.ImageProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
-    innerPadding: PaddingValues,
     navController: NavController = rememberNavController(),
     preview: Boolean = false
 ) {
@@ -65,6 +69,9 @@ fun GameScreen(
         skipPartiallyExpanded = false, // Разрешить три состояния
     )
 
+    Scaffold(
+        topBar = { CenterAlignedTopAppBar(title = {Box {Text("Hide and Seek")}}) }
+    ) { innerPadding ->
     Box(
         Modifier
             .padding(innerPadding)
@@ -83,7 +90,7 @@ fun GameScreen(
         }
 
 
-        //NOTE: вайбкод
+        //vibecode
         if (showBottomSheet.value) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -92,7 +99,7 @@ fun GameScreen(
                 },
                 sheetState = sheetState,
                 dragHandle = {
-                    Column (horizontalAlignment = Alignment.CenterHorizontally){
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Spacer(Modifier.height(50.dp))
                         // "Ручка" для перетаскивания
                         BottomSheetDefaults.DragHandle(
@@ -115,7 +122,7 @@ fun GameScreen(
                 ) {
                     repeat(300)
                     {
-                        AbilityItem(Ability())
+                        AbilityItem(Shield())
                     }
                 }
 
@@ -150,8 +157,9 @@ fun GameScreen(
                 }
             }
     }
+    }
 
-    //enableUserLocation(mapView.value, context)
+    enableUserLocation(mapView.value, context)
 //
 //    //TEMP
 //    val map = mapView.value.mapWindow.map
@@ -163,31 +171,47 @@ fun GameScreen(
 //    ))
 }
 
-//Note: вайбкод
 private fun enableUserLocation(mapView: MapView, context: Context) {
+    val displayMetrics = context.resources.displayMetrics
+    val screenWidth = displayMetrics.widthPixels
+    val screenHeight = displayMetrics.heightPixels
+
     val mapKit: MapKit = MapKitFactory.getInstance()
-
-    // ✅ Используем mapWindow вместо map
     val userLocationLayer: UserLocationLayer = mapKit.createUserLocationLayer(mapView.mapWindow)
-
-    userLocationLayer.isVisible = true
-    userLocationLayer.isHeadingEnabled = true
 
     if (ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     ) {
-        userLocationLayer.also {
-            it.isVisible = true
-            it.isHeadingEnabled = true
+        userLocationLayer.apply {
+            isVisible = true
+            isHeadingEnabled = true
+            setAnchor(
+                PointF(screenWidth / 2f, screenHeight / 2f),
+                PointF(screenWidth / 2f, screenHeight * 0.85f)
+            )
         }
     }
 }
 
+// TEMP для озн пр
+private fun testPlaceMark(mapView: MapView, context: Context) {
+    val mapObjects = mapView.mapWindow.map.mapObjects
+    val placemark = mapObjects.addPlacemark().apply {
+        geometry = Point(55.751225, 37.62954)  // Координаты точки
+        setIcon(
+            ImageProvider.fromResource(
+                context,
+                R.mipmap.test_placemark  // Ресурс изображения маркера
+            )
+        )
+        userData = "Произвольные данные, связанные с объектом"
+    }
+}
 
 @Preview
 @Composable
 fun GamePreview() {
-    GeneralScreen { GameScreen(it, preview = true) }
+    GameScreen(preview = true)
 }
