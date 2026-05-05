@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek.view.game
+package com.keikuethas.irlhideandseek.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -13,16 +13,14 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.mapview.MapView
 
-//NOTE: вайбкод
+//vibecode
 @Composable
 fun YandexMapView(
     modifier: Modifier = Modifier,
     onMapCreated: (MapView) -> Unit = {}
 ) {
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val mapViewState = remember { mutableStateOf<MapView?>(null) }
-
 
     AndroidView(
         factory = { ctx ->
@@ -59,4 +57,15 @@ fun YandexMapView(
             MapKitFactory.getInstance().onStop()
         }
     }
+}
+
+fun MapView.enableUserLocation() {
+    val userLocationLayer = this.mapWindow.map.userLocationLayer
+    userLocationLayer.isEnabled = true
+    userLocationLayer.setAnchor(
+        AnchorPoint(AnchorPoint.HorizontalAlignment.CENTER,
+            AnchorPoint.VerticalAlignment.CENTER),
+        AnchorPoint(AnchorPoint.HorizontalAlignment.RIGHT,
+            AnchorPoint.VerticalAlignment.BOTTOM)
+    )
 }
