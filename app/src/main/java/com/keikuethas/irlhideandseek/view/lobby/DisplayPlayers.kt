@@ -23,9 +23,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.keikuethas.irlhideandseek.GameSettings
 import com.keikuethas.irlhideandseek.Player
+import com.keikuethas.irlhideandseek.PlayerRole
 
+// upgrade
 @Composable
-fun DisplayPlayers(playerList: List<Player>, gameSettings: GameSettings) {
+fun DisplayPlayers(
+    playerList: List<Pair<String, String>>,
+    roleList: List<PlayerRole>,
+    playerName: String) {
     Column(
         Modifier
             .padding(top = 20.dp, bottom = 10.dp)
@@ -53,7 +58,7 @@ fun DisplayPlayers(playerList: List<Player>, gameSettings: GameSettings) {
             )
         ) {
             items(
-                playerList, key = {item: Player -> item.id },
+                playerList, key = {item: Pair<String, String> -> item.first},
                 itemContent = {item ->
                     Row(
                         rowModifier,
@@ -62,11 +67,11 @@ fun DisplayPlayers(playerList: List<Player>, gameSettings: GameSettings) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(item.name)
-                            if (item.id == gameSettings.hostId)
+                            Text(item.first)
+                            if (item.first == playerName)
                                 Icon(Icons.Default.Star, contentDescription = null)
                         }
-                        Text(item.role.toString())
+                        Text(item.second)
                     }
                 }
             )
