@@ -4,10 +4,11 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 // Класс для хранения информации об игроке. В частности, его роль и идентификатор
+//TODO
 @Serializable
 data class Player(
     val name: String,
-    var role: PlayerRole = PlayerRole.Hider,
+    var role: PlayerRole,
     var health: Int = 100,
     var is_alive: Boolean = true,
     //TODO: location
