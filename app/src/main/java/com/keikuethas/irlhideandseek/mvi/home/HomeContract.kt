@@ -30,7 +30,6 @@ sealed interface HomeIntent {
     data class EditName(val value: String) : HomeIntent // Пользователь изменил имя
     data class EditRoomName(val value: String) : HomeIntent // Пользователь изменил ID комнаты
     data object GrantPermissions : HomeIntent  // Пользователь нажал "Предоставить разрешение"
-
     data object DismissError : HomeIntent // Пользователь закрыл ошибку
 }
 

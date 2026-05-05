@@ -30,22 +30,24 @@ class HomeViewModel : ViewModel() {
             is HomeIntent.EditRoomName -> dispatch(RoomNameEdited(intent.value))
             is HomeIntent.JoinGame -> joinGame()
             HomeIntent.GrantPermissions -> sendEffect(HomeEffect.OpenSettings)
-            HomeIntent.DismissError -> dispatch(HomeResult.ErrorDismissed)
+            HomeIntent.DismissError -> dispatch(ErrorDismissed)
         }
     }
 
 
     private fun joinGame() {
-        val gameExists = !true //todo запрос к серверу
+        val gameExists = true //SERVER запрос к серверу
 
         if (gameExists) sendEffect(HomeEffect.JoinLobby(homeState.value.roomNameText))
         else dispatch(
             Error(
                 "Игра не найдена",
-                "Не удалось найти игру с таким идентификатором. " +
+                "Не удалось найти игру с таким кодом. " +
                         "Пожалуйста, проверьте корректность ввода и повторите попытку."
             )
         )
+
+
     }
 
     // Сюда передаём результат, чтобы получить новое состояние
