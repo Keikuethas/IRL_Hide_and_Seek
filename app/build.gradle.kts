@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    id("kotlin-parcelize")
     kotlin("plugin.serialization") version "2.2.0"
 }
 
@@ -75,5 +76,12 @@ dependencies {
 
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-compiler:2.51.1") // или kapt, если не используете KSP
+
+    // ✅ Используйте версии из libs.versions.toml
+    implementation(libs.androidx.hilt)
+    ksp(libs.androidx.hilt.compiler)
+
+    // ✅ kotlinx-serialization: версия плагина = версии Kotlin
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 }
 
