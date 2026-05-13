@@ -7,4 +7,13 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+<!--    zone colors    -->
+    <color name="redBorder">#BD0000</color>
+    <color name="redFill">#40BD0000</color>
+    <color name="blueBorder">#03A9F4</color>
+    <color name="blueFill">#4003A9F4</color>
+    <color name="orangeBorder">#FF9800</color>
+    <color name="orangeFill">#40FF9800</color>
+    <color name="greenBorder">#8BC34A</color>
+    <color name="greenFill">#408BC34A</color>
 </resources>
