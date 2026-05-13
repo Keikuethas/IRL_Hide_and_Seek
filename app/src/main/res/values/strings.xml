@@ -1,3 +1,26 @@
 <resources>
-    <string name="app_name">IRL Hide and Seek</string>
+    <string name="app_name">L.U.R.K.</string>
+    <string name="IntelName">Разведданные</string>
+    <string name="PersonalBombName">Персональная бомба</string>
+    <string name="SafeHouseName">Я в домике</string>
+    <string name="SafeMansionName">Я в особняке</string>
+    <string name="ScanName">Сканирование местности</string>
+    <string name="ShieldName">Щит</string>
+    <string name="SnareName">Капкан</string>
+    <string name="TrapName">Ловушка</string>
+    <string name="DurationSecondsName">Длительность</string>
+    <string name="NumberUsesName">Использований</string>
+    <string name="RechargeTimeName">Время перезарядки</string>
+    <string name="RadiusName">Радиус</string>
+    <string name="TrapDurationSecondsName">Время действия ловушки</string>
+    <string name="NumberUsesParam">Использования</string>
+    <string name="RechargeTimeParam">Время перезарядки</string>
+    <string name="DurationSecondsParam">Время действия</string>
+    <string name="ItemsUnit">шт</string>
+    <string name="SecondsUnit">с</string>
+    <string name="MetersUnit">м</string>
+    <string name="HPUnit">ОЗ</string>
+    <string name="CreateRole">Создать роль</string>
+    <string name="Revert">Отменить</string>
+    <string name="Save">Сохранить</string>
 </resources>
