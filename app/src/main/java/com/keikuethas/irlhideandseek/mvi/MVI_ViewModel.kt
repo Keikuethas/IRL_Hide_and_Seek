@@ -1,5 +1,6 @@
 package com.keikuethas.irlhideandseek.mvi
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,6 +17,7 @@ abstract class MVI_ViewModel<State: Any, Intent: Any, Effect: Any, Result: Any>(
     private val _effect = MutableSharedFlow<Effect>(extraBufferCapacity = 1)
     val effect = _effect.asSharedFlow()
 
+    @Composable
     abstract fun onIntent(intent: Intent)
 
     protected fun sendEffect(effect: Effect) {
