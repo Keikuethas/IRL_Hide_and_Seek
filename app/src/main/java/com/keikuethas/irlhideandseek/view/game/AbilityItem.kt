@@ -21,19 +21,17 @@ import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.ColorUtils
 import com.keikuethas.irlhideandseek.Ability
 import com.keikuethas.irlhideandseek.SafeHouse
-import com.keikuethas.irlhideandseek.utils.adjustLightness
+import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.makeGradientAbilityBrush
+import com.keikuethas.irlhideandseek.utils.name
 
 @Composable
 fun AbilityItem(ability: Ability, progress: Float = 0.5f) {
