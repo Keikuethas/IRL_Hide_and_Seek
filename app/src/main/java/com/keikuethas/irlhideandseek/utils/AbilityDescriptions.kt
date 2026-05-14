@@ -72,7 +72,9 @@ fun paramName(techName: String) = when (techName) {
     "recharge_time" -> stringResource(R.string.RechargeTimeName)
     "radius" -> stringResource(R.string.RadiusName)
     "trap_duration_seconds" -> stringResource(R.string.TrapDurationSecondsName)
-    "damage" -> "Урон"
+    "damage" -> stringResource(R.string.DamageName)
+    "roleName" -> stringResource(R.string.RoleName)
+    "health" -> stringResource(R.string.HealthName)
     else -> techName
 }
 
@@ -80,6 +82,7 @@ fun paramName(techName: String) = when (techName) {
 fun unitName(paramTechName: String) = when (paramTechName) {
     "trap_duration_seconds", "recharge_time", "duration_seconds" -> stringResource(R.string.SecondsUnit)
     "radius" -> stringResource(R.string.MetersUnit)
-    "damage" -> stringResource(R.string.HPUnit)
+    "damage", "health" -> stringResource(R.string.HPUnit)
+    "roleName" -> ""
     else -> stringResource(R.string.ItemsUnit)
 }
