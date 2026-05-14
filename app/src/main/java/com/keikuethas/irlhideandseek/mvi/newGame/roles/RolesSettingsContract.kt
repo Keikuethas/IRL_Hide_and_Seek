@@ -147,6 +147,7 @@ sealed interface RSIntent {
     data object AddAbilityDismissed : RSIntent
     data class AddAbility(val type: KClass<out Ability>) : RSIntent
     data object RoleHealthClick : RSIntent
+    data class DeleteAbility(val type: KClass<out Ability>): RSIntent
 
 }
 
@@ -164,6 +165,7 @@ sealed interface RSResult {
     data class RoleTypeDialogStateSet(val open: Boolean) : RSResult
     data class AbilityAdded(val type: KClass<out Ability>): RSResult
     data class AddAbilityDialogStateSet(val open: Boolean): RSResult
+    data class AbilityDeleted(val type: KClass<out Ability>): RSResult
 }
 
 sealed interface RSEffect {

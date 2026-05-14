@@ -2,10 +2,17 @@ package com.keikuethas.irlhideandseek.mvi.newGame.roles
 
 import androidx.lifecycle.SavedStateHandle
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.AbilityAdded
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.AbilityDeleted
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.AddAbilityDialogStateSet
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.HealthChanged
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.ParameterChanged
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.QuitDialogStateChanged
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.RoleCreated
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.RoleDeleteDialogStateChanged
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.RoleDeleted
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.RoleNameChanged
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.RoleTypeDialogStateSet
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.ScrollRoles
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult.VIDStateChanged
 import com.keikuethas.irlhideandseek.view.DialogInputType
@@ -78,7 +85,7 @@ class RolesSettingsViewModel @Inject constructor(
             )
 
             RSIntent.RoleTypeClick ->
-                dispatch(RSResult.RoleTypeDialogStateSet(true))
+                dispatch(RoleTypeDialogStateSet(true))
 
             RSIntent.Save -> {
                 //TODO: сохранение в головную вьюмодель
@@ -92,12 +99,12 @@ class RolesSettingsViewModel @Inject constructor(
                 val paramName = state.value.showValueInputDialog!!.paramName
                 val type = state.value.showValueInputDialog!!.inputType
                 when (paramName) {
-                    "roleName" -> dispatch(RSResult.RoleNameChanged(intent.newValue))
+                    "roleName" -> dispatch(RoleNameChanged(intent.newValue))
                     "health" ->
-                        dispatch(RSResult.HealthChanged(intent.newValue.toInt().coerceIn(1, 999)))
+                        dispatch(HealthChanged(intent.newValue.toInt().coerceIn(1, 999)))
 
                     else -> dispatch(
-                        RSResult.ParameterChanged(
+                        ParameterChanged(
                             paramName, when (type) {
                                 DialogInputType.INT -> intent.newValue.toInt()
                                 DialogInputType.FLOAT -> intent.newValue.toFloat()
@@ -116,19 +123,19 @@ class RolesSettingsViewModel @Inject constructor(
             is RSIntent.RoleTypeChangeAnswer -> {
                 if (intent.changed)
                     dispatch(RSResult.RoleTypeChanged)
-                dispatch(RSResult.RoleTypeDialogStateSet(false))
+                dispatch(RoleTypeDialogStateSet(false))
             }
 
             is RSIntent.AddAbility -> {
-                dispatch(RSResult.AbilityAdded(intent.type))
-                dispatch(RSResult.AddAbilityDialogStateSet(false))
+                dispatch(AbilityAdded(intent.type))
+                dispatch(AddAbilityDialogStateSet(false))
             }
 
             RSIntent.AddAbilityDismissed ->
-                dispatch(RSResult.AddAbilityDialogStateSet(false))
+                dispatch(AddAbilityDialogStateSet(false))
 
             RSIntent.AddAbilityRequest ->
-                dispatch(RSResult.AddAbilityDialogStateSet(true))
+                dispatch(AddAbilityDialogStateSet(true))
 
             RSIntent.RoleHealthClick -> dispatch(
                 VIDStateChanged(
@@ -141,6 +148,8 @@ class RolesSettingsViewModel @Inject constructor(
                     )
                 )
             )
+
+            is RSIntent.DeleteAbility -> dispatch(AbilityDeleted(intent.type))
         }
     }
 

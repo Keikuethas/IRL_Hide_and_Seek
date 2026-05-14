@@ -129,5 +129,18 @@ object RolesSettingsReducer {
             is RSResult.VIDStateChanged -> state.copy(
                 showValueInputDialog = result.state
             )
+
+            is RSResult.AbilityDeleted -> {
+                val newAbilityList = state.roles[state.currentRole].abilities.filterNot { it.type == result.type }
+                val newRole = state.roles[state.currentRole].copy(
+                    abilities = newAbilityList
+                )
+                val newRoleList: List<RoleState> = state.roles.subList(0, state.currentRole) +
+                        newRole +
+                        state.roles.subList(state.currentRole + 1, state.roles.size)
+                state.copy(
+                    roles = newRoleList
+                )
+            }
         }
 }

@@ -97,7 +97,7 @@ fun RolesSettingsScreen(
     rolesSettingsViewModel: RolesSettingsViewModel = viewModel()
 ) {
     val state = rolesSettingsViewModel.state.collectAsStateWithLifecycle()
-    RSSUI(state.value, { rolesSettingsViewModel.onIntent(it) })
+    RSSUI(state.value) { rolesSettingsViewModel.onIntent(it) }
     BackHandler { rolesSettingsViewModel.onIntent(RSIntent.QuitRequest)  }
     LaunchedEffect(key1 = Unit) {
         rolesSettingsViewModel.effect.collect { effect ->
@@ -219,7 +219,8 @@ fun RSSUI(
                         },
                         onDelete = { onIntent(RSIntent.RoleDeleteRequest) },
                         onAddAbility = { onIntent(RSIntent.AddAbilityRequest) },
-                        onHealthClick = { onIntent(RSIntent.RoleHealthClick) }
+                        onHealthClick = { onIntent(RSIntent.RoleHealthClick) },
+                        onDeleteAbility = {onIntent(RSIntent.DeleteAbility(it))}
                     ) else EmptyRoleElement { onIntent(RSIntent.RoleCreate) }
 
                 Surface(
@@ -378,7 +379,8 @@ fun RoleElement(
     onParamValueClick: (type: KClass<out Ability>, name: String) -> Unit = { _, _ -> },
     onDelete: () -> Unit = {},
     onAddAbility: () -> Unit = {},
-    onHealthClick: () -> Unit = {}
+    onHealthClick: () -> Unit = {},
+    onDeleteAbility: (KClass<out Ability>) -> Unit = {}
 ) {
     Box(
         Modifier
@@ -466,7 +468,8 @@ fun RoleElement(
                                         .padding(10.dp, vertical = 5.dp)
                                         .wrapContentHeight()
                                         .heightIn(max = 1000.dp),
-                                    onParamValueClick = onParamValueClick
+                                    onParamValueClick = onParamValueClick,
+                                    onDeleteAbility = onDeleteAbility
                                 )
                             }
 
@@ -535,18 +538,37 @@ private fun EmptyAbilityCard(
 private fun AbilityCard(
     modifier: Modifier = Modifier,
     state: AbilityState = AbilityState(Shield()),
-    onParamValueClick: (type: KClass<out Ability>, name: String) -> Unit = { _, _ -> }
+    onParamValueClick: (type: KClass<out Ability>, name: String) -> Unit = { _, _ -> },
+    onDeleteAbility: (KClass<out Ability>) -> Unit = {}
 ) {
     OutlinedCard(
         modifier = modifier
             .fillMaxWidth(),
         border = BorderStroke(2.dp, Color.Black)
     ) {
-        Text(
-            state.type.name(),
-            style = typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp)
-        )
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ){
+            Text(
+                state.type.name(),
+                style = typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Surface(
+                onClick = {onDeleteAbility(state.type)},
+                color = Color.Transparent
+            )
+            {
+                Icon(
+                    Icons.Default.DeleteForever,
+                    null,
+                    tint = Color.Red,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+        }
         Text(
             state.type.description(),
             style = typography.bodyMedium,
