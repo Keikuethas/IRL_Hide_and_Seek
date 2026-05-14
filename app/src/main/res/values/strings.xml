@@ -23,4 +23,7 @@
     <string name="CreateRole">Создать роль</string>
     <string name="Revert">Отменить</string>
     <string name="Save">Сохранить</string>
+    <string name="DamageName">Урон</string>
+    <string name="RoleName">Имя роли</string>
+    <string name="HealthName">Здоровье</string>
 </resources>
