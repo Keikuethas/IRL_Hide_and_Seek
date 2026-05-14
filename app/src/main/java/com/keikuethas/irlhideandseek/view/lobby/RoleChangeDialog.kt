@@ -100,7 +100,7 @@ fun RoleChangeDialog(
 
                 //content
                 Surface(
-                    color = BarelyGrey, //resource
+                    color = BarelyGrey,
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.height(700.dp)
                 ) {
