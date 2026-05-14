@@ -1,0 +1,100 @@
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+
+class ActiveGameViewModel : ViewModel() {
+
+    private val wsClient = GameWebsocketClient()
+
+    // Состояние UI для карты
+    val otherPlayersLocations = mutableMapOf<String, Pair<Double, Double>>()
+
+    init {
+        // Подписываемся на события от сервера
+        viewModelScope.launch {
+            wsClient.events.collect { event ->
+                handleServerEvent(event)
+            }
+        }
+    }
+
+    fun connectToGame(gameId: String, playerId: String) {
+        val url = "ws://your-server.com/ws/$gameId/$playerId"
+        wsClient.connect(url)
+    }
+
+    // ==================================================
+    // ОТПРАВКА КОМАНД (Вызываем из Activity/Fragment)
+    // ==================================================
+
+    fun sendMyCurrentLocation(lat: Double, lng: Double) {
+        wsClient.sendCommand("update_location", OutgoingRequests.updateLocation(lat, lng))
+    }
+
+    fun triggerPersonalBomb() {
+        wsClient.sendCommand("use_ability", OutgoingRequests.useAbility(AbilityType.PERSONAL_BOMB))
+    }
+
+    fun setReady(isReady: Boolean) {
+        wsClient.sendCommand("change_ready_status", OutgoingRequests.changeReadyStatus(isReady))
+    }
+
+    // ==================================================
+    // ПРИЕМ СОБЫТИЙ (Обработка ответов)
+    // ==================================================
+
+    private fun handleServerEvent(event: ServerEvent) {
+        // 🔥 Благодаря Sealed interface, when работает исчерпывающе!
+        when (event) {
+            is ServerEvent.InitialConnected -> {
+                val myRole = event.player.roleId
+                val gameRules = event.game
+                // Отрисовать начальное состояние лобби/карты
+            }
+            is ServerEvent.PlayerMoved -> {
+                // Обновляем метку чужого игрока на Google Maps / Yandex Maps
+                otherPlayersLocations[event.playerId] = Pair(event.lat, event.lng)
+                // updateMapUI()
+            }
+            is ServerEvent.ZoneCreated -> {
+                // Рисуем круг на карте (цвет зависит от event.zoneType)
+                when (event.zoneType) {
+                    ZoneType.DANGER -> { /* Нарисовать красный круг бомбы */ }
+                    ZoneType.SAFE -> { /* Синий круг */ }
+                    else -> {}
+                }
+            }
+            is ServerEvent.ZoneDeleted -> {
+                // Удалить круг с карты по event.zoneId
+            }
+            is ServerEvent.AbilityUsed -> {
+                if (event.result == 0) {
+                    // Абилка сработала успешно, запускаем анимацию/звук
+                }
+            }
+            is ServerEvent.FullGameState -> {
+                // Пришло полное обновление игры
+            }
+            is ServerEvent.ReadyStatusChanged -> {
+                // Обновить галочку "Готов" в интерфейсе
+            }
+            is ServerEvent.RoleChanged -> {
+                // Игрок сменил роль
+            }
+            is ServerEvent.Pong -> {
+                // Сервер ответил на пинг
+            }
+            ServerEvent.TimerToHideFinished -> {
+                // Прятки закончились! Охотники выходят. Показать БОЛЬШОЙ АЛЕРТ на экране.
+            }
+            is ServerEvent.Unknown -> {
+                // Логируем неизвестный пакет
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        wsClient.disconnect()
+    }
+}
