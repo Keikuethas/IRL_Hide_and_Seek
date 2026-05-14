@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,29 +24,22 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Start
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,12 +50,16 @@ import com.keikuethas.irlhideandseek.Ability
 import com.keikuethas.irlhideandseek.Intel
 import com.keikuethas.irlhideandseek.PersonalBomb
 import com.keikuethas.irlhideandseek.PlayerRole
+import com.keikuethas.irlhideandseek.R
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.SafeMansion
 import com.keikuethas.irlhideandseek.Shield
-import com.keikuethas.irlhideandseek.ui.theme.color
+import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
 import com.keikuethas.irlhideandseek.utils.adjustLightness
-import kotlinx.coroutines.launch
+import com.keikuethas.irlhideandseek.utils.description
+import com.keikuethas.irlhideandseek.utils.name
+import com.keikuethas.irlhideandseek.utils.paramName
+import com.keikuethas.irlhideandseek.utils.unitName
 
 @Composable
         /**
@@ -105,7 +100,7 @@ fun RoleChangeDialog(
 
                 //content
                 Surface(
-                    color = Color(220, 220, 220, 255), //resource
+                    color = BarelyGrey,
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.height(700.dp)
                 ) {
@@ -119,7 +114,8 @@ fun RoleChangeDialog(
                                 it,
                                 onRoleSelect = onRoleSelect,
                                 padding = PaddingValues(vertical = 5.dp),
-                                enabled = it.name != playerRole)
+                                enabled = it.name != playerRole
+                            )
                         }
                     }
                 }
@@ -168,61 +164,7 @@ fun RoleCard(
                     style = typography.headlineMedium
                 )
 
-                val toolTipState = rememberTooltipState(isPersistent = true)
-                val coroutineScope = rememberCoroutineScope()
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-                    tooltip = {
-                        RichTooltip(
-                            title = {
-                                Row {
-                                    Text(
-                                        text = "Роль относится к типу ", //resource
-                                        style = typography.titleMedium
-                                    )
-                                    Text(
-                                        text = role.type.toString(), //resource
-                                        style = typography.titleMedium,
-                                        color = role.type.color
-                                    )
-                                }
-                            }
-                        ) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Text(
-                                    text = role.type.description,
-                                    style = typography.bodyMedium
-                                )
-                            }
-                        }
-                    },
-                    state = toolTipState,
-                    modifier = Modifier
-                ) {
-                    Surface(
-                        onClick = { coroutineScope.launch { toolTipState.show() } },
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(2.dp, role.type.color),
-                        color = Color.White,
-                        modifier = Modifier.padding(top = 5.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Spacer(
-                                Modifier
-                                    .width(10.dp)
-                                    .height(20.dp)
-                            )
-                            Text(
-                                role.type.toString(),
-                                style = typography.labelLarge,
-                                color = role.type.color
-                            )
-                            Spacer(Modifier.width(10.dp))
-                        }
-                    }
-                }
+                RoleTypeTag(role.type)
             }
 
             IconButton(
@@ -274,6 +216,7 @@ fun RoleCard(
     }
 }
 
+
 @Composable
 fun AbilityCard(ability: Ability, padding: PaddingValues = PaddingValues(0.dp)) {
     OutlinedCard(
@@ -285,7 +228,7 @@ fun AbilityCard(ability: Ability, padding: PaddingValues = PaddingValues(0.dp)) 
         Text(
             ability.name,
             style = typography.titleMedium,
-            modifier = Modifier.padding(start = 10.dp)
+            modifier = Modifier.padding(start = 16.dp)
         )
         Text(
             ability.description,
@@ -293,10 +236,21 @@ fun AbilityCard(ability: Ability, padding: PaddingValues = PaddingValues(0.dp)) 
             modifier = Modifier.padding(start = 10.dp)
         )
         Spacer(Modifier.height(10.dp))
-        // resource
-        ParamInfo("Использований", ability.number_uses)
-        ParamInfo("Время перезарядки", ability.recharge_time, units = "с")
-        ParamInfo("Время действия", ability.duration_seconds, units = "с")
+        ParamInfo(
+            stringResource(R.string.NumberUsesParam),
+            ability.number_uses,
+            unit = stringResource(R.string.ItemsUnit)
+        )
+        ParamInfo(
+            stringResource(R.string.RechargeTimeParam),
+            ability.recharge_time,
+            unit = stringResource(R.string.SecondsUnit)
+        )
+        ParamInfo(
+            stringResource(R.string.DurationSecondsParam),
+            ability.duration_seconds,
+            unit = stringResource(R.string.SecondsUnit)
+        )
         ability.ComposableForEachParam { name, value ->
             ParamInfo(name, value)
         }
@@ -304,28 +258,29 @@ fun AbilityCard(ability: Ability, padding: PaddingValues = PaddingValues(0.dp)) 
 }
 
 @Composable
-fun ParamInfo(name: String, value: Number, style: TextStyle = typography.labelLarge, units: String = "") {
+fun ParamInfo(
+    name: String,
+    value: Number,
+    style: TextStyle = typography.labelLarge,
+    unit: String = ""
+) {
 
-    // перевод на человеческий resource
-    val _name: String = when(name) {
-        "radius" ->  "радиус"
-        "trap_duration_seconds" -> "время действия ловушки"
-        "damage" -> "урон"
-        else -> name
-    }
+    // перевод на человеческий
+    val _name = paramName(name)
+    val _unit = unitName(name)
 
     Row(
         Modifier
-            .padding(vertical = 5.dp)
+            .padding(vertical = 5.dp, horizontal = 10.dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             _name,
             style = style
         )
         Text(
-            "$value $units",
+            "$value $unit",
             style = style
         )
     }
@@ -355,7 +310,7 @@ private fun RoleDialogPreview() {
     val roleList = listOf(
         PlayerRole("Житель", listOf(Shield(), Intel()), RoleType.Hider),
         PlayerRole("Бомбер", listOf(PersonalBomb()), RoleType.Seeker),
-        PlayerRole("Мажор", listOf(Shield(),Intel(), SafeMansion()), RoleType.Hider)
+        PlayerRole("Мажор", listOf(Shield(), Intel(), SafeMansion()), RoleType.Hider)
     )
 
     RoleChangeDialog(

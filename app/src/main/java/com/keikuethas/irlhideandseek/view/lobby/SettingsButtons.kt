@@ -23,11 +23,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.keikuethas.irlhideandseek.view.AbilitiesSettings
 import com.keikuethas.irlhideandseek.view.LobbySettings
 import com.keikuethas.irlhideandseek.view.MapSettings
 import com.keikuethas.irlhideandseek.view.RolesSettings
-import com.keikuethas.irlhideandseek.view.RulesSettings
 
 @Composable
 fun SettingsButtons(navController: NavController) {
@@ -40,7 +38,6 @@ fun SettingsButtons(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             SettingsButton(navController, RolesSettings, Icons.Default.Person, "Роли")
-            SettingsButton(navController, RulesSettings, Icons.Default.Build, "Правила")
         }
 
         Row(

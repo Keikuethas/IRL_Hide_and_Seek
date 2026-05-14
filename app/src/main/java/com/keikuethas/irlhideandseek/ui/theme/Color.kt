@@ -16,3 +16,5 @@ val RoleType.color: Color
         RoleType.Seeker -> Color(233, 30, 99, 255)
         RoleType.Hider -> Color(33, 150, 243, 255)
     }
+
+val BarelyGrey = Color(220, 220, 220, 255)

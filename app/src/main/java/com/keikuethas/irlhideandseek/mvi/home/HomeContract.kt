@@ -1,21 +1,26 @@
 package com.keikuethas.irlhideandseek.mvi.home
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class HomeError(
     val title: String,
     val description: String
-)
+) : Parcelable
 
 // Состояние экрана
+@Parcelize
 data class HomeState(
     val nameText: String = "", // Текст в поле ввода имени
     val roomNameText: String = "", // Текст в поле ввода ID комнаты
     val error: HomeError? = null // Возникшая ошибка
-) {
-
-    val nameTextCounter: String = "${nameText.length}/$nameLengthLimit" // набрано/допустимо
-    val roomNameTextCounter: String =
-        "${roomNameText.length}/$roomNameLengthLimit" // набрано/допустимо
-    val buttonsActive = nameText.isNotBlank() && roomNameText.isNotBlank()
+) : Parcelable {
+    val nameTextCounter get() = "${nameText.length}/$nameLengthLimit" // набрано/допустимо
+    val roomNameTextCounter
+        get() =
+            "${roomNameText.length}/$roomNameLengthLimit" // набрано/допустимо
+    val buttonsActive get() = nameText.isNotBlank() && roomNameText.isNotBlank()
 
     companion object {
         val nameLengthLimit: Int = 20 // макс. длина имени

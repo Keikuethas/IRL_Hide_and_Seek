@@ -58,14 +58,3 @@ fun YandexMapView(
         }
     }
 }
-
-fun MapView.enableUserLocation() {
-    val userLocationLayer = this.mapWindow.map.userLocationLayer
-    userLocationLayer.isEnabled = true
-    userLocationLayer.setAnchor(
-        AnchorPoint(AnchorPoint.HorizontalAlignment.CENTER,
-            AnchorPoint.VerticalAlignment.CENTER),
-        AnchorPoint(AnchorPoint.HorizontalAlignment.RIGHT,
-            AnchorPoint.VerticalAlignment.BOTTOM)
-    )
-}

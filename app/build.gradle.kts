@@ -2,17 +2,17 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.hilt.android)
     id("com.google.devtools.ksp")
     id("kotlin-parcelize")
-    kotlin("plugin.serialization") version "2.2.0"
+    kotlin("kapt")
+//    kotlin("plugin.serialization") version "2.2.0"
 }
 
 android {
     namespace = "com.keikuethas.irlhideandseek"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.keikuethas.irlhideandseek"
@@ -67,21 +67,22 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-
     implementation("com.yandex.android:maps.mobile:4.7.0-lite") //for map
 
     // Навигация между окнами
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    ksp("com.google.dagger:hilt-compiler:2.51.1") // или kapt, если не используете KSP
 
-    // ✅ Используйте версии из libs.versions.toml
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
     implementation(libs.androidx.hilt)
     ksp(libs.androidx.hilt.compiler)
 
-    // ✅ kotlinx-serialization: версия плагина = версии Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+    val ktorVersion = "3.4.3"
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
 }
 

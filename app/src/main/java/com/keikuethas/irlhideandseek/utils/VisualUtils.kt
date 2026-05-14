@@ -1,10 +1,16 @@
 package com.keikuethas.irlhideandseek.utils
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.keikuethas.irlhideandseek.Ability
 
@@ -23,6 +29,72 @@ fun makeGradientAbilityBrush(ability: Ability, progress: Float): Brush {
             progress to baseColor,
             progress + (1f - progress) / 2 to baseColor.adjustLightness(-lightnessDelta),
             1f to baseColor.adjustLightness(-lightnessDelta * 2)
+        )
+    )
+}
+
+/**
+ * Пунктирная граница с заданным цветом
+ */
+fun Modifier.dashedBorder(
+    width: Dp,
+    color: Color,
+    dashLength: Dp,
+    gapLength: Dp,
+    cornerRadius: Dp = 0.dp
+) = drawBehind {
+    val strokeWidthPx = width.toPx()
+    val dashPx = dashLength.toPx()
+    val gapPx = gapLength.toPx()
+    val radiusPx = cornerRadius.toPx()
+
+    val pathEffect = PathEffect.dashPathEffect(
+        intervals = floatArrayOf(dashPx, gapPx),
+        phase = 0f
+    )
+
+    drawRoundRect(
+        color = color,
+        topLeft = Offset.Zero,
+        size = size,
+        cornerRadius = CornerRadius(radiusPx, radiusPx),
+        style = Stroke(
+            width = strokeWidthPx,
+            pathEffect = pathEffect
+        )
+    )
+}
+
+/**
+ * Пунктирная граница с заданной кистью.
+ * Градиент/текстура применяется к видимым участкам пунктира,
+ * а промежутки остаются прозрачными.
+ */
+fun Modifier.dashedBorder(
+    width: Dp,
+    brush: Brush,
+    dashLength: Dp,
+    gapLength: Dp,
+    cornerRadius: Dp = 0.dp
+) = drawBehind {
+    val strokeWidthPx = width.toPx()
+    val dashPx = dashLength.toPx()
+    val gapPx = gapLength.toPx()
+    val radiusPx = cornerRadius.toPx()
+
+    val pathEffect = PathEffect.dashPathEffect(
+        intervals = floatArrayOf(dashPx, gapPx),
+        phase = 0f
+    )
+
+    drawRoundRect(
+        brush = brush,
+        topLeft = Offset.Zero,
+        size = size,
+        cornerRadius = CornerRadius(radiusPx, radiusPx),
+        style = Stroke(
+            width = strokeWidthPx,
+            pathEffect = pathEffect
         )
     )
 }
