@@ -21,8 +21,10 @@ object OutgoingRequests {
         "lng" to lng
     )
 
-    fun useAbility(abilityType: AbilityType) = mapOf(
-        "ability_type" to abilityType.name
+    fun useAbility(abilityType: AbilityType, lat: Double, lng: Double) = mapOf(
+        "ability_type" to abilityType.name,
+        "center_lat" to lat,
+        "center_lng" to lng
     )
 
     fun getGameState() = mapOf<String, Any>()
