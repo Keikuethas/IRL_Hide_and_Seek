@@ -38,10 +38,5 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".service.GameForegroundService"
-            android:exported="false"
-            android:foregroundServiceType="location" />
-
     </application>
 </manifest>
