@@ -395,7 +395,11 @@
 ```json
 {
   "type": "use_ability",
-  "data": { "ability_type": "PERSONAL_BOMB" }
+  "data": { 
+    "ability_type": "PERSONAL_BOMB",
+    "center_lat": 55.43453,
+    "center_lng": 58.3434
+  }
 }
 ```
 **Сервер → Клиент:**
