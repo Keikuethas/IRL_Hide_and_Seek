@@ -1,7 +1,5 @@
 package com.keikuethas.irlhideandseek.view
 
-import com.keikuethas.irlhideandseek.GameSettings
-import com.keikuethas.irlhideandseek.PlayerRole
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,11 +16,10 @@ data class Lobby(
 @Serializable
 data object Game
 
-//@Serializable data class RolesSettings(val gameSettings: GameSettings) //TEMP
+// --- экраны при создании игры ---
+@Serializable data object NewGame
 @Serializable data object RolesSettings
-@Serializable data object RulesSettings
 @Serializable data object MapSettings
-@Serializable data object AbilitiesSettings
 @Serializable data object LobbySettings
 /*
 * Описание экранов:
