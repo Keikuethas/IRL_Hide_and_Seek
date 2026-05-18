@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -94,7 +95,7 @@ private fun ADUI(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                Button(
+                OutlinedButton(
                     onClick = { onDismiss() },
                     Modifier.wrapContentSize()
                 ) {
@@ -148,6 +149,13 @@ private fun VIDUI(
 ) {
 
     val value = remember { mutableStateOf(initialValue.toString()) }
+    val invalidInput: Boolean = value.value.run {
+        when (inputType) {
+            DialogInputType.INT -> toIntOrNull()
+            DialogInputType.FLOAT -> toFloatOrNull()
+            DialogInputType.STRING -> this
+        } == null
+    }
 
     OutlinedCard(
         Modifier
@@ -175,18 +183,9 @@ private fun VIDUI(
 
             OutlinedTextField(
                 value = value.value,
-                onValueChange = {
-                    value.value = when (inputType) {
-                        DialogInputType.INT ->
-                            if (value.value.isEmpty()) "0"
-                            else it.toIntOrNull()
-                        DialogInputType.FLOAT ->
-                            if (value.value.isEmpty()) "0"
-                            else it.toFloatOrNull()
-                        DialogInputType.STRING -> it.trim()
-                    }?.toString() ?: value.value
-                },
-                placeholder = { Text("Значение") }
+                onValueChange = { value.value = it },
+                placeholder = { Text("Значение") },
+                isError = invalidInput
             )
 
             Row(
@@ -194,7 +193,7 @@ private fun VIDUI(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                Button(
+                OutlinedButton(
                     onClick = { onDismiss() },
                     Modifier.wrapContentSize()
                 ) {
@@ -203,7 +202,8 @@ private fun VIDUI(
 
                 Button(
                     onClick = { onConfirm(value.value) },
-                    Modifier.wrapContentSize()
+                    Modifier.wrapContentSize(),
+                    enabled = !invalidInput
                 ) {
                     Text(stringResource(R.string.Save))
                 }
