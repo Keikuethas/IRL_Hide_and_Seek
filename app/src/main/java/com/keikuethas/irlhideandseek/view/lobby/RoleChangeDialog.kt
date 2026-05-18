@@ -54,6 +54,8 @@ import com.keikuethas.irlhideandseek.R
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.SafeMansion
 import com.keikuethas.irlhideandseek.Shield
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
 import com.keikuethas.irlhideandseek.utils.adjustLightness
 import com.keikuethas.irlhideandseek.utils.description
@@ -62,11 +64,14 @@ import com.keikuethas.irlhideandseek.utils.paramName
 import com.keikuethas.irlhideandseek.utils.unitName
 
 @Composable
+        /**
+         *
+         */
 fun RoleChangeDialog(
-    roles: List<PlayerRole>,
+    roles: List<RoleState>,
     playerRole: String,
     onDismiss: () -> Unit = {},
-    onRoleSelect: (String) -> Unit = {}
+    onRoleSelect: (roleName: String) -> Unit = {}
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -94,6 +99,7 @@ fun RoleChangeDialog(
                     style = typography.headlineSmall
                 )
 
+                //content
                 Surface(
                     color = BarelyGrey,
                     shape = RoundedCornerShape(16.dp),
@@ -104,12 +110,12 @@ fun RoleChangeDialog(
                     ) {
                         items(
                             items = roles
-                        ) { role ->
+                        ) {
                             RoleCard(
-                                role,
+                                it,
                                 onRoleSelect = onRoleSelect,
                                 padding = PaddingValues(vertical = 5.dp),
-                                enabled = role.name != playerRole
+                                enabled = it.roleName != playerRole
                             )
                         }
                     }
@@ -126,11 +132,12 @@ fun RoleChangeDialog(
     }
 }
 
+// refactor в отдельный файл
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoleCard(
-    role: PlayerRole,
-    onRoleSelect: (String) -> Unit = {},
+    role: RoleState,
+    onRoleSelect: (roleName: String) -> Unit = {},
     padding: PaddingValues = PaddingValues(0.dp),
     enabled: Boolean = true
 ) {
@@ -154,7 +161,7 @@ fun RoleCard(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    role.name,
+                    role.roleName,
                     style = typography.headlineMedium
                 )
 
@@ -162,7 +169,7 @@ fun RoleCard(
             }
 
             IconButton(
-                onClick = { onRoleSelect(role.name) },
+                onClick = { onRoleSelect(role.roleName) },
                 colors = IconButtonColors(
                     containerColor = Color.Green,
                     contentColor = Color.Unspecified,
@@ -210,8 +217,9 @@ fun RoleCard(
     }
 }
 
+
 @Composable
-fun AbilityCard(ability: Ability, padding: PaddingValues = PaddingValues(0.dp)) {
+fun AbilityCard(ability: AbilityState, padding: PaddingValues = PaddingValues(0.dp)) {
     OutlinedCard(
         Modifier
             .fillMaxWidth()
@@ -219,33 +227,21 @@ fun AbilityCard(ability: Ability, padding: PaddingValues = PaddingValues(0.dp)) 
         border = BorderStroke(2.dp, Color.Blue.adjustLightness(-0.2f))
     ) {
         Text(
-            ability.name,
+            ability.type.name(),
             style = typography.titleMedium,
             modifier = Modifier.padding(start = 16.dp)
         )
         Text(
-            ability.description,
+            ability.type.description(),
             style = typography.bodyMedium,
             modifier = Modifier.padding(start = 10.dp)
         )
         Spacer(Modifier.height(10.dp))
-        ParamInfo(
-            stringResource(R.string.NumberUsesParam),
-            ability.number_uses,
-            unit = stringResource(R.string.ItemsUnit)
-        )
-        ParamInfo(
-            stringResource(R.string.RechargeTimeParam),
-            ability.recharge_time,
-            unit = stringResource(R.string.SecondsUnit)
-        )
-        ParamInfo(
-            stringResource(R.string.DurationSecondsParam),
-            ability.duration_seconds,
-            unit = stringResource(R.string.SecondsUnit)
-        )
-        ability.ComposableForEachParam { name, value ->
-            ParamInfo(name, value)
+
+        LazyColumn() {
+            items(items = ability.params) {
+                ParamInfo(it.first, it.second)
+            }
         }
     }
 }
@@ -257,8 +253,10 @@ fun ParamInfo(
     style: TextStyle = typography.labelLarge,
     unit: String = ""
 ) {
+
+    // перевод на человеческий
     val _name = paramName(name)
-    val _unit = if (unit.isEmpty()) unitName(name) else unit
+    val _unit = unitName(name)
 
     Row(
         Modifier
@@ -271,7 +269,7 @@ fun ParamInfo(
             style = style
         )
         Text(
-            "$value $_unit",
+            "$value $unit",
             style = style
         )
     }
@@ -280,23 +278,24 @@ fun ParamInfo(
 @Preview
 @Composable
 private fun AbilityCardPreview() {
-    AbilityCard(PersonalBomb())
+    AbilityCard(AbilityState(PersonalBomb()))
 }
 
 @Preview
 @Composable
 private fun RoleCardPreview() {
     RoleCard(
-        PlayerRole(
+        RoleState(PlayerRole(
             "Охотник",
             listOf(Shield(), Intel(), PersonalBomb()), RoleType.Seeker
-        )
-    )
+        ), 100
+    ))
 }
 
 @Preview
 @Composable
 private fun RoleDialogPreview() {
+
     val roleList = listOf(
         PlayerRole("Житель", listOf(Shield(), Intel()), RoleType.Hider),
         PlayerRole("Бомбер", listOf(PersonalBomb()), RoleType.Seeker),
@@ -304,7 +303,7 @@ private fun RoleDialogPreview() {
     )
 
     RoleChangeDialog(
-        roles = roleList,
+        roleList.map { RoleState(it, 100) },
         playerRole = roleList.random().name
     )
 }
