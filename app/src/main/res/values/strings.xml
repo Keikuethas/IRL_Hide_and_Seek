@@ -26,4 +26,5 @@
     <string name="DamageName">Урон</string>
     <string name="RoleName">Имя роли</string>
     <string name="HealthName">Здоровье</string>
+    <string name="MAPKIT_API_KEY">4c35e2b8-6372-4bdf-8c3e-bafe5381e779</string>
 </resources>

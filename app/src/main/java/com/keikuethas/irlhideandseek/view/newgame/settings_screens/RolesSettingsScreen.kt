@@ -68,14 +68,13 @@ import com.keikuethas.irlhideandseek.R
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.SafeHouse
 import com.keikuethas.irlhideandseek.Shield
-import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameViewModel
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RolesSettingsViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
-import com.keikuethas.irlhideandseek.mvi.newGame.roles.RolesSettingsViewModel
 import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
 import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.utils.dashedBorder
@@ -93,7 +92,7 @@ import kotlin.reflect.KClass
 @Composable
 fun RolesSettingsScreen(
     navController: NavController = rememberNavController(),
-    sharedGameVM: NewGameViewModel = viewModel(),
+    sharedGameVM: RolesSettingsViewModel = viewModel(),
     rolesSettingsViewModel: RolesSettingsViewModel = viewModel()
 ) {
     val state = rolesSettingsViewModel.state.collectAsStateWithLifecycle()

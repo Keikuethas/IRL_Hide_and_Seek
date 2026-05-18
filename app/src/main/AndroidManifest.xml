@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
+        android:name=".MyApplication"
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -39,7 +41,10 @@
         </activity>
 
         <service
-            android:name=".Websocket.GameSessionService"
+            android:name=".MyApplication"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+        <service android:name=".Websocket.GameSessionService"
             android:foregroundServiceType="dataSync|location"
             android:exported="false" />
 

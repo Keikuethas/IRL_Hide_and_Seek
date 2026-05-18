@@ -8,7 +8,12 @@ import kotlinx.serialization.Serializable
 data object Home
 
 @Serializable
-data class Lobby(val playerName: String, val roomName: String)
+data class Lobby(
+    val playerName: String,
+    val roomName: String,
+    val gameId: String,
+    val playerId: String
+)
 
 @Serializable
 data object Game
