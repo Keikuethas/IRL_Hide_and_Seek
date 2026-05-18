@@ -13,6 +13,7 @@ material3 = "1.4.0"
 hilt = "2.59.2"
 hiltNavigationCompose = "1.2.0"
 ksp = "2.0.21-1.0.26"
+composeMaterial = "1.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +36,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 androidx-hilt = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 androidx-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
