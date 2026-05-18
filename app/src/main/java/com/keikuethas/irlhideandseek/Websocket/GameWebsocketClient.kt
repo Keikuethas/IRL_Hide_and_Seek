@@ -5,18 +5,15 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.*
 import okhttp3.*
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GameWebsocketClient {
-
+@Singleton
+class GameWebsocketClient @Inject constructor() {
     private var webSocket: WebSocket? = null
     private val gson: Gson = GsonBuilder().create()
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -25,14 +22,17 @@ class GameWebsocketClient {
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
-    // Поток входящих типизированных событий
-    private val _events = MutableSharedFlow<ServerEvent>(replay = 0)
+    // Поток событий: буфер 32, сбрасываем старые при переполнении
+    private val _events = MutableSharedFlow<ServerEvent>(
+        replay = 0,
+        extraBufferCapacity = 32,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val events: SharedFlow<ServerEvent> = _events.asSharedFlow()
 
     private val client = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
         .connectTimeout(10, TimeUnit.SECONDS)
-        // OkHttp сам пингует сокет на уровне TCP, но серверный ping/pong мы обрабатываем отдельно
         .pingInterval(20, TimeUnit.SECONDS)
         .build()
 
@@ -48,9 +48,6 @@ class GameWebsocketClient {
         _isConnected.value = false
     }
 
-    /**
-     * Отправка команды на сервер
-     */
     fun sendCommand(type: String, data: Any) {
         val envelope = WsEnvelope(
             type = type,
@@ -61,7 +58,6 @@ class GameWebsocketClient {
         Log.d("WS_CLIENT", "⬆️ Sent: $json")
     }
 
-    // Внутренний слушатель вебсокета
     private inner class SocketListener : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             Log.d("WS_CLIENT", "🟢 Connected")
@@ -70,14 +66,13 @@ class GameWebsocketClient {
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             Log.d("WS_CLIENT", "⬇️ Received: $text")
-            scope.launch {
-                try {
-                    val envelope = gson.fromJson(text, WsEnvelope::class.java)
-                    val event = decodeEvent(envelope)
-                    _events.emit(event)
-                } catch (e: Exception) {
-                    Log.e("WS_CLIENT", "❌ Error parsing message: $text", e)
-                }
+            // ❗ tryEmit не блокирует поток OkHttp
+            try {
+                val envelope = gson.fromJson(text, WsEnvelope::class.java)
+                val event = decodeEvent(envelope)
+                _events.tryEmit(event)
+            } catch (e: Exception) {
+                Log.e("WS_CLIENT", "❌ Error parsing message: $text", e)
             }
         }
 
@@ -92,12 +87,8 @@ class GameWebsocketClient {
         }
     }
 
-    /**
-     * Превращает сырой пакет в строгий Kotlin объект
-     */
     private fun decodeEvent(env: WsEnvelope): ServerEvent {
         val data = env.data ?: return ServerEvent.Unknown(env.type)
-
         return when (env.type) {
             "pong" -> {
                 val p = gson.fromJson(data, PongPayload::class.java)
@@ -135,9 +126,7 @@ class GameWebsocketClient {
                 val p = gson.fromJson(data, DeleteZonePayload::class.java)
                 ServerEvent.ZoneDeleted(p.zoneId)
             }
-            "timer_to_hide_finished" -> {
-                ServerEvent.TimerToHideFinished
-            }
+            "timer_to_hide_finished" -> ServerEvent.TimerToHideFinished
             else -> ServerEvent.Unknown(env.type)
         }
     }
