@@ -32,6 +32,7 @@ import com.keikuethas.irlhideandseek.view.AskingDialog
 import com.keikuethas.irlhideandseek.view.Home
 import com.keikuethas.irlhideandseek.view.RoleChangeDialog
 import androidx.compose.material3.CircularProgressIndicator
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import com.keikuethas.irlhideandseek.view.ErrorDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,12 +100,16 @@ fun LobbyContent(
             )
         }
 
+        //TODO: загрузка ролей полноценно
+
+        // Преобразуем List<String> в List<PlayerRole> для отображения (заглушка)
+        val playerRoles = state.roles.map { roleName ->
+            RoleState(PlayerRole(roleName, emptyList(), RoleType.Hider), 100)
+        }
+
         // Диалог смены роли
         if (state.showRoleChangeDialog) {
-            // Преобразуем List<String> в List<PlayerRole> для отображения (заглушка)
-            val playerRoles = state.roles.map { roleName ->
-                PlayerRole(roleName, emptyList(), RoleType.Hider)
-            }
+
             RoleChangeDialog(
                 roles = playerRoles,
                 playerRole = state.playerRole,
@@ -122,7 +127,7 @@ fun LobbyContent(
             // Отображение списка игроков
             DisplayPlayers(
                 playerList = state.players,
-                roleList = state.roles,
+                roleList = playerRoles,
                 playerName = state.playerName
             )
 

@@ -21,13 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.keikuethas.irlhideandseek.PlayerRole
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 
 // upgrade
 @Composable
 fun DisplayPlayers(
     playerList: List<Pair<String, String>>,
-    roleList: List<String>,
+    roleList: List<RoleState>,
     playerName: String
 ) {
     Column(
@@ -57,32 +57,22 @@ fun DisplayPlayers(
             )
         ) {
             items(
-                playerList, key = {item: Pair<String, String> -> item.first},
-                itemContent = {item ->
+                items = playerList
+            ) { item ->
+                Row(
+                    rowModifier,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Row(
-                        rowModifier,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text(item.first)
-                            if (item.first == playerName)
-                                Icon(Icons.Default.Star, contentDescription = null)
-                        }
-                        Text(item.second)
+                        Text(item.first)
+                        if (item.first == playerName)
+                            Icon(Icons.Default.Star, contentDescription = null)
                     }
+                    Text(item.second)
                 }
-            )
+            }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-private fun LobbyPreviewLocal() = LobbyPreview()
-@Composable
-fun LobbyPreview() {
-    TODO("Not yet implemented")
 }
