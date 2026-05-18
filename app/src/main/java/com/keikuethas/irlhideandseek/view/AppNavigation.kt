@@ -1,19 +1,15 @@
 package com.keikuethas.irlhideandseek.view
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.keikuethas.irlhideandseek.view.game.GameScreen
+import com.keikuethas.irlhideandseek.view.home.HomeScreen
 import com.keikuethas.irlhideandseek.view.lobby.LobbyScreen
-//import com.keikuethas.irlhideandseek.view.newgame.settings_screens.AbilitiesSettingsScreen
-//import com.keikuethas.irlhideandseek.view.newgame.settings_screens.LobbySettingsScreen
 import com.keikuethas.irlhideandseek.view.newgame.settings_screens.MapSettingsScreen
-//import com.keikuethas.irlhideandseek.view.newgame.settings_screens.RulesSettingsScreen
+import com.keikuethas.irlhideandseek.view.newgame.settings_screens.RolesSettingsScreen
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -24,30 +20,20 @@ fun AppNavigation() {
             HomeScreen(navController)
         }
 
-        composable<Lobby> {
+        composable<Lobby>{
             LobbyScreen(navController)
         }
 
         //---
-//        composable<RolesSettings> {
-//            RolesSettingsScreen(it.toRoute<RolesSettings>().gameSettings)
-//        } //TEMP
+        composable<RolesSettings> {
+            RolesSettingsScreen()
+        }
 
-//        composable<RulesSettings>  {
-//            RulesSettingsScreen()
-//        }
 
         composable<MapSettings> {
             MapSettingsScreen()
         }
 
-//        composable<AbilitiesSettings> {
-//            AbilitiesSettingsScreen()
-//        }
-
-//        composable<LobbySettings> {
-//            LobbySettingsScreen()
-//        }
         //---
 
         composable<Game> { backStackEntry ->
