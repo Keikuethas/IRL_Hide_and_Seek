@@ -53,7 +53,7 @@ class WebSocketManager @Inject constructor() {
         _connectionStatus.emit(ConnectionStatus.CONNECTING)
 
         return suspendCancellableCoroutine { continuation ->
-            val url = "ws://shrunk-scrambler-gauze.ngrok-free.dev/ws/$gameId/$playerId" // замените на реальный URL
+            val url = "ws://shrunk-scrambler-gauze.ngrok-free.dev/ws/$gameId/$playerId"
             val request = Request.Builder().url(url).build()
 
             webSocket = client.newWebSocket(request, object : WebSocketListener() {
