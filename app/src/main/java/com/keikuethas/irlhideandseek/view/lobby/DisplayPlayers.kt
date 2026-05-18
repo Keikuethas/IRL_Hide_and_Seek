@@ -21,16 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.keikuethas.irlhideandseek.GameSettings
-import com.keikuethas.irlhideandseek.Player
 import com.keikuethas.irlhideandseek.PlayerRole
 
 // upgrade
 @Composable
 fun DisplayPlayers(
     playerList: List<Pair<String, String>>,
-    roleList: List<PlayerRole>,
-    playerName: String) {
+    roleList: List<String>,
+    playerName: String
+) {
     Column(
         Modifier
             .padding(top = 20.dp, bottom = 10.dp)
@@ -83,3 +82,7 @@ fun DisplayPlayers(
 @Preview
 @Composable
 private fun LobbyPreviewLocal() = LobbyPreview()
+@Composable
+fun LobbyPreview() {
+    TODO("Not yet implemented")
+}

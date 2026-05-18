@@ -40,13 +40,16 @@ import com.keikuethas.irlhideandseek.mvi.home.HomeEffect
 import com.keikuethas.irlhideandseek.mvi.home.HomeIntent
 import com.keikuethas.irlhideandseek.mvi.home.HomeState
 import com.keikuethas.irlhideandseek.mvi.home.HomeViewModel
+import com.keikuethas.irlhideandseek.view.Lobby
+import androidx.hilt.navigation.compose.hiltViewModel
+
 
 // refactor вынести строки в ресурсы
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController = rememberNavController(),
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
@@ -64,7 +67,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = {Box {Text("Hide and Seek")}}) }
+        topBar = { CenterAlignedTopAppBar(title = { Box { Text("Hide and Seek") } }) }
     ) { innerPadding ->
         state.value.error?.let { error ->
             ErrorDialog(
@@ -150,8 +153,10 @@ fun HomeScreen(
                     HomeEffect.HostLobby -> TODO()
                     is HomeEffect.JoinLobby -> navController.navigate(
                         Lobby(
-                            state.value.nameText,
-                            effect.id
+                            playerName = effect.playerName,
+                            roomName = effect.roomName,
+                            gameId = effect.gameId,
+                            playerId = effect.playerId
                         )
                     )
                 }
@@ -159,107 +164,86 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
-        homeViewModel.effect.collect { effect ->
-            when (effect) {
-                HomeEffect.OpenSettings -> {
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", context.packageName, null)
-                    }.let { context.startActivity(it) }
-                }
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun HomeScreenUI(
+        state: HomeState = HomeState(isLoading = false),
+        onIntent: (HomeIntent) -> Unit = {},
+        permissionsGranted: Boolean = true //temp
+    ) {
+        Scaffold(
+            topBar = { CenterAlignedTopAppBar(title = { Box { Text("Hide and Seek") } }) }
+        ) { innerPadding ->
+            state.error?.let { error ->
+                ErrorDialog(
+                    title = error.title,
+                    description = error.description
+                ) { onIntent(HomeIntent.DismissError) }
+            }
 
-                HomeEffect.HostLobby -> TODO()
-                is HomeEffect.JoinLobby -> navController.navigate(
-                    Lobby(
-                        state.value.nameText,
-                        effect.id
+            if (permissionsGranted) {
+                Column(
+                    Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .padding(vertical = 100.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    OutlinedTextField(
+                        value = state.nameText,
+                        onValueChange = { value -> onIntent(HomeIntent.EditName(value)) },
+                        label = {
+                            Row {
+                                Text("Отображаемое имя")
+                                Spacer(Modifier.width(10.dp))
+                                Icon(Icons.Default.Person, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                        supportingText = { Text(state.nameTextCounter) }
                     )
-                )
-            }
-        }
-    }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun HomeScreenUI(
-    state: HomeState = HomeState(),
-    onIntent: (HomeIntent) -> Unit = {},
-    permissionsGranted: Boolean = true //temp
-) {
-    Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = {Box {Text("Hide and Seek")}}) }
-    ) { innerPadding ->
-        state.error?.let { error ->
-            ErrorDialog(
-                title = error.title,
-                description = error.description
-            ) { onIntent(HomeIntent.DismissError) }
-        }
+                    OutlinedTextField(
+                        state.roomNameText,
+                        onValueChange = { value -> onIntent(HomeIntent.EditRoomName(value)) },
+                        label = {
+                            Row {
+                                Text("Идентификатор комнаты")
+                                Spacer(Modifier.width(10.dp))
+                                Icon(Icons.Default.LocationOn, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                        supportingText = { Text(state.roomNameTextCounter) }
+                    )
 
-        if (permissionsGranted) {
-            Column(
-                Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .padding(vertical = 100.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                OutlinedTextField(
-                    value = state.nameText,
-                    onValueChange = { value -> onIntent(HomeIntent.EditName(value)) },
-                    label = {
-                        Row {
-                            Text("Отображаемое имя")
-                            Spacer(Modifier.width(10.dp))
-                            Icon(Icons.Default.Person, contentDescription = null)
-                        }
-                    },
-                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
-                    supportingText = { Text(state.nameTextCounter) }
-                )
+                    ElevatedButton(
+                        onClick = { onIntent(HomeIntent.JoinGame) },
+                        enabled = state.buttonsActive
+                    ) { Text("Присоединиться") }
 
-                OutlinedTextField(
-                    state.roomNameText,
-                    onValueChange = { value -> onIntent(HomeIntent.EditRoomName(value)) },
-                    label = {
-                        Row {
-                            Text("Идентификатор комнаты")
-                            Spacer(Modifier.width(10.dp))
-                            Icon(Icons.Default.LocationOn, contentDescription = null)
-                        }
-                    },
-                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
-                    supportingText = { Text(state.roomNameTextCounter) }
-                )
-
-                ElevatedButton(
-                    onClick = { onIntent(HomeIntent.JoinGame) },
-                    enabled = state.buttonsActive
-                ) { Text("Присоединиться") }
-
-                ElevatedButton(
-                    onClick = { onIntent(HomeIntent.CreateGame) },
-                    enabled = state.buttonsActive
-                ) { Text("Создать") }
-            }
-        } else {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 50.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text( //resource
-                    "Игровой процесс построен на работе с Вашим местоположением в реальной жизни. " +
-                            "Пожалуйста, предоставьте разрешение на работу с геолокацией."
-                )
-                ElevatedButton(
-                    onClick = { onIntent(HomeIntent.GrantPermissions) },
-                ) { Text("Предоставить разрешение") }
+                    ElevatedButton(
+                        onClick = { onIntent(HomeIntent.CreateGame) },
+                        enabled = state.buttonsActive
+                    ) { Text("Создать") }
+                }
+            } else {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 50.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text( //resource
+                        "Игровой процесс построен на работе с Вашим местоположением в реальной жизни. " +
+                                "Пожалуйста, предоставьте разрешение на работу с геолокацией."
+                    )
+                    ElevatedButton(
+                        onClick = { onIntent(HomeIntent.GrantPermissions) },
+                    ) { Text("Предоставить разрешение") }
+                }
             }
         }
     }

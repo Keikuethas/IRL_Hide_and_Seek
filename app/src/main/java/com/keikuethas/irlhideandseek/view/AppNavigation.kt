@@ -8,10 +8,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.keikuethas.irlhideandseek.view.game.GameScreen
 import com.keikuethas.irlhideandseek.view.lobby.LobbyScreen
-import com.keikuethas.irlhideandseek.view.settings_screens.AbilitiesSettingsScreen
-import com.keikuethas.irlhideandseek.view.settings_screens.LobbySettingsScreen
-import com.keikuethas.irlhideandseek.view.settings_screens.MapSettingsScreen
-import com.keikuethas.irlhideandseek.view.settings_screens.RulesSettingsScreen
+//import com.keikuethas.irlhideandseek.view.newgame.settings_screens.AbilitiesSettingsScreen
+//import com.keikuethas.irlhideandseek.view.newgame.settings_screens.LobbySettingsScreen
+import com.keikuethas.irlhideandseek.view.newgame.settings_screens.MapSettingsScreen
+//import com.keikuethas.irlhideandseek.view.newgame.settings_screens.RulesSettingsScreen
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -24,10 +24,8 @@ fun AppNavigation() {
             HomeScreen(navController)
         }
 
-        composable<Lobby>{
-            val playerName = it.toRoute<Lobby>().playerName
-            val roomName = it.toRoute<Lobby>().roomName
-            LobbyScreen(navController, playerName, roomName)
+        composable<Lobby> {
+            LobbyScreen(navController)
         }
 
         //---
@@ -35,21 +33,21 @@ fun AppNavigation() {
 //            RolesSettingsScreen(it.toRoute<RolesSettings>().gameSettings)
 //        } //TEMP
 
-        composable<RulesSettings>  {
-            RulesSettingsScreen()
-        }
+//        composable<RulesSettings>  {
+//            RulesSettingsScreen()
+//        }
 
         composable<MapSettings> {
             MapSettingsScreen()
         }
 
-        composable<AbilitiesSettings> {
-            AbilitiesSettingsScreen()
-        }
+//        composable<AbilitiesSettings> {
+//            AbilitiesSettingsScreen()
+//        }
 
-        composable<LobbySettings> {
-            LobbySettingsScreen()
-        }
+//        composable<LobbySettings> {
+//            LobbySettingsScreen()
+//        }
         //---
 
         composable<Game> { backStackEntry ->

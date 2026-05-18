@@ -62,15 +62,11 @@ import com.keikuethas.irlhideandseek.utils.paramName
 import com.keikuethas.irlhideandseek.utils.unitName
 
 @Composable
-        /**
-         * Окно для отображения информации об ошибке. Содержит только кнопку "закрыть".
-         * @param onDismiss Функция, которая вызывается при закрытии окна
-         */
 fun RoleChangeDialog(
     roles: List<PlayerRole>,
     playerRole: String,
     onDismiss: () -> Unit = {},
-    onRoleSelect: (roleName: String) -> Unit = {}
+    onRoleSelect: (String) -> Unit = {}
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -98,7 +94,6 @@ fun RoleChangeDialog(
                     style = typography.headlineSmall
                 )
 
-                //content
                 Surface(
                     color = BarelyGrey,
                     shape = RoundedCornerShape(16.dp),
@@ -109,12 +104,12 @@ fun RoleChangeDialog(
                     ) {
                         items(
                             items = roles
-                        ) {
+                        ) { role ->
                             RoleCard(
-                                it,
+                                role,
                                 onRoleSelect = onRoleSelect,
                                 padding = PaddingValues(vertical = 5.dp),
-                                enabled = it.name != playerRole
+                                enabled = role.name != playerRole
                             )
                         }
                     }
@@ -131,12 +126,11 @@ fun RoleChangeDialog(
     }
 }
 
-// refactor в отдельный файл
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoleCard(
     role: PlayerRole,
-    onRoleSelect: (roleName: String) -> Unit = {},
+    onRoleSelect: (String) -> Unit = {},
     padding: PaddingValues = PaddingValues(0.dp),
     enabled: Boolean = true
 ) {
@@ -216,7 +210,6 @@ fun RoleCard(
     }
 }
 
-
 @Composable
 fun AbilityCard(ability: Ability, padding: PaddingValues = PaddingValues(0.dp)) {
     OutlinedCard(
@@ -264,10 +257,8 @@ fun ParamInfo(
     style: TextStyle = typography.labelLarge,
     unit: String = ""
 ) {
-
-    // перевод на человеческий
     val _name = paramName(name)
-    val _unit = unitName(name)
+    val _unit = if (unit.isEmpty()) unitName(name) else unit
 
     Row(
         Modifier
@@ -280,7 +271,7 @@ fun ParamInfo(
             style = style
         )
         Text(
-            "$value $unit",
+            "$value $_unit",
             style = style
         )
     }
@@ -306,7 +297,6 @@ private fun RoleCardPreview() {
 @Preview
 @Composable
 private fun RoleDialogPreview() {
-
     val roleList = listOf(
         PlayerRole("Житель", listOf(Shield(), Intel()), RoleType.Hider),
         PlayerRole("Бомбер", listOf(PersonalBomb()), RoleType.Seeker),
@@ -314,7 +304,7 @@ private fun RoleDialogPreview() {
     )
 
     RoleChangeDialog(
-        roleList,
+        roles = roleList,
         playerRole = roleList.random().name
     )
 }

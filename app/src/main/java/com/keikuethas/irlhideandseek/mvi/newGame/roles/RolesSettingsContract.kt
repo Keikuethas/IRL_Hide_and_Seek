@@ -5,7 +5,7 @@ import com.keikuethas.irlhideandseek.Ability
 import com.keikuethas.irlhideandseek.Intel
 import com.keikuethas.irlhideandseek.PersonalBomb
 import com.keikuethas.irlhideandseek.PlayerRole
-import com.keikuethas.irlhideandseek.RoleParams
+//import com.keikuethas.irlhideandseek.RoleParams
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.SafeHouse
 import com.keikuethas.irlhideandseek.SafeMansion
@@ -76,8 +76,8 @@ data class RoleState(
             return PlayerRole(roleName, abils, type)
         }
 
-    val params: RoleParams
-        get() = RoleParams(health, type)
+//    val params: RoleParams
+//        get() = RoleParams(health, type)
 
     val remainingAbilities: List<KClass<out Ability>>
         get() {

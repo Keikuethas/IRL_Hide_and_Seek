@@ -2,6 +2,7 @@ package com.keikuethas.irlhideandseek.mvi.home
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @Parcelize
 data class HomeError(
@@ -14,7 +15,8 @@ data class HomeError(
 data class HomeState(
     val nameText: String = "", // Текст в поле ввода имени
     val roomNameText: String = "", // Текст в поле ввода ID комнаты
-    val error: HomeError? = null // Возникшая ошибка
+    val error: HomeError? = null, // Возникшая ошибка
+    val isLoading: Boolean
 ) : Parcelable {
     val nameTextCounter get() = "${nameText.length}/$nameLengthLimit" // набрано/допустимо
     val roomNameTextCounter
@@ -44,11 +46,18 @@ sealed interface HomeResult {
     data class RoomNameEdited(val value: String) : HomeResult // Имя комнаты обновилось
     data class Error(val title: String, val description: String) : HomeResult // Возникла ошибка
     data object ErrorDismissed : HomeResult // Ошибка закрыта
+
+    data class Loading(val isLoading: Boolean) : HomeResult
 }
 
 // Одноразовые события для UI
 sealed interface HomeEffect {
-    data object OpenSettings : HomeEffect // Открыть настройки приложения
-    data object HostLobby : HomeEffect // Перейти в лобби (создание игры)
-    data class JoinLobby(val id: String) : HomeEffect // Перейти в лобби (подключиться к игре)
+    data object OpenSettings : HomeEffect
+    data object HostLobby : HomeEffect
+    data class JoinLobby(
+        val playerName: String,
+        val roomName: String,
+        val gameId: String,
+        val playerId: String
+    ) : HomeEffect
 }

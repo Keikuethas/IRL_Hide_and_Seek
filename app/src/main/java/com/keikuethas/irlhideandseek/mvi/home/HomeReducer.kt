@@ -7,6 +7,7 @@ object HomeReducer {
             is HomeResult.RoomNameEdited -> state.copy(roomNameText = result.value.take(HomeState.roomNameLengthLimit))
             HomeResult.ErrorDismissed -> state.copy(error = null)
             is HomeResult.Error -> state.copy(error = HomeError(result.title, result.description))
+            is HomeResult.Loading -> state.copy(isLoading = result.isLoading)
         }
     }
 }
