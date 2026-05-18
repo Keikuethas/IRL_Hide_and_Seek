@@ -1,9 +1,9 @@
 package com.keikuethas.irlhideandseek.mvi.lobby
 
+import android.os.Parcelable
 import com.keikuethas.irlhideandseek.Ability
 import com.keikuethas.irlhideandseek.PlayerRole
-import android.os.Parcelable
-import com.keikuethas.irlhideandseek.mvi.home.HomeResult
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import kotlinx.parcelize.Parcelize
 
 // Состояние экрана
@@ -11,6 +11,7 @@ import kotlinx.parcelize.Parcelize
 data class LobbyState(
     val roomName: String = "",
     val playerName: String = "",
+    val roomCode: String = "AMOGUS", // код комнаты
     val playerRole: String = "",
     val players: List<Pair<String, String>> = emptyList(),
     val roles: List<String> = emptyList(),
@@ -20,8 +21,8 @@ data class LobbyState(
     val isLoading: Boolean = false,
     val error: String? = null
 ) : Parcelable
-// Действия на экране. Запросы на изменение состояния
 
+// Действия на экране. Запросы на изменение состояния
 sealed interface LobbyIntent {
     data object QuitRequest: LobbyIntent // Пользователь нажал "покинуть"
     data class QuitDialogRespond(val confirmed: Boolean): LobbyIntent // Пользователь (не) подтвердил выход в диалоговом окне

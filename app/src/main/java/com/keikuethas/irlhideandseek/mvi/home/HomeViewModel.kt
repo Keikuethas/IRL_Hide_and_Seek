@@ -1,8 +1,11 @@
 package com.keikuethas.irlhideandseek.mvi.home
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
+import com.keikuethas.irlhideandseek.LocationProvider
 import androidx.lifecycle.viewModelScope
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
+import com.keikuethas.irlhideandseek.mvi.home.HomeResult.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,14 +25,32 @@ class HomeViewModel @Inject constructor(
     savedStateKey = "homeState",
     savedStateHandle = savedStateHandle
 ) {
+    init {
+        // ✅ Проверяем разрешения при старте
+        dispatch(if (LocationProvider.hasLocationPermission) PermissionGranted else PermissionDenied)
+    }
+
     override fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.CreateGame -> createGame()
             is HomeIntent.EditName -> dispatch(HomeResult.NameEdited(intent.value))
-            is HomeIntent.EditRoomName -> dispatch(HomeResult.RoomNameEdited(intent.value))
-            is HomeIntent.JoinGame -> joinGame()
+            is HomeIntent.EditRoomName -> {
+                dispatch(RoomNameEdited(intent.value))
+                if (intent.value.length == 6) joinGame()
+            }
             HomeIntent.GrantPermissions -> sendEffect(HomeEffect.OpenSettings)
             HomeIntent.DismissError -> dispatch(HomeResult.ErrorDismissed)
+
+            // ✅ Обработка результата системного диалога
+            is HomeIntent.PermissionResult -> {
+                dispatch(if (intent.granted) PermissionGranted else PermissionDenied)
+            }
+
+            HomeIntent.RequestLocationPermission -> {
+                // ✅ Триггер для Compose-слоя (запускается через ActivityResultLauncher)
+                // В чистой MVI ViewModel не знает об Android UI, поэтому эффект не шлём,
+                // а Compose сам перехватит этот Intent и вызовет launcher.
+            }
         }
     }
 
@@ -97,6 +118,8 @@ class HomeViewModel @Inject constructor(
                 player_location_lat = 20.9, //getCurrentLocationLat()
                 player_location_lng = 30.1 //getCurrentLocationLng()
             )
+            Log.i("websocket", request.toString())
+            Log.i("websocket", state.value.roomNameText)
             try {
                 val response = apiService.joinGame(state.value.roomNameText, request)
                 print(response)

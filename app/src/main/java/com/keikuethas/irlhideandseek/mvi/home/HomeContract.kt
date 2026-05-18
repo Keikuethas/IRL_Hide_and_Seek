@@ -2,7 +2,6 @@ package com.keikuethas.irlhideandseek.mvi.home
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
 
 @Parcelize
 data class HomeError(
@@ -16,28 +15,26 @@ data class HomeState(
     val nameText: String = "", // Текст в поле ввода имени
     val roomNameText: String = "", // Текст в поле ввода ID комнаты
     val error: HomeError? = null, // Возникшая ошибка
-    val isLoading: Boolean
+    val isLoading: Boolean = false,
+    val isLocationPermissionGranted: Boolean = false // ✅ Новое поле
 ) : Parcelable {
-    val nameTextCounter get() = "${nameText.length}/$nameLengthLimit" // набрано/допустимо
-    val roomNameTextCounter
-        get() =
-            "${roomNameText.length}/$roomNameLengthLimit" // набрано/допустимо
-    val buttonsActive get() = nameText.isNotBlank() && roomNameText.isNotBlank()
+    val nameTextCounter get() = "${nameText.length}/$MAXNAMELENGTH"
+    val buttonsActive get() = nameText.isNotBlank() && isLocationPermissionGranted // ✅ Кнопки активны только с разрешением
 
     companion object {
-        val nameLengthLimit: Int = 20 // макс. длина имени
-        val roomNameLengthLimit: Int = 10 // макс. длина имени комнаты
+        const val MAXNAMELENGTH: Int = 20
     }
 }
 
 // Действия пользователя на экране
 sealed interface HomeIntent {
-    data object JoinGame : HomeIntent // Пользователь нажал "Присоединиться"
-    data object CreateGame : HomeIntent // Пользователь нажал "Создать"
-    data class EditName(val value: String) : HomeIntent // Пользователь изменил имя
-    data class EditRoomName(val value: String) : HomeIntent // Пользователь изменил ID комнаты
-    data object GrantPermissions : HomeIntent  // Пользователь нажал "Предоставить разрешение"
-    data object DismissError : HomeIntent // Пользователь закрыл ошибку
+    data object CreateGame : HomeIntent
+    data class EditName(val value: String) : HomeIntent
+    data class EditRoomName(val value: String) : HomeIntent
+    data object GrantPermissions : HomeIntent // ✅ Оставим для открытия настроек (фолбэк)
+    data object RequestLocationPermission : HomeIntent // ✅ Для системного диалога
+    data class PermissionResult(val granted: Boolean) : HomeIntent // ✅ Результат системного диалога
+    data object DismissError : HomeIntent
 }
 
 // Результаты обработки действий
@@ -48,6 +45,8 @@ sealed interface HomeResult {
     data object ErrorDismissed : HomeResult // Ошибка закрыта
 
     data class Loading(val isLoading: Boolean) : HomeResult
+    data object PermissionGranted : HomeResult // ✅
+    data object PermissionDenied : HomeResult // ✅
 }
 
 // Одноразовые события для UI
