@@ -12,45 +12,42 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.keikuethas.irlhideandseek.LocationEvent
+import com.keikuethas.irlhideandseek.LocationProvider
 import com.keikuethas.irlhideandseek.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class GameSessionService : Service() {
 
-    @Inject
-    lateinit var wsClient: GameWebsocketClient
+    @Inject lateinit var wsClient: GameWebsocketClient
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var locationTrackingJob: Job? = null
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
 
-        // Сервис слушает события независимо от UI
+        // 1. Слушаем события сервера
         serviceScope.launch {
-            wsClient.events.collect { event ->
-                handleGameEvent(event)
-            }
+            wsClient.events.collect { event -> handleGameEvent(event) }
         }
+
+        // 2. Запускаем фоновое отслеживание геолокации
+        startLocationTracking()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
                 val serverUrl = intent.getStringExtra(EXTRA_SERVER_URL) ?: return START_NOT_STICKY
-                // Переподключение на случай Process Death
                 if (!wsClient.isConnected.value) {
                     wsClient.connect(serverUrl)
                 }
             }
-
             ACTION_STOP -> {
                 wsClient.disconnect()
                 stopSelf()
@@ -63,78 +60,79 @@ class GameSessionService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        locationTrackingJob?.cancel()
         serviceScope.cancel()
-        // Не дисконнектим здесь — пусть решает ViewModel
+    }
+
+    // 🔹 Запуск трекинга локации в фоне
+    private fun startLocationTracking() {
+        if (!LocationProvider.hasLocationPermission) {
+            // Если нет разрешений — сервис не должен работать в фоне
+            stopSelf()
+            return
+        }
+
+        locationTrackingJob = serviceScope.launch {
+            LocationProvider.observeLocation(minTimeMs = 3000L, minDistanceM = 15f)
+                .collect { event ->
+                    when (event) {
+                        is LocationEvent.Update -> {
+                            // Отправляем координаты на сервер
+                            wsClient.sendPlayerLocation(event.location.latitude, event.location.longitude)
+                        }
+                        LocationEvent.PermissionRevoked -> {
+                            // Пользователь отозвал разрешение → останавливаем сервис
+                            stopSelf()
+                        }
+                        LocationEvent.ProvidersDisabled -> {
+                            // GPS/сеть выключены → можно показать уведомление или ждать
+                        }
+                    }
+                }
+        }
     }
 
     private fun handleGameEvent(event: ServerEvent) {
-        // 🔹 Логика, которая должна работать в фоне:
         when (event) {
             is ServerEvent.PlayerMoved -> savePlayerLocation(event.playerId, event.lat, event.lng)
             is ServerEvent.AbilityUsed -> playAbilitySound(event.ability.toString())
             is ServerEvent.TimerToHideFinished -> triggerVibration()
-            is ServerEvent.ZoneCreated -> storeZone(
-                event.zoneId,
-                event.centerLat,
-                event.centerLng,
-                event.radius
-            )
-
+            is ServerEvent.ZoneCreated -> storeZone(event.zoneId, event.centerLat, event.centerLng, event.radius)
             else -> Unit
         }
     }
 
+    // 🔔 Notification & Channel (без изменений, кроме типов)
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Игровая сессия",
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            description = "Фоновая работа игры «Прятки»"
-            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-        }
-        val manager = getSystemService(NotificationManager::class.java)
-        manager?.createNotificationChannel(channel)
+            CHANNEL_ID, "Игровая сессия", NotificationManager.IMPORTANCE_LOW
+        ).apply { description = "Фоновая работа игры «Прятки»"; lockscreenVisibility = Notification.VISIBILITY_PRIVATE }
+        getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
     }
 
     private fun buildNotification(): Notification {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val intent = Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP }
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("🎮 Прятки: Игра активна")
-            .setContentText("Слежение за границами и событиями")
-            .setSmallIcon(android.R.drawable.ic_dialog_map) // todo поменять на свою иконку
+            .setContentText("📍 Отслеживание местоположения")
+            .setSmallIcon(android.R.drawable.ic_dialog_map)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
     }
 
-    // 🔹//refactor Методы фоновой логики (вынеси в репозитории в продакшене)
-    private fun savePlayerLocation(playerId: String, lat: Double, lng: Double) {
-        // Сохраняем в Room / отправляем в аналитику / кэшируем для синхронизации
-    }
-
-    private fun playAbilitySound(ability: String) {
-        // Воспроизводим звук через SoundPool / MediaPlayer
-    }
-
+    // 🔹 Заглушки (вынесите в репозитории/UseCases)
+    private fun savePlayerLocation(playerId: String, lat: Double, lng: Double) = Unit
+    private fun playAbilitySound(ability: String) = Unit
     private fun triggerVibration() {
-        val vibrator = getSystemService(Vibrator::class.java)
-
-        if (vibrator == null || !vibrator.hasVibrator()) return
-
+        val vibrator = getSystemService(Vibrator::class.java) ?: return
+        if (!vibrator.hasVibrator()) return
         vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
     }
-
-    private fun storeZone(zoneId: String, lat: Double, lng: Double, radius: Double) {
-        // Сохраняем зону в локальную БД для офлайн-доступа
-    }
+    private fun storeZone(zoneId: String, lat: Double, lng: Double, radius: Double) = Unit
 
     companion object {
         private const val CHANNEL_ID = "game_session_channel"
@@ -152,9 +150,7 @@ class GameSessionService : Service() {
         }
 
         fun stopService(context: Context) {
-            val intent = Intent(context, GameSessionService::class.java).apply {
-                action = ACTION_STOP
-            }
+            val intent = Intent(context, GameSessionService::class.java).apply { action = ACTION_STOP }
             context.startService(intent)
         }
     }

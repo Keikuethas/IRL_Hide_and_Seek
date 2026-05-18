@@ -130,4 +130,6 @@ class GameWebsocketClient @Inject constructor() {
             else -> ServerEvent.Unknown(env.type)
         }
     }
+
+    fun sendPlayerLocation(latitude: Double, longitude: Double) {TODO()}
 }
