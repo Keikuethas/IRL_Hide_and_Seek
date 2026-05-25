@@ -57,13 +57,13 @@ fun PermissionDeniedSection(
         Spacer(Modifier.height(24.dp))
         Text(
             "Требуется доступ к геолокации",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(12.dp))
         Text(
             "Игровой процесс построен на отслеживании вашего местоположения в реальной жизни. Пожалуйста, предоставьте разрешение.",
-            style = MaterialTheme.typography.bodyMedium,
+            style = typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -78,7 +78,7 @@ fun PermissionDeniedSection(
         ) {
             Icon(Icons.Default.LocationOn, null, Modifier.size(24.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Разрешить доступ", style = MaterialTheme.typography.titleMedium)
+            Text("Разрешить доступ", style = typography.titleMedium)
         }
 
         Spacer(Modifier.height(12.dp))
