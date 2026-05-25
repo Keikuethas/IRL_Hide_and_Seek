@@ -1,6 +1,5 @@
 package com.keikuethas.irlhideandseek.view.newgame.settings_screens
 
-import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -57,7 +56,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.keikuethas.irlhideandseek.Ability
@@ -68,13 +66,12 @@ import com.keikuethas.irlhideandseek.R
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.SafeHouse
 import com.keikuethas.irlhideandseek.Shield
-import com.keikuethas.irlhideandseek.mvi.newGame.roles.RolesSettingsViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSIntent
-import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSResult
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RolesViewModel
 import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
 import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.utils.dashedBorder
@@ -87,22 +84,28 @@ import com.keikuethas.irlhideandseek.view.RoleTypeLabel
 import com.keikuethas.irlhideandseek.view.ValueInputDialog
 import kotlin.reflect.KClass
 
+// TODO: padding у надписей, а то там кринж какой-то
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun RolesSettingsScreen(
     navController: NavController = rememberNavController(),
-    sharedGameVM: RolesSettingsViewModel = viewModel(),
-    rolesSettingsViewModel: RolesSettingsViewModel = viewModel()
+    rolesViewModel: RolesViewModel = hiltViewModel()
 ) {
-    val state = rolesSettingsViewModel.state.collectAsStateWithLifecycle()
-    RSSUI(state.value) { rolesSettingsViewModel.onIntent(it) }
-    BackHandler { rolesSettingsViewModel.onIntent(RSIntent.QuitRequest)  }
+    val state = rolesViewModel.state.collectAsStateWithLifecycle()
+
+    RSSUI(
+        state.value,
+    ) { rolesViewModel.onIntent(it) }
+    BackHandler { rolesViewModel.onIntent(RSIntent.QuitRequest) }
     LaunchedEffect(key1 = Unit) {
-        rolesSettingsViewModel.effect.collect { effect ->
+        rolesViewModel.effect.collect { effect ->
             when (effect) {
-                RSEffect.Quit ->
-                    navController.navigate(navController.previousBackStackEntry!!.destination)
+                RSEffect.Quit -> navController.navigateUp()
+                RSEffect.Save -> {
+                    navController.navigateUp()
+                }
             }
         }
     }
@@ -119,21 +122,25 @@ fun RSSUI(
     ),
     onIntent: (RSIntent) -> Unit = {}
 ) {
+
     when {
         state.showQuitDialog ->
             AskingDialog(
+                title = "Вы уверены?",
                 description = "Сделанные вами изменения не сохранятся.",
                 confirmButtonText = "Выйти",
                 onDismiss = { onIntent(RSIntent.QuitAnswer(false)) },
-                onConfirm = { onIntent(RSIntent.QuitAnswer(true)) }
+                onConfirm = { onIntent(RSIntent.QuitAnswer(true)) },
+                dismissButtonText = "Отменить"
             )
 
         state.showRoleRemoveDialog ->
             AskingDialog(
-                title = "Удалить роль",
+                title = "Вы уверены?",
                 description = "Удалить роль ${state.roles[state.currentRole].roleName}? " +
-                        "Это действие не может быть отменено.",
+                        "Это действие необратимо.",
                 confirmButtonText = "Удалить",
+                dismissButtonText = "Отменить",
                 onDismiss = { onIntent(RSIntent.RoleDeleteAnswer(false)) },
                 onConfirm = { onIntent(RSIntent.RoleDeleteAnswer(true)) }
             )
@@ -219,7 +226,7 @@ fun RSSUI(
                         onDelete = { onIntent(RSIntent.RoleDeleteRequest) },
                         onAddAbility = { onIntent(RSIntent.AddAbilityRequest) },
                         onHealthClick = { onIntent(RSIntent.RoleHealthClick) },
-                        onDeleteAbility = {onIntent(RSIntent.DeleteAbility(it))}
+                        onDeleteAbility = { onIntent(RSIntent.DeleteAbility(it)) }
                     ) else EmptyRoleElement { onIntent(RSIntent.RoleCreate) }
 
                 Surface(
@@ -473,9 +480,13 @@ fun RoleElement(
                             }
 
                             if (state.displayAbilityAdd)
-                                item { EmptyAbilityCard(modifier = Modifier
-                                    .padding(10.dp, vertical = 5.dp)
-                                    .wrapContentHeight(), onClick = onAddAbility) }
+                                item {
+                                    EmptyAbilityCard(
+                                        modifier = Modifier
+                                            .padding(10.dp, vertical = 5.dp)
+                                            .wrapContentHeight(), onClick = onAddAbility
+                                    )
+                                }
                         }
                     }
                 }
@@ -493,7 +504,7 @@ fun RoleElement(
                 Icons.Default.DeleteForever,
                 null,
                 tint = Color.Red,
-                )
+            )
         }
     }
 }
@@ -545,18 +556,18 @@ private fun AbilityCard(
             .fillMaxWidth(),
         border = BorderStroke(2.dp, Color.Black)
     ) {
-        Row (
+        Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
-        ){
+        ) {
             Text(
                 state.type.name(),
                 style = typography.titleMedium,
                 modifier = Modifier.padding(start = 16.dp)
             )
             Surface(
-                onClick = {onDeleteAbility(state.type)},
+                onClick = { onDeleteAbility(state.type) },
                 color = Color.Transparent
             )
             {
