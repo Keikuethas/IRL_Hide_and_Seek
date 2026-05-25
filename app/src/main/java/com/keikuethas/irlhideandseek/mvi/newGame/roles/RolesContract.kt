@@ -107,7 +107,7 @@ data class RoleState(
 }
 
 @Parcelize
-data class ValueInputDialogState( // Value Input Dialog State
+data class AbilityVIDState( // Value Input Dialog State
     val initialValue: String = "",
     val inputType: DialogInputType = DialogInputType.STRING,
     val paramName: String,
@@ -120,9 +120,9 @@ data class RSState(
     val currentRole: Int = 0,
     val showQuitDialog: Boolean = false,
     val showRoleRemoveDialog: Boolean = false,
-    val showValueInputDialog: ValueInputDialogState? = null,
+    val showValueInputDialog: AbilityVIDState? = null,
     val showRoleTypeDialog: Boolean = false,
-    val showAbilityAddDialog: Boolean = false
+    val showAbilityAddDialog: Boolean = false,
 ) : Parcelable
 
 sealed interface RSIntent {
@@ -147,13 +147,15 @@ sealed interface RSIntent {
     data object AddAbilityDismissed : RSIntent
     data class AddAbility(val type: KClass<out Ability>) : RSIntent
     data object RoleHealthClick : RSIntent
-    data class DeleteAbility(val type: KClass<out Ability>): RSIntent
+    data class DeleteAbility(val type: KClass<out Ability>) : RSIntent
+
+    data class Initialize(val state: RSState) : RSIntent
 
 }
 
 sealed interface RSResult {
     data class ScrollRoles(val right: Boolean) : RSResult
-    data class VIDStateChanged(val state: ValueInputDialogState?) : RSResult
+    data class VIDStateChanged(val state: AbilityVIDState?) : RSResult
     data class QuitDialogStateChanged(val open: Boolean) : RSResult
     data object RoleCreated : RSResult
     data class RoleDeleteDialogStateChanged(val open: Boolean) : RSResult
@@ -163,11 +165,13 @@ sealed interface RSResult {
     data class ParameterChanged(val name: String, val newValue: Number) : RSResult
     data object RoleTypeChanged : RSResult
     data class RoleTypeDialogStateSet(val open: Boolean) : RSResult
-    data class AbilityAdded(val type: KClass<out Ability>): RSResult
-    data class AddAbilityDialogStateSet(val open: Boolean): RSResult
-    data class AbilityDeleted(val type: KClass<out Ability>): RSResult
+    data class AbilityAdded(val type: KClass<out Ability>) : RSResult
+    data class AddAbilityDialogStateSet(val open: Boolean) : RSResult
+    data class AbilityDeleted(val type: KClass<out Ability>) : RSResult
+    data class Initialized(val state: RSState) : RSResult
 }
 
 sealed interface RSEffect {
     data object Quit : RSEffect
+    data object Save : RSEffect
 }

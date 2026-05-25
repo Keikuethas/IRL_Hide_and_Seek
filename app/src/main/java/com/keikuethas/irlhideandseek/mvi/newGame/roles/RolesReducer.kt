@@ -1,11 +1,10 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.roles
 
-import android.util.Log
 import com.keikuethas.irlhideandseek.PlayerRole
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.getAbilityByType
 
-object RolesSettingsReducer {
+object RolesReducer {
     fun reduce(state: RSState, result: RSResult): RSState =
         when (result) {
 
@@ -75,7 +74,6 @@ object RolesSettingsReducer {
             RSResult.RoleCreated -> {
                 val newRole = RoleState(PlayerRole("New role", type = RoleType.Hider), 100)
                 val newRoleList: List<RoleState> = state.roles + newRole
-                Log.i("susdebug", "still alive")
                 state.copy(roles = newRoleList)
             }
 
@@ -142,5 +140,7 @@ object RolesSettingsReducer {
                     roles = newRoleList
                 )
             }
+
+            is RSResult.Initialized -> result.state
         }
 }
