@@ -2,33 +2,32 @@ package com.keikuethas.irlhideandseek.mvi.home
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
-import com.keikuethas.irlhideandseek.LocationProvider
 import androidx.lifecycle.viewModelScope
+import com.keikuethas.irlhideandseek.LocationProvider
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
-import com.keikuethas.irlhideandseek.mvi.home.HomeResult.*
+import com.keikuethas.irlhideandseek.mvi.home.HomeResult.Error
+import com.keikuethas.irlhideandseek.mvi.home.HomeResult.PermissionDenied
+import com.keikuethas.irlhideandseek.mvi.home.HomeResult.PermissionGranted
+import com.keikuethas.irlhideandseek.mvi.home.HomeResult.RoomNameEdited
+import com.keikuethas.irlhideandseek.network.ApiService
+import com.keikuethas.irlhideandseek.network.models.JoinGameRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import com.keikuethas.irlhideandseek.network.models.JoinGameRequest
-import com.keikuethas.irlhideandseek.network.ApiService
-import com.keikuethas.irlhideandseek.mvi.home.HomeResult.Error
-import com.keikuethas.irlhideandseek.network.models.CreateGameRequest
-import com.keikuethas.irlhideandseek.network.models.HostPlayer
 import retrofit2.HttpException
+import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val apiService: ApiService
 ) : MVI_HiltViewModel<HomeState, HomeIntent, HomeEffect, HomeResult>(
-    initialState = HomeState(isLoading = false),
+    initialState = HomeState(
+        isLoading = false,
+        isLocationPermissionGranted = LocationProvider.hasLocationPermission
+    ),
     savedStateKey = "homeState",
     savedStateHandle = savedStateHandle
 ) {
-    init {
-        // ✅ Проверяем разрешения при старте
-        dispatch(if (LocationProvider.hasLocationPermission) PermissionGranted else PermissionDenied)
-    }
 
     override fun onIntent(intent: HomeIntent) {
         when (intent) {
@@ -55,55 +54,53 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun createGame() {
-        if (state.value.nameText.isBlank() || state.value.roomNameText.isBlank()) {
-            dispatch(Error("Ошибка", "Введите имя и название комнаты"))
-            return
-        }
-        viewModelScope.launch {
-            dispatch(HomeResult.Loading(true))
-            val request = CreateGameRequest(
-                name = state.value.roomNameText,
-                center_lat = 55.751244,  // TODO: реальные координаты
-                center_lng = 37.618423,
-                safe_zone_radius = 500.0,
-                min_zone_radius = 50.0,
-                zone_shrink_interval = 120,
-                game_duration = 1800,
-                time_to_hide = 300,
-                host_player = HostPlayer(
-                    host_name = state.value.nameText,
-                    host_player_location_lat = 55.751244,
-                    host_player_location_lng = 37.618423
-                ),
-                game_roles = emptyMap(),
-                roles_abilities = emptyMap(),
-                events = emptyList(),
-                roles_events = emptyMap(),
-                events_configurations = emptyMap()
-            )
-            try {
-                val response = apiService.createGame(request)
-                dispatch(HomeResult.Loading(false))
-                sendEffect(
-                    HomeEffect.JoinLobby(
-                        playerName = state.value.nameText,
-                        roomName = state.value.roomNameText,
-                        gameId = response.game.id,
-                        playerId = response.host_player_id
-                    )
-                )
-            } catch (e: HttpException) {
-                dispatch(HomeResult.Loading(false))
-                when (e.code()) {
-                    400 -> dispatch(Error("Некорректный запрос", "Проверьте данные игры"))
-                    409 -> dispatch(Error("Имя занято", "Игра с таким названием уже существует"))
-                    else -> dispatch(Error("Ошибка", e.message() ?: "Неизвестная ошибка"))
-                }
-            } catch (e: Exception) {
-                dispatch(HomeResult.Loading(false))
-                dispatch(Error("Ошибка подключения", e.message ?: "Проверьте интернет-соединение"))
-            }
-        }
+
+        sendEffect(HomeEffect.HostLobby)
+//        viewModelScope.launch {
+//            dispatch(HomeResult.Loading(true))
+//            val request = CreateGameRequest(
+//                name = state.value.roomNameText,
+//                center_lat = 55.751244,  // TODO: реальные координаты
+//                center_lng = 37.618423,
+//                safe_zone_radius = 500.0,
+//                min_zone_radius = 50.0,
+//                zone_shrink_interval = 120,
+//                game_duration = 1800,
+//                time_to_hide = 300,
+//                host_player = HostPlayer(
+//                    host_name = state.value.nameText,
+//                    host_player_location_lat = 55.751244,
+//                    host_player_location_lng = 37.618423
+//                ),
+//                game_roles = emptyMap(),
+//                roles_abilities = emptyMap(),
+//                events = emptyList(),
+//                roles_events = emptyMap(),
+//                events_configurations = emptyMap()
+//            )
+//            try {
+//                val response = apiService.createGame(request)
+//                dispatch(HomeResult.Loading(false))
+//                sendEffect(
+//                    HomeEffect.JoinLobby(
+//                        playerName = state.value.nameText,
+//                        roomName = state.value.roomNameText,
+//                        gameId = response.game.id,
+//                        playerId = response.host_player_id
+//                    )
+//                )
+//            } catch (e: HttpException) {
+//                dispatch(HomeResult.Loading(false))
+//                when (e.code()) {
+//                    400 -> dispatch(Error("Некорректный запрос", "Проверьте данные игры"))
+//                    409 -> dispatch(Error("Имя занято", "Игра с таким названием уже существует"))
+//                    else -> dispatch(Error("Ошибка", e.message() ?: "Неизвестная ошибка"))
+//                }
+//            } catch (e: Exception) {
+//                dispatch(HomeResult.Loading(false))
+//                dispatch(Error("Ошибка подключения", e.message ?: "Проверьте интернет-соединение"))
+//            }
+//        }
     }
 
     private fun joinGame() {
