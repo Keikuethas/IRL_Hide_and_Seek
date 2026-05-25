@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.graphics.createBitmap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -146,7 +145,14 @@ private fun createMapObject(
     return when (state.type) {
         is MapObjectType.Marker -> {
             collection.addPlacemark().apply {
-                setIcon(ImageProvider.fromBitmap(createMarkerBitmap(state.type.color)))
+                setIcon(
+                    ImageProvider.fromBitmap(
+                        createMarkerBitmap(
+                            strokeColor = state.type.strokeColor,
+                            fillColor = state.type.fillColor
+                        )
+                    )
+                )
                 geometry = state.location
             }
         }
@@ -169,19 +175,45 @@ private fun updateMapObject(existingObj: MapObject, state: MapObjectState) {
     existingObj.isVisible = state.isVisible
 }
 
-private fun createMarkerBitmap(color: androidx.compose.ui.graphics.Color): Bitmap {
-    val size = 64
-    val bitmap = createBitmap(size, size)
+/**
+ * Создаёт Bitmap-иконку для маркера игрока.
+ * @param fillColor Цвет внутренней области (отображает роль)
+ * @param strokeColor Цвет внешнего кольца (отображает статус "Текущий игрок")
+ * @param size Размер итогового Bitmap (рекомендуется 64 или 128 для Retina)
+ */
+fun createMarkerBitmap(
+    fillColor: androidx.compose.ui.graphics.Color,
+    strokeColor: androidx.compose.ui.graphics.Color,
+    size: Int = 64
+): Bitmap {
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
-    val paint = Paint().apply {
-        this.color = color.toArgb()
-        isAntiAlias = true
-        style = Paint.Style.FILL
-    }
-    canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
-    paint.color = Color.WHITE
+    val center = size / 2f
+
+    // Настройки геометрии для максимальной видимости
+    val strokeThickness = 8f
+    val outerRadius = center - strokeThickness / 2f
+    val innerRadius = center - strokeThickness - 2f // 2px технический зазор
+
+    val paint = Paint().apply { isAntiAlias = true }
+
+    // 1. Внешнее кольцо → индикатор "Текущий игрок"
+    paint.color = strokeColor.toArgb()
     paint.style = Paint.Style.STROKE
-    paint.strokeWidth = 4f
-    canvas.drawCircle(size / 2f, size / 2f, size / 2f - 2f, paint)
+    paint.strokeWidth = strokeThickness
+    canvas.drawCircle(center, center, outerRadius, paint)
+
+    // 2. Внутренний круг → индикатор "Роль"
+    paint.color = fillColor.toArgb()
+    paint.style = Paint.Style.FILL
+    canvas.drawCircle(center, center, innerRadius, paint)
+
+    // 3. Контрастная разделительная линия (2px)
+    // Предотвращает "размытие" стыка цветов при антиалиасинге и делает оба цвета независимыми
+    paint.color = Color.WHITE // Можно заменить на динамический контрастный цвет
+    paint.style = Paint.Style.STROKE
+    paint.strokeWidth = 2f
+    canvas.drawCircle(center, center, innerRadius + 1f, paint)
+
     return bitmap
 }
