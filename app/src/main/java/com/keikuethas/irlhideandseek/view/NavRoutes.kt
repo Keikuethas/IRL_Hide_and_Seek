@@ -16,14 +16,15 @@ data class Lobby(
 @Serializable
 data object Game
 
+@Serializable data object NewGameNavigation
+
 // --- экраны при создании игры ---
 @Serializable data object NewGame
 @Serializable data object RolesSettings
 @Serializable data object MapSettings
-@Serializable data object LobbySettings
+@Serializable data object EventSettings
 /*
 * Описание экранов:
 * Home -> ввод имени и идентификатора комнаты, либо создание своей комнаты
-* Lobby -> настройка комнаты: параметры бонусов, роли игроков
 * Game -> собственно игра. Карта, активация бонусов, прятки
 * */
