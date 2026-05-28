@@ -8,11 +8,11 @@ import androidx.navigation.compose.rememberNavController
 import com.keikuethas.irlhideandseek.view.game.GameScreen
 import com.keikuethas.irlhideandseek.view.home.HomeScreen
 import com.keikuethas.irlhideandseek.view.lobby.LobbyScreen
-import com.keikuethas.irlhideandseek.view.newgame.NewGameNavigation
 import com.keikuethas.irlhideandseek.view.newgame.NewGameScreen
 import com.keikuethas.irlhideandseek.view.newgame.settings_screens.EventsSettingsScreen
 import com.keikuethas.irlhideandseek.view.newgame.settings_screens.MapSettingsScreen
 import com.keikuethas.irlhideandseek.view.newgame.settings_screens.RolesSettingsScreen
+import com.keikuethas.irlhideandseek.view.newgame.settings_screens.TimeScreen
 
 @Composable
 fun AppNavigation() {
@@ -32,10 +32,6 @@ fun AppNavigation() {
             GameScreen(navController)
         }
 
-        composable<NewGameNavigation> {
-            NewGameNavigation(navController)
-        }
-
         composable<NewGame> {
             NewGameScreen(navController)
         }
@@ -50,6 +46,10 @@ fun AppNavigation() {
 
         composable<EventSettings> {
             EventsSettingsScreen(navController)
+        }
+
+        composable<TimeSettings> {
+            TimeScreen(navController)
         }
     }
 }
