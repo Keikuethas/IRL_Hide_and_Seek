@@ -23,6 +23,8 @@ data object Game
 @Serializable data object RolesSettings
 @Serializable data object MapSettings
 @Serializable data object EventSettings
+
+@Serializable data object TimeSettings
 /*
 * Описание экранов:
 * Home -> ввод имени и идентификатора комнаты, либо создание своей комнаты
