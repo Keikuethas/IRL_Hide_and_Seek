@@ -1,0 +1,249 @@
+package com.keikuethas.irlhideandseek.view.newgame.settings_screens
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeEffect
+import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeIntent
+import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeViewModel
+import com.keikuethas.irlhideandseek.view.AskingDialog
+import com.keikuethas.irlhideandseek.view.CustomTimeInputDialog
+import com.keikuethas.irlhideandseek.view.TextTopAppBar
+import kotlinx.coroutines.flow.collectLatest
+import java.util.Locale
+
+@Composable
+fun TimeScreen(
+    navController: NavController,
+    viewModel: TimeViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // Кнопка "Назад" эквивалентна "Отменить"
+    BackHandler(enabled = !state.showQuitDialog) {
+        viewModel.onIntent(TimeIntent.RequestQuit)
+    }
+
+    // Навигация по эффектам
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                TimeEffect.Save, TimeEffect.Quit -> navController.popBackStack()
+            }
+        }
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { TextTopAppBar("Время") }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+                .padding(top = 20.dp, bottom = 24.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 1. Карточка: Время спрятаться
+            TimeConfigCard(
+                title = "Время чтобы спрятаться",
+                currentTimeSec = state.hideTime,
+                onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(hide = true)) }
+            )
+
+            // 1. Карточка: Время искать
+            TimeConfigCard(
+                title = "Время чтобы искать",
+                currentTimeSec = state.seekTime,
+                onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(hide = false)) }
+            )
+
+            // 6. Валидация минимума 30 секунд
+            val minTimeSec = 30
+            val isHideTimeValid = state.hideTime >= minTimeSec
+            val isSeekTimeValid = state.seekTime >= minTimeSec
+
+            if (!isHideTimeValid || !isSeekTimeValid) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = "Warning",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Минимальное время раунда: ${minTimeSec / 60}м ${minTimeSec % 60}с",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            // 3. Нижние кнопки в ряд
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { viewModel.onIntent(TimeIntent.RequestQuit) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = !state.isPickerOpen
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Cancel",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Отменить")
+                }
+
+                Button(
+                    onClick = { viewModel.onIntent(TimeIntent.Save) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = !state.isPickerOpen && isHideTimeValid && isSeekTimeValid
+                ) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Save",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Сохранить")
+                }
+            }
+        }
+    }
+
+    // 5. Диалог выбора времени (механизм сохранён)
+    if (state.isPickerOpen) {
+        CustomTimeInputDialog(
+            initTime = if (state.editingHideTime) state.hideTime else state.seekTime,
+            onPick = { newValue ->
+                viewModel.onIntent(TimeIntent.ChangeTime(newValue))
+                viewModel.onIntent(TimeIntent.DeclineTimeChange)
+            },
+            onDismiss = { viewModel.onIntent(TimeIntent.DeclineTimeChange) }
+        )
+    }
+
+    // 5. Диалог подтверждения выхода
+    if (state.showQuitDialog) {
+        AskingDialog(
+            title = "Подтверждение выхода",
+            description = "Несохранённые изменения будут потеряны. Вы уверены?",
+            confirmButtonText = "Выйти",
+            dismissButtonText = "Отмена",
+            onDismiss = { viewModel.onIntent(TimeIntent.DenyQuit) },
+            onConfirm = { viewModel.onIntent(TimeIntent.ConfirmQuit) }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimeConfigCard(
+    title: String,
+    currentTimeSec: Int,
+    onEditClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Левая часть: Заголовок, Иконка и Время
+            Column(modifier = Modifier.weight(1f)) {
+                // Строка с заголовком и иконкой
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Время
+                Text(
+                    text = formatTime(currentTimeSec),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            // Правая часть: Кнопка "Изменить"
+            FilledTonalButton(
+                onClick = onEditClick,
+                shape = RoundedCornerShape(14.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text("Изменить")
+            }
+        }
+    }
+}
+private fun formatTime(seconds: Int): String {
+    val min = seconds / 60
+    val sec = seconds % 60
+    return String.format(Locale.getDefault(), "%02d:%02d", min, sec)
+}
