@@ -3,6 +3,7 @@ package com.keikuethas.irlhideandseek.data.repository
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
 import com.keikuethas.irlhideandseek.mvi.newGame.main.MSState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
+import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +37,10 @@ class NewGameRepository @Inject constructor() {
         _newGameState.value = _newGameState.value.copy(mapSettings = mapState)
     }
 
+    fun updateTimeSettings(timeState: TimeState) {
+        _newGameState.value= _newGameState.value.copy(timeSettings = timeState)
+    }
+
     // Сброс всех настроек
     fun resetAll() {
         _newGameState.value = NewGameSessionState()
@@ -51,5 +56,6 @@ data class NewGameSessionState(
     val selectedPreset: String = "<new>",
     val rolesSettings: RSState = RSState(),
     val eventSettings: ESState = ESState(),
-    val mapSettings: MSState = MSState() // создайте заглушку если нет
+    val mapSettings: MSState = MSState(),
+    val timeSettings: TimeState = TimeState()
 )

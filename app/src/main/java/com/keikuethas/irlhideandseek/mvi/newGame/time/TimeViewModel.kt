@@ -1,5 +1,6 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.time
 import androidx.lifecycle.SavedStateHandle
+import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.PickerClosed
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.PickerOpened
@@ -10,7 +11,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TimeViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val repository: NewGameRepository
 ) : MVI_HiltViewModel<TimeState, TimeIntent, TimeEffect, TimeResult>(
     initialState = TimeState(),
     savedStateHandle = savedStateHandle,
@@ -28,7 +30,10 @@ class TimeViewModel @Inject constructor(
         TimeIntent.DenyQuit -> dispatch(QuitDialogStateChanged(false))
         TimeIntent.RequestQuit -> dispatch(QuitDialogStateChanged(true))
         is TimeIntent.RequestTimeChange -> dispatch(PickerOpened(intent.hide))
-        TimeIntent.Save -> sendEffect(TimeEffect.Save)
+        TimeIntent.Save -> {
+            repository.updateTimeSettings(state.value)
+            sendEffect(TimeEffect.Save)
+        }
     }
 
     override fun reduce(state: TimeState, result: TimeResult): TimeState =

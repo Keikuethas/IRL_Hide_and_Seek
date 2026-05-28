@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EventsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: NewGameRepository // Инъекция репозитория
+    private val repository: NewGameRepository
 ) : MVI_HiltViewModel<ESState, ESIntent, ESEffect, ESResult>(
     initialState = ESState(),
     savedStateHandle = savedStateHandle,
