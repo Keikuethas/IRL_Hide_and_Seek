@@ -71,7 +71,7 @@ class NewGameViewModel @Inject constructor(
         }
 
         NewGameIntent.GoToEvents -> sendEffect(NewGameEffect.GoToEvents)
-        NewGameIntent.GoToGeneral -> sendEffect(NewGameEffect.GoToGeneral)
+        NewGameIntent.GoToTime -> sendEffect(NewGameEffect.GoToTime)
         NewGameIntent.GoToMap -> sendEffect(NewGameEffect.GoToMap)
         NewGameIntent.GoToRoles -> sendEffect(NewGameEffect.GoToRoles)
     }

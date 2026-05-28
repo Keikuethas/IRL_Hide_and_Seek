@@ -72,6 +72,7 @@ import com.keikuethas.irlhideandseek.view.EventSettings
 import com.keikuethas.irlhideandseek.view.Lobby
 import com.keikuethas.irlhideandseek.view.MapSettings
 import com.keikuethas.irlhideandseek.view.RolesSettings
+import com.keikuethas.irlhideandseek.view.TimeSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +96,7 @@ fun NewGameScreen(
 
                 NewGameEffect.Quit -> navController.navigateUp()
                 NewGameEffect.GoToEvents -> navController.navigate(EventSettings)
-                NewGameEffect.GoToGeneral -> TODO()
+                NewGameEffect.GoToTime -> navController.navigate(TimeSettings)
                 NewGameEffect.GoToMap -> navController.navigate(MapSettings)
                 NewGameEffect.GoToRoles -> navController.navigate(RolesSettings)
             }
@@ -179,31 +180,17 @@ fun NGSUI(
                 }
             }
 
-            Column {
-                ActionCard(
-                    title = "Настройка времени",
-                    description = "Задайте время пряток и поиска", // upgrade придумать слово получше
-                    icon = Icons.Default.Timelapse,
-                    onClick = { onIntent(TODO()) },
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                    iconBackgroundColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    hasDrawer = state.missingRoles.isNotEmpty()
-                )
-                if (state.missingRoles.isNotEmpty())
-                    ValidationDrawer(backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
-                        RoleValidationList(
-                            missingRoles = state.missingRoles,
-                            onCreateRole = { roleType ->
-                                onIntent(
-                                    NewGameIntent.CreateEmptyRole(
-                                        roleType
-                                    )
-                                )
-                            }
-                        )
-                    }
-            }
+
+            ActionCard(
+                title = "Настройка времени",
+                description = "Задайте время пряток и поиска", // upgrade придумать слово получше
+                icon = Icons.Default.Timelapse,
+                onClick = { onIntent(NewGameIntent.GoToTime) },
+                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                iconBackgroundColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                hasDrawer = false
+            )
 
             // Секция ролей: Карточка + Ящик валидации
             Column {
@@ -534,23 +521,4 @@ private fun RoleValidationList(
             }
         }
     }
-}
-
-// ================= ВАЛИДАЦИЯ =================
-
-private fun getMissingRequiredRoles(state: NewGameState): List<RoleType> {
-    val missing: MutableList<RoleType> = mutableListOf()
-    RoleType.entries.forEach { type ->
-        if (!state.rolesSettings.roles.any { it.type == type }) missing.add(type)
-    }
-    return missing
-}
-
-private fun isEventsConfigured(state: NewGameState): Boolean {
-    return state.eventSettings.events.isNotEmpty()
-}
-
-private fun isMapConfigured(state: NewGameState): Boolean {
-    // TODO: реализовать реальную проверку конфигурации карты
-    return state.mapSettings.isConfigured
 }

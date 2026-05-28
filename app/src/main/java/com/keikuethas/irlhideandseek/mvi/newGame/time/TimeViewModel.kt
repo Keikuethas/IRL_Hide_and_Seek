@@ -1,5 +1,6 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.time
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.PickerClosed
@@ -7,6 +8,7 @@ import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.PickerOpened
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.QuitDialogStateChanged
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.TimeChanged
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,6 +20,15 @@ class TimeViewModel @Inject constructor(
     savedStateHandle = savedStateHandle,
     savedStateKey = "TimeState"
 ) {
+
+    init {
+        // Загружаем текущие настройки из репозитория при открытии экрана
+        viewModelScope.launch {
+            val initialState = repository.newGameState.value.timeSettings
+            onIntent(TimeIntent.Initialize(initialState))
+        }
+    }
+
     override fun onIntent(intent: TimeIntent) = when (intent) {
         is TimeIntent.ChangeTime -> dispatch(
             TimeChanged(hide = state.value.editingHideTime, newValue = intent.newValue)
@@ -34,6 +45,8 @@ class TimeViewModel @Inject constructor(
             repository.updateTimeSettings(state.value)
             sendEffect(TimeEffect.Save)
         }
+
+        is TimeIntent.Initialize -> dispatch(TimeResult.Initialized(intent.state))
     }
 
     override fun reduce(state: TimeState, result: TimeResult): TimeState =

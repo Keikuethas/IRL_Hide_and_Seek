@@ -62,7 +62,7 @@ sealed interface NewGameIntent {
     data object GoToRoles: NewGameIntent
     data object GoToEvents: NewGameIntent
     data object GoToMap: NewGameIntent
-    data object GoToGeneral: NewGameIntent
+    data object GoToTime: NewGameIntent
 }
 
 sealed interface NewGameResult {
@@ -84,5 +84,5 @@ sealed interface NewGameEffect {
     data object GoToRoles: NewGameEffect
     data object GoToEvents: NewGameEffect
     data object GoToMap: NewGameEffect
-    data object GoToGeneral: NewGameEffect
+    data object GoToTime: NewGameEffect
 }

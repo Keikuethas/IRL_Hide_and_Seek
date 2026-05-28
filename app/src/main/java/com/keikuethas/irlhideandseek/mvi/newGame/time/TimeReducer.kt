@@ -9,5 +9,6 @@ object TimeReducer {
         TimeResult.PickerClosed -> state.copy(isPickerOpen = false, editingHideTime = false)
         is TimeResult.PickerOpened -> state.copy(isPickerOpen = true, editingHideTime = result.hide)
         is TimeResult.QuitDialogStateChanged -> state.copy(showQuitDialog = result.open)
+        is TimeResult.Initialized -> result.state
     }
 }
