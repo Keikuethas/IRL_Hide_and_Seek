@@ -81,47 +81,6 @@ fun MSUI(
     }
 }
 
-// В перспективе можно сделать зону не кругом, а полигоном
-//
-//private fun drawPointsOnMap(mapView: MapView, points: List<Point>, context: Context) {
-//    val map = mapView.mapWindow.map
-//    map.mapObjects.clear()
-//    val polygon = Polygon(LinearRing(points), listOf<LinearRing>())
-//    map.mapObjects.addPolygon(polygon)
-//    points.forEach {
-//        map.mapObjects.addPlacemark().apply {
-//            geometry = it
-//            setIcon(ImageProvider.fromResource(context, R.mipmap.test_placemark))
-//        }
-//    }
-//    Log.i("11map", "redraw")
-//}
-//
-//private fun MutableList<Point>.addPoint(point: Point): Boolean {
-//    if (size <= 2) return add(point)
-//
-//    // Расстояние от новой точки до отрезка, образованного i-ой и j-ой точками
-//    fun getDistance(i: Int, j: Int = i + 1): Double {
-//
-//        val projection = point.projectOnLine(get(i), get(j))
-//        return if (projection.isBetween(get(i), get(j)))
-//            point.distanceTo(projection)
-//        else Double.POSITIVE_INFINITY
-//    }
-//
-//    val minI = (0 until size - 1).minBy { point.distanceToSegment(get(it), get(it + 1)) }
-//
-//    if (point.distanceToSegment(get(0), get(size - 1)) < point.distanceToSegment(
-//            get(minI),
-//            get(minI + 1)
-//        )
-//    )
-//        return add(point)
-//
-//    add(minI + 1, point)
-//    return true
-//}
-
 @Preview
 @Composable
 fun MapSettingsScreenPreview() {

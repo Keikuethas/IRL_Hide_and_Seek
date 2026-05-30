@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,12 +28,11 @@ import com.keikuethas.irlhideandseek.mvi.lobby.LobbyEffect
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyIntent
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyState
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyViewModel
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import com.keikuethas.irlhideandseek.view.AskingDialog
+import com.keikuethas.irlhideandseek.view.ErrorDialog
 import com.keikuethas.irlhideandseek.view.Home
 import com.keikuethas.irlhideandseek.view.RoleChangeDialog
-import androidx.compose.material3.CircularProgressIndicator
-import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
-import com.keikuethas.irlhideandseek.view.ErrorDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +47,7 @@ fun LobbyScreen(
         ErrorDialog(
             title = "Ошибка",
             description = state.value.error ?: "",
-            onDismiss = { /* тут можно сбросить ошибку, если нужно */ }
+            onDismiss = { viewModel.onIntent(TODO()) }
         )
     }
 

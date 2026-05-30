@@ -26,4 +26,5 @@
     <string name="DamageName">Урон</string>
     <string name="RoleName">Имя роли</string>
     <string name="HealthName">Здоровье</string>
+    <string name="CloseLabel">Закрыть</string>
 </resources>
