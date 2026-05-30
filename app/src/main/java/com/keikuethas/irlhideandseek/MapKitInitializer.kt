@@ -14,7 +14,7 @@ object MapKitInitializer {
             if (isInitialized) return
 
             MapKitFactory.setApiKey(
-                context.getString(R.string.MAPKIT_API_KEY)
+                context.getString(R.string.key)
             )
             MapKitFactory.initialize(context.applicationContext)
             isInitialized = true
