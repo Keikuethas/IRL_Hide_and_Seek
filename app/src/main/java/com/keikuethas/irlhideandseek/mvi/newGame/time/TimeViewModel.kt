@@ -30,9 +30,12 @@ class TimeViewModel @Inject constructor(
     }
 
     override fun onIntent(intent: TimeIntent) = when (intent) {
-        is TimeIntent.ChangeTime -> dispatch(
-            TimeChanged(hide = state.value.editingHideTime, newValue = intent.newValue)
-        )
+        is TimeIntent.ChangeTime -> {
+            dispatch(
+                TimeChanged(type = state.value.editingType!!, newValue = intent.newValue)
+            )
+            dispatch(PickerClosed)
+        }
         TimeIntent.ConfirmQuit -> {
             dispatch(QuitDialogStateChanged(false))
             sendEffect(TimeEffect.Quit)
@@ -40,7 +43,7 @@ class TimeViewModel @Inject constructor(
         TimeIntent.DeclineTimeChange -> dispatch(PickerClosed)
         TimeIntent.DenyQuit -> dispatch(QuitDialogStateChanged(false))
         TimeIntent.RequestQuit -> dispatch(QuitDialogStateChanged(true))
-        is TimeIntent.RequestTimeChange -> dispatch(PickerOpened(intent.hide))
+        is TimeIntent.RequestTimeChange -> dispatch(PickerOpened(type = intent.type))
         TimeIntent.Save -> {
             repository.updateTimeSettings(state.value)
             sendEffect(TimeEffect.Save)

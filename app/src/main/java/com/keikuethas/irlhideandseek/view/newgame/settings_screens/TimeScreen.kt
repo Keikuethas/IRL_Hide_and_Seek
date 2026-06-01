@@ -39,10 +39,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeIntent
+import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeType
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeViewModel
 import com.keikuethas.irlhideandseek.view.AskingDialog
 import com.keikuethas.irlhideandseek.view.CustomTimeInputDialog
-import com.keikuethas.irlhideandseek.view.TextTopAppBar
+import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale
 
@@ -53,12 +54,10 @@ fun TimeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    // Кнопка "Назад" эквивалентна "Отменить"
     BackHandler(enabled = !state.showQuitDialog) {
         viewModel.onIntent(TimeIntent.RequestQuit)
     }
 
-    // Навигация по эффектам
     LaunchedEffect(viewModel) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
@@ -79,21 +78,25 @@ fun TimeScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. Карточка: Время спрятаться
             TimeConfigCard(
                 title = "Время чтобы спрятаться",
                 currentTimeSec = state.hideTime,
-                onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(hide = true)) }
+                onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(TimeType.Hide)) }
             )
 
-            // 1. Карточка: Время искать
             TimeConfigCard(
                 title = "Время чтобы искать",
                 currentTimeSec = state.seekTime,
-                onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(hide = false)) }
+                onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(TimeType.Seek)) }
             )
 
-            // 6. Валидация минимума 30 секунд
+            TimeConfigCard(
+                title = "Время между сужением зоны",
+                currentTimeSec = state.shrinkTime,
+                onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(TimeType.Shrink)) }
+            )
+
+            //refactor to state
             val minTimeSec = 30
             val isHideTimeValid = state.hideTime >= minTimeSec
             val isSeekTimeValid = state.seekTime >= minTimeSec
@@ -121,7 +124,6 @@ fun TimeScreen(
 
             Spacer(Modifier.weight(1f))
 
-            // 3. Нижние кнопки в ряд
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -130,7 +132,6 @@ fun TimeScreen(
                     onClick = { viewModel.onIntent(TimeIntent.RequestQuit) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
-                    enabled = !state.isPickerOpen
                 ) {
                     Icon(
                         Icons.Default.Refresh,
@@ -145,7 +146,7 @@ fun TimeScreen(
                     onClick = { viewModel.onIntent(TimeIntent.Save) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
-                    enabled = !state.isPickerOpen && isHideTimeValid && isSeekTimeValid
+                    enabled = isHideTimeValid && isSeekTimeValid
                 ) {
                     Icon(
                         Icons.Default.Check,
@@ -159,19 +160,27 @@ fun TimeScreen(
         }
     }
 
-    // 5. Диалог выбора времени (механизм сохранён)
-    if (state.isPickerOpen) {
+    if (state.editingType != null) {
         CustomTimeInputDialog(
-            initTime = if (state.editingHideTime) state.hideTime else state.seekTime,
+            initTime = when (state.editingType) {
+                TimeType.Hide -> state.hideTime
+                TimeType.Seek -> state.seekTime
+                TimeType.Shrink -> state.shrinkTime
+                else -> TODO()
+            },
+            text = when(state.editingType) {
+                TimeType.Hide -> "Таймаут перед раундом"
+                TimeType.Seek -> "Время раунда"
+                TimeType.Shrink -> "Период сужения зоны"
+                else -> TODO()
+            },
             onPick = { newValue ->
                 viewModel.onIntent(TimeIntent.ChangeTime(newValue))
-                viewModel.onIntent(TimeIntent.DeclineTimeChange)
             },
             onDismiss = { viewModel.onIntent(TimeIntent.DeclineTimeChange) }
         )
     }
 
-    // 5. Диалог подтверждения выхода
     if (state.showQuitDialog) {
         AskingDialog(
             title = "Подтверждение выхода",
@@ -242,6 +251,7 @@ private fun TimeConfigCard(
         }
     }
 }
+
 private fun formatTime(seconds: Int): String {
     val min = seconds / 60
     val sec = seconds % 60
