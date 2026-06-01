@@ -34,7 +34,7 @@ fun SettingsTopAppBar(
     bottomContent: @Composable () -> Unit = {}
 ) {
     TopAppBar(
-    modifier = modifier,
+        modifier = modifier,
         title = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(bottomContentSpacing)
@@ -61,9 +61,10 @@ fun SettingsTopAppBar(
 }
 
 private val modifier = Modifier.padding(top = 5.dp)
-private val colors @Composable get() = TopAppBarDefaults.topAppBarColors(
-    containerColor = MaterialTheme.colorScheme.primaryContainer,
-)
+private val colors
+    @Composable get() = TopAppBarDefaults.topAppBarColors(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+    )
 
 @Composable
 private fun MainContent(
@@ -74,11 +75,17 @@ private fun MainContent(
     ) {
 
         IconButton(
-            onClick = onBackClick, colors = IconButtonDefaults.iconButtonColors(
+            onClick = onBackClick,
+            colors = IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.surface
+            ),
+
+            ) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                null,
+                tint = MaterialTheme.colorScheme.onSurface
             )
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
         }
 
         Text(
@@ -93,7 +100,11 @@ private fun MainContent(
                 containerColor = MaterialTheme.colorScheme.surface
             ), modifier = Modifier.padding(end = 16.dp)
         ) {
-            Icon(Icons.Default.Save, null)
+            Icon(
+                Icons.Default.Save,
+                null,
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
