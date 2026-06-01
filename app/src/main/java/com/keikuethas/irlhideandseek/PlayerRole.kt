@@ -12,19 +12,19 @@ data class PlayerRole(
 }
 
 enum class RoleType {
-    Hider, Seeker;
+    HIDER, SEEKER;
 
     // resource
     override fun toString(): String = when(this) {
-        Hider -> "Прячущийся"
-        Seeker -> "Охотник"
+        HIDER -> "Прячущийся"
+        SEEKER -> "Охотник"
     }
 
     // resource
     val description: String by lazy {
         when (this) {
-            Hider -> "Задача игроков с ролью этого типа - оставаться в живых, пока не истечёт время игры."
-            Seeker -> "Задача игроков с ролью этого типа - найти всех прячущихся до истечения времени игры."
+            HIDER -> "Задача игроков с ролью этого типа - оставаться в живых, пока не истечёт время игры."
+            SEEKER -> "Задача игроков с ролью этого типа - найти всех прячущихся до истечения времени игры."
         }
     }
 }

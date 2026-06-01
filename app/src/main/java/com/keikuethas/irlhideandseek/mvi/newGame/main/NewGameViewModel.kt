@@ -1,5 +1,6 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.main
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
@@ -14,14 +15,21 @@ import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.ResetState
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.RolesUpdated
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.RoomNameChanged
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
+import com.keikuethas.irlhideandseek.network.ApiService
+import com.keikuethas.irlhideandseek.network.models.CreateGameRequest
+import com.keikuethas.irlhideandseek.network.models.HostPlayer
+import com.keikuethas.irlhideandseek.network.models.RoleParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
+import com.keikuethas.irlhideandseek.RoleType
 
 @HiltViewModel
 class NewGameViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: NewGameRepository // Инъекция репозитория
+    private val repository: NewGameRepository,
+    private val apiService: ApiService
 ) : MVI_HiltViewModel<NewGameState, NewGameIntent, NewGameEffect, NewGameResult>(
     initialState = NewGameState(),
     savedStateKey = "NewGameState",
@@ -29,7 +37,6 @@ class NewGameViewModel @Inject constructor(
 ) {
 
     init {
-        // Подписываемся на изменения в репозитории, чтобы обновлять главный экран
         viewModelScope.launch {
             repository.newGameState.collect { val newRoles = it.rolesSettings
                 dispatch(RolesUpdated(newRoles))
@@ -42,9 +49,60 @@ class NewGameViewModel @Inject constructor(
         }
     }
 
+    fun setHostName(name: String) {
+        dispatch(NewGameResult.SetHostName(name))
+    }
+
+    private fun buildCreateGameRequest(): CreateGameRequest {
+        Log.d("NewGameVM", "buildCreateGameRequest start")
+        val currentState = state.value
+        Log.d("NewGameVM", "currentState: $currentState")
+        val gameRoles = currentState.rolesSettings.roles.associate { role: RoleState ->
+            role.roleName to RoleParams(
+                health = role.health,
+                victory_condition = role.type.name
+            )
+        }
+        Log.d("NewGameVM", "gameRoles: $gameRoles")
+        val events = currentState.eventSettings.events.map { it.type.name } // предполагаем, что событие имеет поле type
+        Log.d("NewGameVM", "events: $events")
+
+        return CreateGameRequest(
+            name = currentState.roomName,
+            center_lat = currentState.hostLocationLat,
+            center_lng = currentState.hostLocationLng,
+            safe_zone_radius = 500.0,
+            min_zone_radius = 50.0,
+            zone_shrink_interval = 120,
+            game_duration = 1800,
+            time_to_hide = 300,
+            host_player = HostPlayer(
+                host_name = currentState.hostName.ifEmpty { "Host" },
+                host_player_location_lat = currentState.hostLocationLat,
+                host_player_location_lng = currentState.hostLocationLng
+            ),
+            game_roles = gameRoles,
+            roles_abilities = emptyMap(),
+            events = events,
+            roles_events = emptyMap(),
+            events_configurations = emptyMap()
+        )
+    }
+
     override fun onIntent(intent: NewGameIntent) = when (intent) {
         NewGameIntent.CreateGame -> {
-            // TODO: Логика создания игры
+            viewModelScope.launch {
+                Log.d("NewGameVM", "CreateGame intent received")
+                val request = buildCreateGameRequest()
+                try {
+                    val response = apiService.createGame(request)
+                    Log.d("NewGameVM", "Response created: $response")
+                    sendEffect(NewGameEffect.JoinGame(response.game.id, response.host_player_id))
+                } catch (e: Exception) {
+                    Log.d("NewGameVM", "Response error: $e")
+                    dispatch(NewGameResult.Error(e.message ?: "Ошибка создания игры"))
+                }
+            }
         }
         is NewGameIntent.QuitDialogRespond -> if (intent.confirmed) sendEffect(NewGameEffect.Quit)
         else dispatch(QuitDialogStateSet(false))
@@ -60,7 +118,6 @@ class NewGameViewModel @Inject constructor(
         NewGameIntent.ResetSettings -> dispatch(ResetDialogStateSet(true))
         is NewGameIntent.ResetDialogRespond -> if (intent.confirmed) {
             dispatch(ResetState)
-            // Также очищаем репозиторий при сбросе
             repository.updateRolesSettings(RSState())
             repository.updateEventsSettings(ESState())
         } else dispatch(ResetDialogStateSet(false))
@@ -74,6 +131,7 @@ class NewGameViewModel @Inject constructor(
         NewGameIntent.GoToTime -> sendEffect(NewGameEffect.GoToTime)
         NewGameIntent.GoToMap -> sendEffect(NewGameEffect.GoToMap)
         NewGameIntent.GoToRoles -> sendEffect(NewGameEffect.GoToRoles)
+        NewGameIntent.DismissError -> dispatch(NewGameResult.Error(""))
     }
 
     override fun reduce(state: NewGameState, result: NewGameResult) =

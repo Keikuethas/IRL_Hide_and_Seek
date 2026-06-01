@@ -13,8 +13,8 @@ val Pink40 = Color(0xFF7D5260)
 
 val RoleType.color: Color
     get() = when (this) {
-        RoleType.Seeker -> Color(233, 30, 99, 255)
-        RoleType.Hider -> Color(33, 150, 243, 255)
+        RoleType.SEEKER -> Color(233, 30, 99, 255)
+        RoleType.HIDER -> Color(33, 150, 243, 255)
     }
 
 val BarelyGrey = Color(220, 220, 220, 255)

@@ -78,19 +78,21 @@ import com.keikuethas.irlhideandseek.view.TimeSettings
 @Composable
 fun NewGameScreen(
     navController: NavController = rememberNavController(),
+    playerName: String,
     newGameViewModel: NewGameViewModel = hiltViewModel()
 ) {
     val state = newGameViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
+        newGameViewModel.setHostName(playerName)
         newGameViewModel.effect.collect { effect ->
             when (effect) {
                 is NewGameEffect.JoinGame -> navController.navigate(
                     Lobby(
-                        playerName = "", //todo,
+                        playerName = state.value.hostName,  // или используйте state.value.hostName
                         roomName = state.value.roomName,
-                        gameId = effect.gameID,
-                        playerId = "host_id"
+                        gameId = effect.gameId,
+                        playerId = effect.playerId
                     )
                 )
 

@@ -42,9 +42,10 @@ class WebSocketManager @Inject constructor() {
         CONNECTING, CONNECTED, DISCONNECTED, RECONNECTING
     }
 
-    private val json = kotlinx.serialization.json.Json {
+    private val json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
+        encodeDefaults = true   // ← добавьте эту строку
     }
 
     suspend fun connect(gameId: String, playerId: String): Result<Unit> {
@@ -149,7 +150,7 @@ class WebSocketManager @Inject constructor() {
         val message = OutgoingChangeRole(data = ChangeRoleData(roleId))
         val jsonString = json.encodeToString(message)
         Log.d("WebSocket", "Sending change_role: $jsonString")
-        send(jsonString)
+        webSocket?.send(jsonString)
     }
 
     fun sendChangeReadyStatus(status: Boolean) {

@@ -103,7 +103,7 @@ fun HomeScreen(
                 }
 
                 HomeEffect.HostLobby -> {
-                    navController.navigate(NewGame)
+                    navController.navigate(NewGame(state.value.nameText))
                 }
 
                 is HomeEffect.JoinLobby -> navController.navigate(

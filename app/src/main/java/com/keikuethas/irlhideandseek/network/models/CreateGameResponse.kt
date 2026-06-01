@@ -4,19 +4,12 @@ import com.keikuethas.irlhideandseek.Websocket_V2.RoleFull
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateGameResponse(
-    val game: GameInfo,
-    val host_player_id: String
-)
-
-@Serializable
 data class GameInfo(
     val id: String,
     val game_code: String,
     val name: String,
     val status: String,
     val created_at: String,
-    val zone_boundary_damage: Int,
     val safe_zone_center_lat: Double,
     val safe_zone_center_lng: Double,
     val safe_zone_radius: Float,
@@ -24,19 +17,10 @@ data class GameInfo(
     val zone_shrink_interval: Int,
     val game_duration: Int,
     val time_to_hide: Int,
+    val zone_boundary_damage: Int,
     val current_safe_zone_id: String?,
     val last_shrink_at: String?,
-    val roles: List<RoleFull> = emptyList()  // ← обязате= emptyList()льно добавить
-)
-
-@Serializable
-data class RoleInfo(
-    val id: String,
-    val name: String,
-    val health: Int,
-    val victory_condition: String,
-    val abilities: List<AbilityInfo>,
-    val events: List<EventInfo>
+    val roles: List<RoleFull> = emptyList()
 )
 
 @Serializable

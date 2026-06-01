@@ -72,7 +72,7 @@ object RolesReducer {
             is RSResult.QuitDialogStateChanged -> state.copy(showQuitDialog = result.open)
 
             RSResult.RoleCreated -> {
-                val newRole = RoleState(PlayerRole("New role", type = RoleType.Hider), 100)
+                val newRole = RoleState(PlayerRole("New role", type = RoleType.HIDER), 100)
                 val newRoleList: List<RoleState> = state.roles + newRole
                 state.copy(roles = newRoleList)
             }
@@ -101,7 +101,7 @@ object RolesReducer {
             RSResult.RoleTypeChanged -> {
                 val oldType = state.roles[state.currentRole].type
                 val newRole = state.roles[state.currentRole].copy(
-                    type = if (oldType == RoleType.Hider) RoleType.Seeker else RoleType.Hider
+                    type = if (oldType == RoleType.HIDER) RoleType.SEEKER else RoleType.HIDER
                 )
                 val newRoleList: List<RoleState> = state.roles.subList(0, state.currentRole) +
                         newRole +

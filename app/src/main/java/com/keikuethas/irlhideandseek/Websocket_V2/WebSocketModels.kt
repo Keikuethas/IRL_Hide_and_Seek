@@ -177,7 +177,7 @@ data class GameInfo(
     val safe_zone_center_lat: Double,
     val safe_zone_center_lng: Double,
     val safe_zone_radius: Float,
-    // ... другие поля по необходимости
+    val roles: List<RoleFull> = emptyList()
 )
 
 @Serializable

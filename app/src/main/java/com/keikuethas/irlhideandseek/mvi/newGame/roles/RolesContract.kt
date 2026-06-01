@@ -56,7 +56,7 @@ data class RoleState(
     val roleName: String = "New role",
     val type: RoleType,
     val abilities: List<AbilityState> = emptyList(),
-    val health: Int = 100,
+    val health: Int = 100
 ) : Parcelable {
     constructor(role: PlayerRole, health: Int) : this(
         roleName = role.name,

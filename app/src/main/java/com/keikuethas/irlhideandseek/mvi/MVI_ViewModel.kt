@@ -16,7 +16,7 @@ abstract class MVI_ViewModel<State: Any, Intent: Any, Effect: Any, Result: Any>(
     private val _effect = MutableSharedFlow<Effect>(extraBufferCapacity = 1)
     val effect = _effect.asSharedFlow()
 
-    abstract fun onIntent(intent: Intent)
+    abstract fun onIntent(intent: Intent): Any
 
     protected fun sendEffect(effect: Effect) {
         viewModelScope.launch { _effect.emit(effect) }

@@ -57,13 +57,10 @@ class LobbyViewModel @Inject constructor(
                     Log.d("LobbyVM", "Raw message: $message")
                     when (message) {
                         is IncomingMessage.WebSocketConnectedPlayer -> {
-                            // Инициализируем состояние из приветственных данных
-                            Log.d("LobbyVM", "Received WebSocketConnectedPlayer")
                             val game = message.data.game_data
                             val player = message.data.player_data
-                            val roles = game.roles.map { it.name } // список названий ролей
-                            val playersList = extractPlayersFromGame(game) // список пар (имя, роль)
-                            Log.d("WebSocketConnectedPlayer", "Raw message: $roles")
+                            val roles = game.roles   // теперь List<RoleFull>
+                            val playersList = extractPlayersFromGame(game)
                             dispatch(
                                 LobbyResult.InitState(
                                     roomName = game.name,
@@ -117,6 +114,11 @@ class LobbyViewModel @Inject constructor(
 
     override fun onIntent(intent: LobbyIntent) {
         when (intent) {
+            LobbyIntent.RequestRoleChangeDialog -> {
+                Log.d("LobbyVM", "RequestRoleChangeDialog received")
+                dispatch(LobbyResult.RoleChangeDialogStateSet(true))
+            }
+
             LobbyIntent.ChangeReadyStatus -> {
                 val newStatus = !state.value.isReady
                 webSocketManager.sendChangeReadyStatus(newStatus)
@@ -125,8 +127,8 @@ class LobbyViewModel @Inject constructor(
             }
 
             is LobbyIntent.ChangeRole -> {
-                Log.d("LobbyVM", "Sending change_role for: ${intent.newRole}")
-                webSocketManager.sendChangeRole(intent.newRole)
+                Log.d("LobbyVM", "Sending change_role for roleId: ${intent.roleId}")
+                webSocketManager.sendChangeRole(intent.roleId)
                 dispatch(LobbyResult.RoleChangeDialogStateSet(false))
             }
 
@@ -147,9 +149,7 @@ class LobbyViewModel @Inject constructor(
                 dispatch(LobbyResult.QuitDialogStateSet(true))
             }
 
-            LobbyIntent.RequestRoleChangeDialog -> {
-                dispatch(LobbyResult.RoleChangeDialogStateSet(true))
-            }
+            LobbyIntent.DismissError -> dispatch(LobbyResult.Error("", ""))
         }
     }
 
