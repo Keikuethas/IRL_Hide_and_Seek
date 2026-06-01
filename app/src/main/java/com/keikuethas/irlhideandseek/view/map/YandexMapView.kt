@@ -12,13 +12,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Circle
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraListener
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapObject
 import com.yandex.mapkit.map.MapObjectCollection
 import com.yandex.mapkit.mapview.MapView
@@ -28,16 +32,15 @@ import com.yandex.runtime.image.ImageProvider
 @Composable
 fun YandexMapView(
     modifier: Modifier = Modifier,
-    state: MapState = MapState(), // ✅ Входные данные из ViewModel
+    state: MapState = MapState(),
     onMapCreated: (MapView) -> Unit = {},
     onCameraMoveFinished: () -> Unit = {},
+    onCameraPositionChanged: (Point) -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val mapViewState = remember { mutableStateOf<MapView?>(null) }
-
-    // ✅ Хранилище объектов карты: ID -> Объект Yandex Map
-    // Позволяет управлять объектами без пересоздания коллекции
     val mapObjectsMap = remember { mutableMapOf<String, MapObject>() }
+    val cameraListener = remember { mutableStateOf<CameraListener?>(null) }
 
     AndroidView(
         factory = { ctx ->
@@ -75,7 +78,28 @@ fun YandexMapView(
         }
     }
 
-    // ✅ Синхронизация состояния с картой
+    // Инициализация слушателя камеры
+    mapViewState.value?.let { mapView ->
+        val map = mapView.mapWindow.map
+
+        // Создаём и подключаем слушатель камеры один раз
+        LaunchedEffect(map) {
+            val listener =
+                CameraListener { map, cameraPosition, reason, finished ->
+                    onCameraPositionChanged(cameraPosition.target)
+
+                    // Сбрасываем флаг, если перемещение завершено
+                    if (finished && state.shouldMoveCamera) {
+                        onCameraMoveFinished()
+                    }
+                }
+
+            map.addCameraListener(listener)
+            cameraListener.value = listener
+        }
+    }
+
+    // Синхронизация состояния с картой
     mapViewState.value?.let { mapView ->
         val map = mapView.mapWindow.map
 
@@ -95,22 +119,26 @@ fun YandexMapView(
                         /* callback */ null
                     )
                 }
-                onCameraMoveFinished()
             }
         }
     }
+        DisposableEffect(Unit) {
+        onDispose {
+            cameraListener.value?.let { mapViewState.value?.mapWindow?.map?.removeCameraListener(it) }
+        }
+    }
+
 }
 
-// ✅ Логика синхронизации (Diffing)
 private fun syncMapObjects(
-    map: com.yandex.mapkit.map.Map,
+    map: Map,
     newState: List<MapObjectState>,
     existingObjectsMap: MutableMap<String, MapObject>
 ) {
     val collection = map.mapObjects.addCollection()
     val newIds = newState.map { it.id }.toSet()
 
-    // 1. ❌ УДАЛЕНИЕ: Объекты, которые есть в карте, но нет в новом состоянии
+    // Удаление объектов
     val idsToRemove = existingObjectsMap.keys - newIds
     idsToRemove.forEach { id ->
         existingObjectsMap[id]?.let { obj ->
@@ -119,7 +147,7 @@ private fun syncMapObjects(
         }
     }
 
-    // 2. ✅ ДОБАВЛЕНИЕ / ОБНОВЛЕНИЕ: Новые или измененные объекты
+    // Обновление объектов
     newState.forEach { stateObj ->
         val existingObj = existingObjectsMap[stateObj.id]
 
@@ -171,8 +199,17 @@ private fun createMapObject(
 }
 
 private fun updateMapObject(existingObj: MapObject, state: MapObjectState) {
-    // Можно добавить логику обновления свойств без пересоздания
     existingObj.isVisible = state.isVisible
+
+    // Обновляем позицию для объектов с followCamera
+    when (existingObj) {
+        is com.yandex.mapkit.map.PlacemarkMapObject -> {
+            existingObj.geometry = state.location
+        }
+        is com.yandex.mapkit.map.CircleMapObject -> {
+            existingObj.geometry = Circle(state.location, existingObj.geometry.radius)
+        }
+    }
 }
 
 /**
@@ -186,7 +223,7 @@ fun createMarkerBitmap(
     strokeColor: androidx.compose.ui.graphics.Color,
     size: Int = 64
 ): Bitmap {
-    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(size, size)
     val canvas = Canvas(bitmap)
     val center = size / 2f
 
@@ -197,20 +234,18 @@ fun createMarkerBitmap(
 
     val paint = Paint().apply { isAntiAlias = true }
 
-    // 1. Внешнее кольцо → индикатор "Текущий игрок"
+    // 1. Внешнее кольцо
     paint.color = strokeColor.toArgb()
     paint.style = Paint.Style.STROKE
     paint.strokeWidth = strokeThickness
     canvas.drawCircle(center, center, outerRadius, paint)
 
-    // 2. Внутренний круг → индикатор "Роль"
+    // Внутренний круг
     paint.color = fillColor.toArgb()
     paint.style = Paint.Style.FILL
     canvas.drawCircle(center, center, innerRadius, paint)
 
-    // 3. Контрастная разделительная линия (2px)
-    // Предотвращает "размытие" стыка цветов при антиалиасинге и делает оба цвета независимыми
-    paint.color = Color.WHITE // Можно заменить на динамический контрастный цвет
+    paint.color = Color.WHITE
     paint.style = Paint.Style.STROKE
     paint.strokeWidth = 2f
     canvas.drawCircle(center, center, innerRadius + 1f, paint)
