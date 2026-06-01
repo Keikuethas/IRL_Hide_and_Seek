@@ -1,6 +1,5 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.map
 
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.keikuethas.irlhideandseek.view.map.MapObjectState
 import com.keikuethas.irlhideandseek.view.map.MapObjectType.Zone
@@ -12,32 +11,27 @@ object MapReducer {
                 safeZoneRadius = max,
                 minSafeZoneRadius = min,
                 yandexMapState = state.yandexMapState.copy(
-                    objects = state.yandexMapState.objects.map {
-                        it.copy(
-                            type = (it.type as Zone).copy(
-                                radius = (if (it.id == "big") max else min).toFloat()
-                            )
-                        )
+                    objects = state.yandexMapState.objects.map { obj ->
+                        when (obj.id.trim()) {
+                            "big" -> obj.copy(type = (obj.type as Zone).copy(radius = max.toFloat()))
+                            "small" -> obj.copy(type = (obj.type as Zone).copy(radius = min.toFloat()))
+                            else -> obj
+                        }
                     }
                 )
             )
         }
-
         MapResult.FollowStatusChanged -> with(state) {
-            Log.i("REDUCER", state.toString())
+            val newFollowState = !followCamera
             copy(
-                followCamera = !followCamera,
+                followCamera = newFollowState,
                 yandexMapState = yandexMapState.copy(
-                    objects = yandexMapState.objects.map { it.copy(followCamera = !followCamera) }
+                    objects = yandexMapState.objects.map { it.copy(followCamera = newFollowState) }
                 )
             )
         }
-
         is MapResult.QuitDialogStateSet -> state.copy(showQuitDialog = result.open)
-        MapResult.StopCameraMovement -> with(state) {
-            copy(yandexMapState = yandexMapState.copy(shouldMoveCamera = false))
-        }
-
+        MapResult.StopCameraMovement -> state.copy(yandexMapState = state.yandexMapState.copy(shouldMoveCamera = false))
         is MapResult.Initialized -> result.state
         is MapResult.LocationSet -> with(state) {
             copy(
@@ -49,34 +43,46 @@ object MapReducer {
                     objects = listOf(
                         MapObjectState(
                             id = "big",
-                            type = Zone(
-                                strokeColor = Color.Blue,
-                                fillColor = Color.Blue.copy(alpha = 0.05F),
-                                radius = safeZoneRadius.toFloat()
-                            ),
+                            type = Zone(strokeColor = Color.Blue, fillColor = Color.Blue.copy(alpha = 0.05F), radius = safeZoneRadius.toFloat()),
                             location = result.location,
-                            followCamera = followCamera
+                            followCamera = followCamera,
+                            isVisible = true
                         ),
-
                         MapObjectState(
                             id = "small",
-                            type = Zone(
-                                strokeColor = Color.Red,
-                                fillColor = Color.Red.copy(alpha = 0.05F),
-                                radius = minSafeZoneRadius.toFloat()
-                            ),
+                            type = Zone(strokeColor = Color.Red, fillColor = Color.Red.copy(alpha = 0.05F), radius = minSafeZoneRadius.toFloat()),
                             location = result.location,
-                            followCamera = followCamera
+                            followCamera = followCamera,
+                            isVisible = true
                         )
                     )
                 )
             )
         }
+        is MapResult.CameraPositionChanged -> with(state) {
+            // 🔄 Ключевое исправление: обновляем координаты объектов в стейте, если они привязаны к камере
+            val updatedObjects = if (followCamera) {
+                yandexMapState.objects.map { it.copy(location = result.position) }
+            } else yandexMapState.objects
 
+            copy(
+                yandexMapState = yandexMapState.copy(
+                    cameraPosition = result.position,
+                    objects = updatedObjects
+                )
+            )
+        }
         is MapResult.LocationUpdated -> with(state) {
+            val updatedObjects = if (followCamera) {
+                yandexMapState.objects.map { it.copy(location = result.location) }
+            } else yandexMapState.objects
+
             copy(
                 location = result.location,
-                yandexMapState = yandexMapState.copy(cameraPosition = result.location)
+                yandexMapState = yandexMapState.copy(
+                    cameraPosition = result.location,
+                    objects = updatedObjects
+                )
             )
         }
     }

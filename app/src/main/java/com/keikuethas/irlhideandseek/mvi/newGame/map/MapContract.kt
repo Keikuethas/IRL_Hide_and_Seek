@@ -14,8 +14,7 @@ data class MapState(
     val showQuitDialog: Boolean = false,
     val followCamera: Boolean = true,
     val location: @RawValue Point? = null
-) : Parcelable {
-}
+) : Parcelable
 
 sealed interface MapIntent {
     data class ChangeZoneRange(val min: Int, val max: Int) : MapIntent
@@ -27,7 +26,7 @@ sealed interface MapIntent {
     data object ConfirmQuit : MapIntent
     data object DeclineQuit : MapIntent
     data class Initialize(val state: MapState) : MapIntent
-    data class SetLocation(val location: Point): MapIntent
+    data class SetLocation(val location: Point) : MapIntent
 }
 
 sealed interface MapResult {
@@ -38,6 +37,8 @@ sealed interface MapResult {
     data class Initialized(val state: MapState) : MapResult
     data class LocationSet(val location: Point) : MapResult
     data class LocationUpdated(val location: Point) : MapResult
+    // 👇 Новое: всегда обновляет центр карты (UI)
+    data class CameraPositionChanged(val position: Point) : MapResult
 }
 
 sealed interface MapEffect {

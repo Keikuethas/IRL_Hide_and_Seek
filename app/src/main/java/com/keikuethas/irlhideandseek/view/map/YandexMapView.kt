@@ -9,6 +9,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
@@ -38,9 +39,8 @@ fun YandexMapView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val mapViewState = remember { mutableStateOf<MapView?>(null) }
     val mapObjectsMap = remember { mutableMapOf<String, MapObject>() }
-    // 👇 Коллекция создаётся один раз на весь жизненный цикл экрана
     val mapObjectsCollection = remember { mutableStateOf<MapObjectCollection?>(null) }
-    val cameraListener = remember { mutableStateOf<CameraListener?>(null) }
+    val cameraListenerRef = remember { mutableStateOf<CameraListener?>(null) }
 
     AndroidView(
         factory = { ctx ->
@@ -79,36 +79,30 @@ fun YandexMapView(
     mapViewState.value?.let { mapView ->
         val map = mapView.mapWindow.map
 
-        // Инициализация коллекции и слушателя камеры
-        LaunchedEffect(map) {
-            if (mapObjectsCollection.value == null) {
-                mapObjectsCollection.value = map.mapObjects.addCollection()
-            }
+        if (mapObjectsCollection.value == null) {
+            mapObjectsCollection.value = map.mapObjects.addCollection()
+        }
 
+        val shouldMoveCameraState = rememberUpdatedState(state.shouldMoveCamera)
+        LaunchedEffect(map) {
             val listener = CameraListener { _, cameraPosition, _, finished ->
                 onCameraPositionChanged(cameraPosition.target)
-                if (finished && state.shouldMoveCamera) {
+                if (finished && shouldMoveCameraState.value) {
                     onCameraMoveFinished()
                 }
             }
-
             map.addCameraListener(listener)
-            cameraListener.value = listener
+            cameraListenerRef.value = listener
         }
 
-        // Синхронизация объектов
-        LaunchedEffect(state.objects, state.cameraPosition) {
+        // 🔄 Синхронизация объектов (теперь полагается на точные координаты из редюсера)
+        LaunchedEffect(state.objects) {
             val collection = mapObjectsCollection.value ?: return@LaunchedEffect
-            val objectsWithUpdatedLocation = state.objects.map { obj ->
-                if (obj.followCamera && state.cameraPosition != null) {
-                    obj.copy(location = state.cameraPosition)
-                } else obj
-            }
-            syncMapObjects(collection, objectsWithUpdatedLocation, mapObjectsMap)
+            syncMapObjects(collection, state.objects, mapObjectsMap)
         }
 
-        // Движение камеры
-        LaunchedEffect(state.cameraPosition) {
+        // 📸 Программное движение камеры
+        LaunchedEffect(state.cameraPosition, state.shouldMoveCamera, state.zoom) {
             if (state.shouldMoveCamera) {
                 state.cameraPosition?.let { point ->
                     map.move(
@@ -123,7 +117,9 @@ fun YandexMapView(
 
     DisposableEffect(Unit) {
         onDispose {
-            cameraListener.value?.let { mapViewState.value?.mapWindow?.map?.removeCameraListener(it) }
+            cameraListenerRef.value?.let {
+                mapViewState.value?.mapWindow?.map?.removeCameraListener(it)
+            }
         }
     }
 }
@@ -133,10 +129,9 @@ private fun syncMapObjects(
     newState: List<MapObjectState>,
     existingObjectsMap: MutableMap<String, MapObject>
 ) {
-    val newIds = newState.map { it.id }.toSet()
-
-    // Удаление старых объектов
+    val newIds = newState.mapNotNull { it.id.takeIf { id -> id.isNotBlank() } }.toSet()
     val idsToRemove = existingObjectsMap.keys - newIds
+
     idsToRemove.forEach { id ->
         existingObjectsMap[id]?.let { obj ->
             collection.remove(obj)
@@ -144,12 +139,13 @@ private fun syncMapObjects(
         }
     }
 
-    // Добавление/обновление
     newState.forEach { stateObj ->
-        val existingObj = existingObjectsMap[stateObj.id]
+        val id = stateObj.id.takeIf { it.isNotBlank() } ?: return@forEach
+        val existingObj = existingObjectsMap[id]
+
         if (existingObj == null) {
             createMapObject(collection, stateObj)?.let { newObject ->
-                existingObjectsMap[stateObj.id] = newObject
+                existingObjectsMap[id] = newObject
             }
         } else {
             updateMapObject(existingObj, stateObj)
@@ -157,18 +153,14 @@ private fun syncMapObjects(
     }
 }
 
-private fun createMapObject(
-    collection: MapObjectCollection,
-    state: MapObjectState
-): MapObject? {
+private fun createMapObject(collection: MapObjectCollection, state: MapObjectState): MapObject? {
     if (!state.isVisible) return null
     return when (state.type) {
         is MapObjectType.Marker -> {
             collection.addPlacemark().apply {
-                setIcon(ImageProvider.fromBitmap(
-                    createMarkerBitmap(state.type.strokeColor, state.type.fillColor)
-                ))
+                setIcon(ImageProvider.fromBitmap(createMarkerBitmap(state.type.strokeColor, state.type.fillColor)))
                 geometry = state.location
+                isVisible = state.isVisible
             }
         }
         is MapObjectType.Zone -> {
@@ -176,6 +168,7 @@ private fun createMapObject(
                 strokeWidth = 2f
                 strokeColor = state.type.strokeColor.toArgb()
                 fillColor = state.type.fillColor.toArgb()
+                isVisible = state.isVisible // Явно задаём видимость при создании
             }
         }
     }
@@ -184,12 +177,13 @@ private fun createMapObject(
 private fun updateMapObject(existingObj: MapObject, state: MapObjectState) {
     existingObj.isVisible = state.isVisible
     when (existingObj) {
-        is com.yandex.mapkit.map.PlacemarkMapObject -> {
-            existingObj.geometry = state.location
-        }
+        is com.yandex.mapkit.map.PlacemarkMapObject -> existingObj.geometry = state.location
         is com.yandex.mapkit.map.CircleMapObject -> {
-            val newRadius = (state.type as? MapObjectType.Zone)?.radius ?: existingObj.geometry.radius
-            existingObj.geometry = Circle(state.location, newRadius)
+            val zoneType = state.type as? MapObjectType.Zone
+            val newRadius = zoneType?.radius ?: existingObj.geometry.radius
+            if (zoneType != null && newRadius > 0f) {
+                existingObj.geometry = Circle(state.location, newRadius)
+            }
         }
     }
 }
