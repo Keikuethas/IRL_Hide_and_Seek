@@ -37,7 +37,7 @@ import com.keikuethas.irlhideandseek.mvi.home.HomeViewModel
 import com.keikuethas.irlhideandseek.view.ErrorDialog
 import com.keikuethas.irlhideandseek.view.Lobby
 import com.keikuethas.irlhideandseek.view.NewGame
-import com.keikuethas.irlhideandseek.view.TextTopAppBar
+import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

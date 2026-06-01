@@ -77,8 +77,8 @@ import com.keikuethas.irlhideandseek.utils.Name
 import com.keikuethas.irlhideandseek.utils.dashedBorder
 import com.keikuethas.irlhideandseek.utils.paramName
 import com.keikuethas.irlhideandseek.view.AskingDialog
-import com.keikuethas.irlhideandseek.view.TextTopAppBar
 import com.keikuethas.irlhideandseek.view.ValueInputDialog
+import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 
 // NOTE:
 //  Вообще я здесь не очень хорошо сделал, перекопировав код из RolesScreen.kt
