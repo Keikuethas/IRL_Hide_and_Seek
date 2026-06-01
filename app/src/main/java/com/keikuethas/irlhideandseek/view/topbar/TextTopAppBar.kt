@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek.view
+package com.keikuethas.irlhideandseek.view.topbar
 
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,3 +30,4 @@ fun TextTopAppBar(text: String) {
         )
     )
 }
+
