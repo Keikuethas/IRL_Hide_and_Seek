@@ -40,6 +40,7 @@ import androidx.compose.ui.window.DialogProperties
 @Composable
 fun CustomTimeInputDialog(
     initTime: Int,
+    text: String,
     onPick: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -67,7 +68,7 @@ fun CustomTimeInputDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "Длительность раунда",
+                    text,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
