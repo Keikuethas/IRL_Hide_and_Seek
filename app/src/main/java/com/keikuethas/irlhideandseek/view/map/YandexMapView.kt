@@ -22,17 +22,15 @@ import com.yandex.mapkit.geometry.Circle
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraListener
 import com.yandex.mapkit.map.CameraPosition
-import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapObject
 import com.yandex.mapkit.map.MapObjectCollection
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
 
-//vibecode
 @Composable
 fun YandexMapView(
     modifier: Modifier = Modifier,
-    state: MapState = MapState(),
+    state: YandexMapState = YandexMapState(),
     onMapCreated: (MapView) -> Unit = {},
     onCameraMoveFinished: () -> Unit = {},
     onCameraPositionChanged: (Point) -> Unit = {}
@@ -40,6 +38,8 @@ fun YandexMapView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val mapViewState = remember { mutableStateOf<MapView?>(null) }
     val mapObjectsMap = remember { mutableMapOf<String, MapObject>() }
+    // 👇 Коллекция создаётся один раз на весь жизненный цикл экрана
+    val mapObjectsCollection = remember { mutableStateOf<MapObjectCollection?>(null) }
     val cameraListener = remember { mutableStateOf<CameraListener?>(null) }
 
     AndroidView(
@@ -61,12 +61,10 @@ fun YandexMapView(
                     mapView?.onStart()
                     MapKitFactory.getInstance().onStart()
                 }
-
                 Lifecycle.Event.ON_STOP -> {
                     mapView?.onStop()
                     MapKitFactory.getInstance().onStop()
                 }
-
                 else -> {}
             }
         }
@@ -78,67 +76,66 @@ fun YandexMapView(
         }
     }
 
-    // Инициализация слушателя камеры
     mapViewState.value?.let { mapView ->
         val map = mapView.mapWindow.map
 
-        // Создаём и подключаем слушатель камеры один раз
+        // Инициализация коллекции и слушателя камеры
         LaunchedEffect(map) {
-            val listener =
-                CameraListener { map, cameraPosition, reason, finished ->
-                    onCameraPositionChanged(cameraPosition.target)
+            if (mapObjectsCollection.value == null) {
+                mapObjectsCollection.value = map.mapObjects.addCollection()
+            }
 
-                    // Сбрасываем флаг, если перемещение завершено
-                    if (finished && state.shouldMoveCamera) {
-                        onCameraMoveFinished()
-                    }
+            val listener = CameraListener { _, cameraPosition, _, finished ->
+                onCameraPositionChanged(cameraPosition.target)
+                if (finished && state.shouldMoveCamera) {
+                    onCameraMoveFinished()
                 }
+            }
 
             map.addCameraListener(listener)
             cameraListener.value = listener
         }
-    }
 
-    // Синхронизация состояния с картой
-    mapViewState.value?.let { mapView ->
-        val map = mapView.mapWindow.map
-
-        LaunchedEffect(state.objects) {
-            syncMapObjects(map, state.objects, mapObjectsMap)
+        // Синхронизация объектов
+        LaunchedEffect(state.objects, state.cameraPosition) {
+            val collection = mapObjectsCollection.value ?: return@LaunchedEffect
+            val objectsWithUpdatedLocation = state.objects.map { obj ->
+                if (obj.followCamera && state.cameraPosition != null) {
+                    obj.copy(location = state.cameraPosition)
+                } else obj
+            }
+            syncMapObjects(collection, objectsWithUpdatedLocation, mapObjectsMap)
         }
 
+        // Движение камеры
         LaunchedEffect(state.cameraPosition) {
             if (state.shouldMoveCamera) {
                 state.cameraPosition?.let { point ->
                     map.move(
-                        /* cameraPosition */ CameraPosition(point, state.zoom, 0.0f, 0.0f),
-                        /* animation */ Animation(
-                            Animation.Type.SMOOTH,
-                            1.0f
-                        ),
-                        /* callback */ null
+                        CameraPosition(point, state.zoom, 0.0f, 0.0f),
+                        Animation(Animation.Type.SMOOTH, 1.0f),
+                        null
                     )
                 }
             }
         }
     }
-        DisposableEffect(Unit) {
+
+    DisposableEffect(Unit) {
         onDispose {
             cameraListener.value?.let { mapViewState.value?.mapWindow?.map?.removeCameraListener(it) }
         }
     }
-
 }
 
 private fun syncMapObjects(
-    map: Map,
+    collection: MapObjectCollection,
     newState: List<MapObjectState>,
     existingObjectsMap: MutableMap<String, MapObject>
 ) {
-    val collection = map.mapObjects.addCollection()
     val newIds = newState.map { it.id }.toSet()
 
-    // Удаление объектов
+    // Удаление старых объектов
     val idsToRemove = existingObjectsMap.keys - newIds
     idsToRemove.forEach { id ->
         existingObjectsMap[id]?.let { obj ->
@@ -147,18 +144,14 @@ private fun syncMapObjects(
         }
     }
 
-    // Обновление объектов
+    // Добавление/обновление
     newState.forEach { stateObj ->
         val existingObj = existingObjectsMap[stateObj.id]
-
         if (existingObj == null) {
-            // Создаем новый объект
-            val newObject = createMapObject(collection, stateObj)
-            if (newObject != null) {
+            createMapObject(collection, stateObj)?.let { newObject ->
                 existingObjectsMap[stateObj.id] = newObject
             }
         } else {
-            // Обновляем существующий (например, видимость или позицию)
             updateMapObject(existingObj, stateObj)
         }
     }
@@ -169,27 +162,17 @@ private fun createMapObject(
     state: MapObjectState
 ): MapObject? {
     if (!state.isVisible) return null
-
     return when (state.type) {
         is MapObjectType.Marker -> {
             collection.addPlacemark().apply {
-                setIcon(
-                    ImageProvider.fromBitmap(
-                        createMarkerBitmap(
-                            strokeColor = state.type.strokeColor,
-                            fillColor = state.type.fillColor
-                        )
-                    )
-                )
+                setIcon(ImageProvider.fromBitmap(
+                    createMarkerBitmap(state.type.strokeColor, state.type.fillColor)
+                ))
                 geometry = state.location
             }
         }
-
         is MapObjectType.Zone -> {
-
-            collection.addCircle(
-                Circle(state.location, state.type.radius)
-            ).apply {
+            collection.addCircle(Circle(state.location, state.type.radius)).apply {
                 strokeWidth = 2f
                 strokeColor = state.type.strokeColor.toArgb()
                 fillColor = state.type.fillColor.toArgb()
@@ -200,24 +183,17 @@ private fun createMapObject(
 
 private fun updateMapObject(existingObj: MapObject, state: MapObjectState) {
     existingObj.isVisible = state.isVisible
-
-    // Обновляем позицию для объектов с followCamera
     when (existingObj) {
         is com.yandex.mapkit.map.PlacemarkMapObject -> {
             existingObj.geometry = state.location
         }
         is com.yandex.mapkit.map.CircleMapObject -> {
-            existingObj.geometry = Circle(state.location, existingObj.geometry.radius)
+            val newRadius = (state.type as? MapObjectType.Zone)?.radius ?: existingObj.geometry.radius
+            existingObj.geometry = Circle(state.location, newRadius)
         }
     }
 }
 
-/**
- * Создаёт Bitmap-иконку для маркера игрока.
- * @param fillColor Цвет внутренней области (отображает роль)
- * @param strokeColor Цвет внешнего кольца (отображает статус "Текущий игрок")
- * @param size Размер итогового Bitmap (рекомендуется 64 или 128 для Retina)
- */
 fun createMarkerBitmap(
     fillColor: androidx.compose.ui.graphics.Color,
     strokeColor: androidx.compose.ui.graphics.Color,
@@ -226,21 +202,16 @@ fun createMarkerBitmap(
     val bitmap = createBitmap(size, size)
     val canvas = Canvas(bitmap)
     val center = size / 2f
-
-    // Настройки геометрии для максимальной видимости
     val strokeThickness = 8f
     val outerRadius = center - strokeThickness / 2f
-    val innerRadius = center - strokeThickness - 2f // 2px технический зазор
-
+    val innerRadius = center - strokeThickness - 2f
     val paint = Paint().apply { isAntiAlias = true }
 
-    // 1. Внешнее кольцо
     paint.color = strokeColor.toArgb()
     paint.style = Paint.Style.STROKE
     paint.strokeWidth = strokeThickness
     canvas.drawCircle(center, center, outerRadius, paint)
 
-    // Внутренний круг
     paint.color = fillColor.toArgb()
     paint.style = Paint.Style.FILL
     canvas.drawCircle(center, center, innerRadius, paint)
@@ -249,6 +220,5 @@ fun createMarkerBitmap(
     paint.style = Paint.Style.STROKE
     paint.strokeWidth = 2f
     canvas.drawCircle(center, center, innerRadius + 1f, paint)
-
     return bitmap
 }

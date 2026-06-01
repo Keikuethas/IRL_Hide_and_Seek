@@ -1,10 +1,7 @@
 package com.keikuethas.irlhideandseek.view.newgame.settings_screens
 
-import android.util.Log
-import androidx.annotation.IntRange
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +14,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,14 +29,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.keikuethas.irlhideandseek.R
+import com.keikuethas.irlhideandseek.mvi.newGame.map.MapEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapState
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapViewModel
+import com.keikuethas.irlhideandseek.view.AskingDialog
+import com.keikuethas.irlhideandseek.view.RangeSliderWithTooltips
 import com.keikuethas.irlhideandseek.view.map.YandexMapView
 import com.keikuethas.irlhideandseek.view.topbar.SettingsTopAppBar
-import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.InputListener
-import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.mapview.MapView
 
 @Composable
@@ -49,44 +45,46 @@ fun MapSettingsScreen(
     viewModel: MapViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
-    // TODO установка круглой зоны произвольного радиуса в произвольном месте
-    //  отображение хоста для удобства
+
     MSUI(
         state = state.value,
-        onIntent = { viewModel.onIntent(it) }
-    )
+        unitName = stringResource(R.string.MetersUnit)
+    ) { viewModel.onIntent(it) }
 
-    // todo effect
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect {
+            when (it) {
+                MapEffect.Quit -> localNavController.popBackStack()
+            }
+        }
+    }
 }
 
 @Composable
 fun MSUI(
     preview: Boolean = false,
     state: MapState = MapState(),
+    unitName: String = "м",
     onIntent: (MapIntent) -> Unit = {}
 ) {
     val mapView = remember { mutableStateOf<MapView?>(null) }
-    // vibecode
-    val inputListener = remember {
-        object : InputListener {
-            override fun onMapTap(map: Map, point: Point) {
-                Log.i("11map", "Long tap: ${point.latitude}, ${point.longitude}")
 
-            }
+    if (state.showQuitDialog)
+        AskingDialog(
+            title = "Вы уверены?",
+            description = "Сделанные вами изменения не сохранятся.",
+            confirmButtonText = "Выйти",
+            onDismiss = { onIntent(MapIntent.DeclineQuit) },
+            onConfirm = { onIntent(MapIntent.ConfirmQuit) },
+            dismissButtonText = "Отменить"
+        )
 
-            override fun onMapLongTap(map: Map, point: Point) {
-
-            }
-        }
-    }
-
-    // todo настройка радиуса зоны в bottomBar или topBar
     Scaffold(
         topBar = {
             SettingsTopAppBar(
                 "Карта",
-                onBackClick = { TODO() },
-                onSaveClick = { TODO() },
+                onBackClick = { onIntent(MapIntent.RequestQuit) },
+                onSaveClick = { onIntent(MapIntent.Save) },
                 bottomContentSpacing = 5.dp,
             ) {
                 Row(
@@ -94,102 +92,96 @@ fun MSUI(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Перемещать зону",
-                        style = typography.bodyLarge
-                    )
-
+                    Text(text = "Перемещать зону", style = typography.bodyLarge)
                     Spacer(Modifier.width(24.dp))
-
                     Switch(
-                        checked = true, //TODO
-                        onCheckedChange = {} //TODO
+                        checked = state.followCamera,
+                        onCheckedChange = { onIntent(MapIntent.ChangeFollowStatus) }
                     )
                 }
             }
-        },
-        bottomBar = { BottomBar() }
+        }
+
     ) { innerPadding ->
         Box(
             Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            if (!preview)
-                YandexMapView(
-                    modifier = Modifier.fillMaxSize(),
-                    state = state.yandexMapState,
-                    onMapCreated = { map ->
-                        mapView.value = map
-                        map.mapWindow.map.addInputListener(inputListener)
-                    },
-                    onCameraMoveFinished = { TODO() },
-                    onCameraPositionChanged = { TODO() }
-                )
-            Icon(
-                Icons.Default.Add,
-                contentDescription = null,
+
+            Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.Center)
-            )
+                    .fillMaxSize()
+                    .padding(bottom = 80.dp)
+            ) {
+                if (!preview) {
+                    YandexMapView(
+                        modifier = Modifier.fillMaxSize(),
+                        state = state.yandexMapState,
+                        onMapCreated = { map ->
+                            mapView.value = map
+                        },
+                        onCameraMoveFinished = { onIntent(MapIntent.ReportCameraMoveFinished) },
+                        onCameraPositionChanged = {
+                            onIntent(
+                                MapIntent.ReportCameraPositionChanged(
+                                    it
+                                )
+                            )
+                        }
+                    )
+                }
+
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(48.dp)
+                )
+            }
+
+
+            Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                with(state) {
+                    BottomBar(
+                        minRadius = minSafeZoneRadius,
+                        maxRadius = safeZoneRadius,
+                        unitName = unitName,
+                        onValueChange = { min, max ->
+                            onIntent(
+                                MapIntent.ChangeZoneRange(
+                                    min,
+                                    max
+                                )
+                            )
+                        }
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun BottomBar() {
-
-    // temp
-    val value = remember { mutableIntStateOf(100) }
-
-    Column(
-        modifier = Modifier.padding(10.dp)
-    ) {
-        RadiusSlider(
-            label = "Радиус зоны",
-            value = value.intValue,
-            valueRange = 10..300,
-            step = 10,
-            onValueChange = {value.intValue = it}
-        )
-    }
-}
-
-@Composable
-private fun RadiusSlider(
-    label: String,
-    value: Int,
-    valueRange: ClosedRange<Int>,
-    @IntRange(from = 1) step: Int,
-    onValueChange: (Int) -> Unit
+private fun BottomBar(
+    minRadius: Int,
+    maxRadius: Int,
+    unitName: String,
+    onValueChange: (min: Int, max: Int) -> Unit
 ) {
-    Column(
-
-    ) {
-        Text(
-            text = label,
-            style = typography.labelLarge
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+    Box(Modifier.padding(horizontal = 48.dp)) {
+        RangeSliderWithTooltips(
+            value = minRadius.toFloat()..maxRadius.toFloat(),
+            onValueChange = { range ->
+                onValueChange(range.start.toInt(), range.endInclusive.toInt())
+            },
+            valueRange = 10F..500F,
+            startLabel = "Минимальный радиус",
+            endLabel = "Начальный радиус",
+            valueFormatter = { "${it.toInt()} $unitName" }
         ) {
-            Slider(
-                value = value.toFloat(),
-                onValueChange = { onValueChange(it.toInt()) },
-                valueRange = with(valueRange) { start.toFloat()..endInclusive.toFloat() },
-                steps = with(valueRange) { endInclusive - start } / step
-            )
-
-            Text(
-                text = "$value ${stringResource(R.string.MetersUnit)}",
-                style = typography.labelLarge,
-                modifier = Modifier.width(200.dp),
-                maxLines = 1
-            )
+            Text("Настройка безопасной зоны", style = typography.labelLarge)
         }
     }
 }
