@@ -5,6 +5,8 @@ import com.keikuethas.irlhideandseek.Ability
 import com.keikuethas.irlhideandseek.PlayerRole
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import kotlinx.parcelize.Parcelize
+import com.keikuethas.irlhideandseek.Websocket_V2.RoleFull
+import kotlinx.parcelize.IgnoredOnParcel
 
 // Состояние экрана
 @Parcelize
@@ -14,7 +16,8 @@ data class LobbyState(
     val roomCode: String = "AMOGUS", // код комнаты
     val playerRole: String = "",
     val players: List<Pair<String, String>> = emptyList(),
-    val roles: List<String> = emptyList(),
+    @IgnoredOnParcel
+    val roles: List<RoleFull> = emptyList(),
     val isReady: Boolean = false,
     val showRoleChangeDialog: Boolean = false,
     val showQuitDialog: Boolean = false,
@@ -28,8 +31,9 @@ sealed interface LobbyIntent {
     data class QuitDialogRespond(val confirmed: Boolean): LobbyIntent // Пользователь (не) подтвердил выход в диалоговом окне
     data object ChangeReadyStatus: LobbyIntent // Поменять статус готовности
     data object RequestRoleChangeDialog: LobbyIntent // Пользователь нажал "сменить роль"
-    data class ChangeRole(val newRole: String): LobbyIntent // Пользователь хочет поменять роль
+    data class ChangeRole(val roleId: String) : LobbyIntent // Пользователь хочет поменять роль
     data object DeclineRoleChange: LobbyIntent // Пользователь закрыл диалог без смены роли
+    data object DismissError : LobbyIntent
 }
 
 // Результат действия. Меняет состояние
@@ -48,7 +52,7 @@ sealed interface LobbyResult {
         val playerName: String,
         val playerRole: String,
         val players: List<Pair<String, String>>,
-        val roles: List<String>,
+        val roles: List<RoleFull>,
         val isReady: Boolean
     ) : LobbyResult
     data class Error(val title: String, val message: String) : LobbyResult

@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.keikuethas.irlhideandseek.view.game.GameScreen
 import com.keikuethas.irlhideandseek.view.home.HomeScreen
 import com.keikuethas.irlhideandseek.view.lobby.LobbyScreen
@@ -32,8 +33,9 @@ fun AppNavigation() {
             GameScreen(navController)
         }
 
-        composable<NewGame> {
-            NewGameScreen(navController)
+        composable<NewGame> { backStackEntry ->
+            val newGame = backStackEntry.toRoute<NewGame>()
+            NewGameScreen(navController, newGame.playerName)
         }
 
         composable<RolesSettings> {

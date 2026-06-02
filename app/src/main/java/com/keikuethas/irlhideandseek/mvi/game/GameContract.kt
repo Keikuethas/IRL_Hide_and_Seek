@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 data class PlayerState(
     val name: String = "player",
     val roleName: String = "new role",
-    val roleType: RoleType = RoleType.Seeker,
+    val roleType: RoleType = RoleType.SEEKER,
     val lat: Double = 0.0,
     val lng: Double = 0.0
 ): Parcelable
@@ -32,7 +32,7 @@ data class ZoneState(
 data class GameState(
     val secondsRemain: Int = 600,
     val abilities: List<AbilityState> = emptyList(),
-    val roleType: RoleType = RoleType.Seeker,
+    val roleType: RoleType = RoleType.SEEKER,
     val players: List<PlayerState> = emptyList(),
     val playerName: String = "me",
     val itsTimeToHide: Boolean = false,

@@ -71,7 +71,7 @@ private fun Header( //todo разные подписи к таймеру (+вы�
         Text(
             state.run {
                 when {
-                    itsTimeToHide && roleType == RoleType.Hider -> "Время спрятаться:"
+                    itsTimeToHide && roleType == RoleType.HIDER -> "Время спрятаться:"
                     else -> ""
                 }
             } + "${secs / 60}:${(secs % 60).toString().padStart(2, '0')}"
@@ -136,7 +136,7 @@ private fun GSUI(
                     //char
                     type = MapObjectType.Marker(
                         strokeColor = Color.Green,
-                        fillColor = RoleType.Hider.color
+                        fillColor = RoleType.HIDER.color
                     ),
                     location = Point(55.660311, 37.472870),
                 ),

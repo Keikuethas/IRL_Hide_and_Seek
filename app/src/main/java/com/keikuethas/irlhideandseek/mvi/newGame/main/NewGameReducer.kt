@@ -31,5 +31,7 @@ object NewGameReducer {
                 eventSettings = ESState(),
                 mapSettings = MapState()
             )
+            is NewGameResult.Error -> state.copy(error = result.message)
+            is NewGameResult.SetHostName -> state.copy(hostName = result.hostName)
         }
 }

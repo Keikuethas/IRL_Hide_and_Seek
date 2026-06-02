@@ -287,7 +287,7 @@ private fun RoleCardPreview() {
     RoleCard(
         RoleState(PlayerRole(
             "Охотник",
-            listOf(Shield(), Intel(), PersonalBomb()), RoleType.Seeker
+            listOf(Shield(), Intel(), PersonalBomb()), RoleType.SEEKER
         ), 100
     ))
 }
@@ -297,9 +297,9 @@ private fun RoleCardPreview() {
 private fun RoleDialogPreview() {
 
     val roleList = listOf(
-        PlayerRole("Житель", listOf(Shield(), Intel()), RoleType.Hider),
-        PlayerRole("Бомбер", listOf(PersonalBomb()), RoleType.Seeker),
-        PlayerRole("Мажор", listOf(Shield(), Intel(), SafeMansion()), RoleType.Hider)
+        PlayerRole("Житель", listOf(Shield(), Intel()), RoleType.HIDER),
+        PlayerRole("Бомбер", listOf(PersonalBomb()), RoleType.SEEKER),
+        PlayerRole("Мажор", listOf(Shield(), Intel(), SafeMansion()), RoleType.HIDER)
     )
 
     RoleChangeDialog(

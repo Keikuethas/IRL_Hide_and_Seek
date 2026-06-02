@@ -31,7 +31,7 @@ data class HostPlayer(
 @Serializable
 data class RoleParams(
     val health: Int,
-    val victory_condition: String  // "SEEKER" или "HIDER"
+    val victory_condition: String
 )
 
 @Serializable
@@ -39,11 +39,27 @@ data class AbilityParams(
     val duration_seconds: Int,
     val number_uses: Int,
     val recharge_time: Int,
-    val addition_data: Map<String, Double> = emptyMap()
+    val addition_data: Map<String, Double>
 )
 
 @Serializable
 data class EventConfig(
-    val activation_frequency: String, // "FREQUENT", "RARE", "COMMON"
-    val addition_data: Map<String, Double> = emptyMap()
+    val activation_frequency: String,
+    val addition_data: Map<String, Double>
+)
+
+@Serializable
+data class CreateGameResponse(
+    val game: GameInfo,
+    val host_player_id: String
+)
+
+@Serializable
+data class RoleFull(
+    val id: String,
+    val name: String,
+    val health: Int,
+    val victory_condition: String,
+    val abilities: List<AbilityInfo>,
+    val events: List<EventInfo>
 )

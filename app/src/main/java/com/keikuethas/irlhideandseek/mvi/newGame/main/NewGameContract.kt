@@ -20,7 +20,11 @@ data class NewGameState(
     val timeSettings: TimeState = TimeState(),
     val rolesSettings: RSState = RSState(),
     val eventSettings: ESState = ESState(),
-    val mapSettings: MapState = MapState()
+    val mapSettings: MapState = MapState(),
+    val hostName: String = "",
+    val hostLocationLat: Double = 55.751244,
+    val hostLocationLng: Double = 37.618423,
+    val error: String? = null
 ) : Parcelable {
     val mapConfigured get() = mapSettings.location != null
 
@@ -43,9 +47,12 @@ sealed interface NewGameIntent {
     data object GoToEvents: NewGameIntent
     data object GoToMap: NewGameIntent
     data object GoToTime: NewGameIntent
+
+    data object DismissError : NewGameIntent
 }
 
 sealed interface NewGameResult {
+    data class SetHostName(val hostName: String) : NewGameResult //refactor repository
     data class QuitDialogStateSet(val open: Boolean) : NewGameResult
     data class ResetDialogStateSet(val open: Boolean) : NewGameResult
     data class PresetSelected(val presetName: String) : NewGameResult
@@ -56,11 +63,14 @@ sealed interface NewGameResult {
     data class RolesUpdated(val newState: RSState) : NewGameResult
     data class EventsUpdated(val newState: ESState) : NewGameResult
     data class MapUpdated(val newState: MapState) : NewGameResult
+    data class MapUpdated(val newState: MSState) : NewGameResult
+
+    data class Error(val message: String) : NewGameResult
 }
 
 sealed interface NewGameEffect {
     data object Quit : NewGameEffect
-    data class JoinGame(val gameID: String) : NewGameEffect
+    data class JoinGame(val gameId: String, val playerId: String) : NewGameEffect //refactor ?
     data object GoToRoles: NewGameEffect
     data object GoToEvents: NewGameEffect
     data object GoToMap: NewGameEffect

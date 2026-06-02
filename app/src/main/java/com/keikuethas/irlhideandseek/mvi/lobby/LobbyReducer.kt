@@ -19,12 +19,18 @@ object LobbyReducer {
 
             is LobbyResult.ReadyStatusSet -> state.copy(isReady = result.ready)
 
-            is LobbyResult.RoleChanged ->
-                if (state.players.any { it.first == result.name })
-                    state.copy(
+            is LobbyResult.RoleChanged -> {
+                var newState = state
+                if (state.players.any { it.first == result.name }) {
+                    newState = state.copy(
                         players = state.players.filterNot { it.first == result.name } + (result.name to result.role)
                     )
-                else state
+                }
+                if (result.name == state.playerName) {
+                    newState = newState.copy(playerRole = result.role)
+                }
+                newState
+            }
 
             is LobbyResult.QuitDialogStateSet -> state.copy(showQuitDialog = result.open)
 

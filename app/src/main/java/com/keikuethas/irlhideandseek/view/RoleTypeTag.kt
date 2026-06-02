@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun RoleTypeTag(type: RoleType = RoleType.Seeker) {
+fun RoleTypeTag(type: RoleType = RoleType.SEEKER) {
     val toolTipState = rememberTooltipState(isPersistent = true, initialIsVisible = false)
     val coroutineScope = rememberCoroutineScope()
     TooltipBox(

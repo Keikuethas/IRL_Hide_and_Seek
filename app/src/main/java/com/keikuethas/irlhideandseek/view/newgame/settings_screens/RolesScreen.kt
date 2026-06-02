@@ -117,7 +117,7 @@ fun RolesSettingsScreen(
 fun RSSUI(
     state: RSState = RSState(
         roles = listOf(
-            RoleState(PlayerRole("new role", type = RoleType.Hider), 100)
+            RoleState(PlayerRole("new role", type = RoleType.HIDER), 100)
         )
     ),
     onIntent: (RSIntent) -> Unit = {}
@@ -376,7 +376,7 @@ fun RoleElement(
         role = PlayerRole(
             "Role name", listOf(
                 Shield(), SafeHouse(), Intel(), PersonalBomb()
-            ), RoleType.Hider
+            ), RoleType.HIDER
         ),
         health = 100
     ),
@@ -641,7 +641,7 @@ fun ParamInfo(
 
 @Composable
 fun RoleTypeChangeDialog(
-    currentType: RoleType = RoleType.Seeker,
+    currentType: RoleType = RoleType.SEEKER,
     onDismiss: () -> Unit = {},
     onChange: () -> Unit = {}
 ) {
@@ -661,7 +661,7 @@ fun RoleTypeChangeDialog(
 
 @Composable
 fun RTCDUI(
-    currentType: RoleType = RoleType.Hider,
+    currentType: RoleType = RoleType.HIDER,
     onDismiss: () -> Unit = {},
     onChange: () -> Unit = {}
 ) {
@@ -676,14 +676,14 @@ fun RTCDUI(
                 .padding(top = 10.dp, bottom = 20.dp),
             textAlign = TextAlign.Center
         )
-        if (currentType == RoleType.Seeker) {
-            RTCDVariant(RoleType.Seeker, selected = true, onClick = onDismiss)
+        if (currentType == RoleType.SEEKER) {
+            RTCDVariant(RoleType.SEEKER, selected = true, onClick = onDismiss)
             Spacer(Modifier.height(10.dp))
-            RTCDVariant(type = RoleType.Hider, selected = false, onClick = onChange)
+            RTCDVariant(type = RoleType.HIDER, selected = false, onClick = onChange)
         } else {
-            RTCDVariant(RoleType.Hider, selected = true, onClick = onDismiss)
+            RTCDVariant(RoleType.HIDER, selected = true, onClick = onDismiss)
             Spacer(Modifier.height(10.dp))
-            RTCDVariant(type = RoleType.Seeker, selected = false, onClick = onChange)
+            RTCDVariant(type = RoleType.SEEKER, selected = false, onClick = onChange)
         }
 
         Surface(
@@ -712,7 +712,7 @@ fun RTCDUI(
 //@Preview
 @Composable
 fun RTCDVariant(
-    type: RoleType = RoleType.Seeker, selected: Boolean = true, onClick: () -> Unit = {}
+    type: RoleType = RoleType.SEEKER, selected: Boolean = true, onClick: () -> Unit = {}
 ) {
     Surface(
         Modifier
