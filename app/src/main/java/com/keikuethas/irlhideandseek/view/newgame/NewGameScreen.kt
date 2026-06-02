@@ -262,24 +262,26 @@ fun NGSUI(
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                     iconBackgroundColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    hasDrawer = !state.mapSettings.isConfigured
+                    hasDrawer = !state.mapConfigured
                 )
-                ValidationDrawer(backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Warning,
-                            null,
-                            Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                        Text(
-                            "Карта не настроена",
-                            style = typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                if (!state.mapConfigured){
+                    ValidationDrawer(backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Warning,
+                                null,
+                                Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                "Карта не настроена",
+                                style = typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }

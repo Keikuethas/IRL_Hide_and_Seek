@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
-import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.EmptyRoleCreated
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.EventsUpdated
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.PresetSelected
@@ -13,7 +12,6 @@ import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.ResetDialogS
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.ResetState
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.RolesUpdated
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.RoomNameChanged
-import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,6 +38,12 @@ class NewGameViewModel @Inject constructor(
                 dispatch(EventsUpdated(newEvents))
             }
         }
+
+        viewModelScope.launch {
+            repository.newGameState.collect { val newMap = it.mapSettings
+            dispatch(NewGameResult.MapUpdated(newMap))
+            }
+        }
     }
 
     override fun onIntent(intent: NewGameIntent) = when (intent) {
@@ -61,8 +65,7 @@ class NewGameViewModel @Inject constructor(
         is NewGameIntent.ResetDialogRespond -> if (intent.confirmed) {
             dispatch(ResetState)
             // Также очищаем репозиторий при сбросе
-            repository.updateRolesSettings(RSState())
-            repository.updateEventsSettings(ESState())
+            repository.resetAll()
         } else dispatch(ResetDialogStateSet(false))
 
         is NewGameIntent.CreateEmptyRole -> {

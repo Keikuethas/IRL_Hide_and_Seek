@@ -1,6 +1,7 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.main
 
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
+import com.keikuethas.irlhideandseek.mvi.newGame.map.MapState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 
@@ -28,7 +29,7 @@ object NewGameReducer {
             NewGameResult.ResetState -> state.copy(
                 rolesSettings = RSState(),
                 eventSettings = ESState(),
-                mapSettings = MSState()
+                mapSettings = MapState()
             )
         }
 }

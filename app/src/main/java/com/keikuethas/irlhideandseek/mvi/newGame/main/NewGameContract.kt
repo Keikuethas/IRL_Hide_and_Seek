@@ -1,16 +1,14 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.main
 
 import android.os.Parcelable
-import com.keikuethas.irlhideandseek.GameSettings
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
+import com.keikuethas.irlhideandseek.mvi.newGame.map.MapState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeState
 import kotlinx.parcelize.Parcelize
 
-// Заглушка для состояния карты (пока не реализована) todo
-@Parcelize
-data class MSState(val isConfigured: Boolean = false) : Parcelable
+// CONCERN: нужно ли хранить состояния настроек, если они уже хранятся в репозитории?
 
 @Parcelize
 data class NewGameState(
@@ -22,31 +20,13 @@ data class NewGameState(
     val timeSettings: TimeState = TimeState(),
     val rolesSettings: RSState = RSState(),
     val eventSettings: ESState = ESState(),
-    val mapSettings: MSState = MSState()
+    val mapSettings: MapState = MapState()
 ) : Parcelable {
+    val mapConfigured get() = mapSettings.location != null
 
     val eventsConfigured: Boolean get() = eventSettings.events.isNotEmpty()
     val missingRoles: List<RoleType> get() = RoleType.entries.filterNot {entry -> rolesSettings.roles.any {it.type == entry} }
-    val canCreateGame: Boolean get() = missingRoles.isEmpty() && eventsConfigured && mapSettings.isConfigured
-
-    val gameSettings: GameSettings
-        get() = GameSettings(
-            name = roomName,
-            center_lat = 0.0,
-            center_lng = 0.0,
-            safe_zone_radius = TODO(),
-            min_zone_radius = TODO(),
-            zone_shrink_interval = TODO(),
-            game_duration = TODO(),
-            time_to_hide = TODO(),
-            host_name = TODO(),
-            host_player_location_lat = TODO(),
-            host_player_location_lng = TODO(),
-            game_roles = TODO(),
-            roles_abilities = TODO(),
-            events_configurations = TODO(),
-            roles_events = TODO()
-        )
+    val canCreateGame: Boolean get() = missingRoles.isEmpty() && eventsConfigured && mapConfigured
 }
 
 sealed interface NewGameIntent {
@@ -75,7 +55,7 @@ sealed interface NewGameResult {
 
     data class RolesUpdated(val newState: RSState) : NewGameResult
     data class EventsUpdated(val newState: ESState) : NewGameResult
-    data class MapUpdated(val newState: MSState) : NewGameResult
+    data class MapUpdated(val newState: MapState) : NewGameResult
 }
 
 sealed interface NewGameEffect {

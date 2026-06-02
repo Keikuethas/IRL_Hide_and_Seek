@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 import com.keikuethas.irlhideandseek.view.map.MapObjectState
 import com.keikuethas.irlhideandseek.view.map.MapObjectType.Zone
 
+
+
 object MapReducer {
     fun reduce(state: MapState, result: MapResult): MapState = when (result) {
         is MapResult.ZoneRangeChanged -> with(result) {
@@ -21,6 +23,7 @@ object MapReducer {
                 )
             )
         }
+
         MapResult.FollowStatusChanged -> with(state) {
             val newFollowState = !followCamera
             copy(
@@ -30,9 +33,25 @@ object MapReducer {
                 )
             )
         }
+
         is MapResult.QuitDialogStateSet -> state.copy(showQuitDialog = result.open)
-        MapResult.StopCameraMovement -> state.copy(yandexMapState = state.yandexMapState.copy(shouldMoveCamera = false))
-        is MapResult.Initialized -> result.state
+        MapResult.StopCameraMovement -> state.copy(
+            yandexMapState = state.yandexMapState.copy(
+                shouldMoveCamera = false
+            )
+        )
+
+        is MapResult.Initialized -> with (result.state) {
+            copy(
+                followCamera = location == null,
+                yandexMapState = yandexMapState.copy(
+                    shouldMoveCamera = true,
+                    cameraPosition = location,
+                    zoom = 15f,
+                    objects = yandexMapState.objects.map { it.copy(followCamera = location == null) }
+                )
+            )
+        }
         is MapResult.LocationSet -> with(state) {
             copy(
                 location = result.location,
@@ -43,14 +62,22 @@ object MapReducer {
                     objects = listOf(
                         MapObjectState(
                             id = "big",
-                            type = Zone(strokeColor = Color.Blue, fillColor = Color.Blue.copy(alpha = 0.05F), radius = safeZoneRadius.toFloat()),
+                            type = Zone(
+                                strokeColor = Color.Blue,
+                                fillColor = Color.Blue.copy(alpha = 0.05F),
+                                radius = safeZoneRadius.toFloat()
+                            ),
                             location = result.location,
                             followCamera = followCamera,
                             isVisible = true
                         ),
                         MapObjectState(
                             id = "small",
-                            type = Zone(strokeColor = Color.Red, fillColor = Color.Red.copy(alpha = 0.05F), radius = minSafeZoneRadius.toFloat()),
+                            type = Zone(
+                                strokeColor = Color.Red,
+                                fillColor = Color.Red.copy(alpha = 0.05F),
+                                radius = minSafeZoneRadius.toFloat()
+                            ),
                             location = result.location,
                             followCamera = followCamera,
                             isVisible = true
@@ -59,11 +86,12 @@ object MapReducer {
                 )
             )
         }
+
         is MapResult.CameraPositionChanged -> with(state) {
             // 🔄 Ключевое исправление: обновляем координаты объектов в стейте, если они привязаны к камере
-            val updatedObjects = if (followCamera) {
-                yandexMapState.objects.map { it.copy(location = result.position) }
-            } else yandexMapState.objects
+            val updatedObjects =
+                yandexMapState.objects.map { if (it.followCamera) it.copy(location = result.position) else it }
+
 
             copy(
                 yandexMapState = yandexMapState.copy(
@@ -72,6 +100,7 @@ object MapReducer {
                 )
             )
         }
+
         is MapResult.LocationUpdated -> with(state) {
             val updatedObjects = if (followCamera) {
                 yandexMapState.objects.map { it.copy(location = result.location) }

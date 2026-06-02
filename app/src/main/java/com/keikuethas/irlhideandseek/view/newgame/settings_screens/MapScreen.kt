@@ -39,6 +39,8 @@ import com.keikuethas.irlhideandseek.view.map.YandexMapView
 import com.keikuethas.irlhideandseek.view.topbar.SettingsTopAppBar
 import com.yandex.mapkit.mapview.MapView
 
+//FIXME: камера устанавливается не туда
+
 @Composable
 fun MapSettingsScreen(
     localNavController: NavController,

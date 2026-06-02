@@ -7,7 +7,7 @@ import com.keikuethas.irlhideandseek.Websocket.AbilityType
 import com.keikuethas.irlhideandseek.Websocket.GameData
 import com.keikuethas.irlhideandseek.Websocket.ZoneType
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
-import com.keikuethas.irlhideandseek.view.map.MapState
+import com.keikuethas.irlhideandseek.view.map.YandexMapState
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import kotlin.reflect.KClass
@@ -39,7 +39,7 @@ data class GameState(
     val usingAbilityOnMap: @RawValue KClass<out Ability>? = null,
     val abilityListPage: Int? = null, //concern
     val playerListOpen: Boolean = false,
-    val mapState: @RawValue MapState = MapState()
+    val mapState: @RawValue YandexMapState = YandexMapState()
 ): Parcelable
 
 
