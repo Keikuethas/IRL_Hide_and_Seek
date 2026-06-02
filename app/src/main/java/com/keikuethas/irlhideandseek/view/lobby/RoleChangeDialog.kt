@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek.view
+package com.keikuethas.irlhideandseek.view.lobby
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -39,18 +39,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.keikuethas.irlhideandseek.Ability
 import com.keikuethas.irlhideandseek.Intel
 import com.keikuethas.irlhideandseek.PersonalBomb
 import com.keikuethas.irlhideandseek.PlayerRole
-import com.keikuethas.irlhideandseek.R
 import com.keikuethas.irlhideandseek.RoleType
 import com.keikuethas.irlhideandseek.SafeMansion
 import com.keikuethas.irlhideandseek.Shield
@@ -62,6 +59,7 @@ import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.name
 import com.keikuethas.irlhideandseek.utils.paramName
 import com.keikuethas.irlhideandseek.utils.unitName
+import com.keikuethas.irlhideandseek.view.RoleTypeTag
 
 @Composable
         /**
@@ -132,7 +130,6 @@ fun RoleChangeDialog(
     }
 }
 
-// refactor в отдельный файл
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoleCard(
@@ -238,7 +235,7 @@ fun AbilityCard(ability: AbilityState, padding: PaddingValues = PaddingValues(0.
         )
         Spacer(Modifier.height(10.dp))
 
-        LazyColumn() {
+        LazyColumn(modifier = Modifier.heightIn(max = 500.dp)) {
             items(items = ability.params) {
                 ParamInfo(it.first, it.second)
             }
