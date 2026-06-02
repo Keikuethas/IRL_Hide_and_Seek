@@ -50,7 +50,7 @@ import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.utils.adjustLightness
 import com.keikuethas.irlhideandseek.view.map.MapObjectState
 import com.keikuethas.irlhideandseek.view.map.MapObjectType
-import com.keikuethas.irlhideandseek.view.map.MapState
+import com.keikuethas.irlhideandseek.view.map.YandexMapState
 import com.keikuethas.irlhideandseek.view.map.YandexMapView
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
@@ -122,7 +122,7 @@ private fun GSUI(
 
     // temp for test
     state: GameState = GameState(
-        mapState = MapState(
+        mapState = YandexMapState(
             objects = listOf(
                 MapObjectState(
                     type = MapObjectType.Zone( //sz
