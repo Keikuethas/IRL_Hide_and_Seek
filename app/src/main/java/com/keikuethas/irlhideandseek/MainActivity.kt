@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.keikuethas.irlhideandseek.ui.theme.IRLHideAndSeekTheme
 import com.keikuethas.irlhideandseek.view.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,6 +27,13 @@ class MainActivity : ComponentActivity() {
             LOCATION_PERMISSION_REQUEST_CODE
         )
 
+        // Скрываем навигационную панель
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+            controller.hide(androidx.core.view.WindowInsetsCompat.Type.navigationBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
 
         enableEdgeToEdge()
         setContent {
