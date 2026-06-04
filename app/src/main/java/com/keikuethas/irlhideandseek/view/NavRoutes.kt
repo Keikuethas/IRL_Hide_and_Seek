@@ -3,9 +3,9 @@ package com.keikuethas.irlhideandseek.view
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object Home
+data object Home {
 
-
+}
 @Serializable
 data class Lobby(
     val playerName: String,
@@ -13,20 +13,27 @@ data class Lobby(
     val gameId: String,
     val playerId: String
 )
-
 @Serializable
-data object Game
+data object Game {
 
-@Serializable data object NewGameNavigation
+}
 
 // --- экраны при создании игры ---
 @Serializable
-data class NewGame(val playerName: String)
-@Serializable data object RolesSettings
-@Serializable data object MapSettings
-@Serializable data object EventSettings
+data class NewGame(val playerName: String) {
 
-@Serializable data object TimeSettings
+}
+@Serializable data object RolesSettings
+@Serializable data object MapSettings {
+
+}
+@Serializable data object EventSettings {
+
+}
+
+@Serializable data object TimeSettings {
+
+}
 /*
 * Описание экранов:
 * Home -> ввод имени и идентификатора комнаты, либо создание своей комнаты
