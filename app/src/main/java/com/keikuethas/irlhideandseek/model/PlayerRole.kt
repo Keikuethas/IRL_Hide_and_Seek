@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek
+package com.keikuethas.irlhideandseek.model
 
 import kotlinx.serialization.Serializable
 
@@ -22,9 +22,9 @@ enum class RoleType {
 
     // resource
     val description: String by lazy {
-        when (this) {
-            HIDER -> "Задача игроков с ролью этого типа - оставаться в живых, пока не истечёт время игры."
-            SEEKER -> "Задача игроков с ролью этого типа - найти всех прячущихся до истечения времени игры."
+        "Задача игроков с ролью этого типа - " + when (this) {
+            HIDER -> "оставаться в живых, пока не истечёт время игры."
+            SEEKER -> "найти всех прячущихся до истечения времени игры."
         }
     }
 }

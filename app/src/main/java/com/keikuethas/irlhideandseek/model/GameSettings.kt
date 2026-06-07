@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek
+package com.keikuethas.irlhideandseek.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable

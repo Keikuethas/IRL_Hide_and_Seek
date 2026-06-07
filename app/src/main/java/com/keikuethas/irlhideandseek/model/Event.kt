@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek
+package com.keikuethas.irlhideandseek.model
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
