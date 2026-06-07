@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek.data.repository
+package com.keikuethas.irlhideandseek.data
 
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapState
