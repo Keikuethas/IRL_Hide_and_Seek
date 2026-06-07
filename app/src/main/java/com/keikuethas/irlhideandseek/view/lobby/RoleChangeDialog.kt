@@ -45,12 +45,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.keikuethas.irlhideandseek.Intel
-import com.keikuethas.irlhideandseek.PersonalBomb
-import com.keikuethas.irlhideandseek.PlayerRole
-import com.keikuethas.irlhideandseek.RoleType
-import com.keikuethas.irlhideandseek.SafeMansion
-import com.keikuethas.irlhideandseek.Shield
+import com.keikuethas.irlhideandseek.model.Intel
+import com.keikuethas.irlhideandseek.model.PersonalBomb
+import com.keikuethas.irlhideandseek.model.PlayerRole
+import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.model.SafeMansion
+import com.keikuethas.irlhideandseek.model.Shield
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
@@ -59,7 +59,7 @@ import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.name
 import com.keikuethas.irlhideandseek.utils.paramName
 import com.keikuethas.irlhideandseek.utils.unitName
-import com.keikuethas.irlhideandseek.view.RoleTypeTag
+import com.keikuethas.irlhideandseek.view.components.RoleTypeTag
 
 @Composable
         /**
@@ -266,7 +266,7 @@ fun ParamInfo(
             style = style
         )
         Text(
-            "$value $unit",
+            "$value $_unit",
             style = style
         )
     }

@@ -1,6 +1,9 @@
 package com.keikuethas.irlhideandseek.websocket.incoming
 
 import android.os.Parcelable
+import com.keikuethas.irlhideandseek.model.DeathReason
+import com.keikuethas.irlhideandseek.model.VictoryCondition
+import com.keikuethas.irlhideandseek.model.ZoneType
 import com.keikuethas.irlhideandseek.network.models.AbilityInfo
 import com.keikuethas.irlhideandseek.network.models.EventInfo
 import com.keikuethas.irlhideandseek.network.models.GameInfo
@@ -69,7 +72,7 @@ data class GameStateData(
 
 @Serializable
 data class ZoneData(
-    val zone_id: String,
+    val zone_id: ZoneType,
     val zone_type: String,
     val center_lat: Double,
     val center_lng: Double,
@@ -91,13 +94,13 @@ data class PlayerOfflineData(val player_id: String)
 
 @Serializable
 data class YouDiedData(
-    val reason: String,
+    val reason: DeathReason,
     val hunter_player_id: String? = null
 )
 
 @Serializable
 data class PlayerDiedData(
-    val reason: String,
+    val reason: DeathReason,
     val player_id: String,
     val hunter_player_id: String? = null
 )
@@ -111,13 +114,16 @@ data class GameFinishedData(val is_victory: Boolean)
 @Serializable
 data class ErrorData(val message: String)
 
+
+
+//refactor
 @Parcelize
 @Serializable
 data class RoleInfo(
     val id: String,
     val name: String,
     val health: Int,
-    val victory_condition: String,
+    val victory_condition: VictoryCondition,
     val abilities: List<AbilityInfo>,
     val events: List<EventInfo?> = emptyList()
 ): Parcelable

@@ -2,6 +2,7 @@ package com.keikuethas.irlhideandseek.websocket.incoming
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 /*
 * Входящие сообщения (сервер -> клиент)
@@ -71,6 +72,16 @@ sealed interface IncomingMessage {
     @Serializable
     @SerialName("game_finished")
     data class GameFinished(val data: GameFinishedData) : IncomingMessage
+
+    @Serializable
+    @SerialName("timer_to_hide_finished")
+    data class TimerToHideFinished(val data: JsonObject) : IncomingMessage
+
+    @Serializable
+    @SerialName("start_timer_to_hide")
+    data class StartTimerToHide(val data: TimerData) : IncomingMessage
+
+
 
     @Serializable
     @SerialName("error")

@@ -3,11 +3,20 @@ package com.keikuethas.irlhideandseek.mvi.lobby
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.keikuethas.irlhideandseek.Websocket_V2.IncomingMessage
-import com.keikuethas.irlhideandseek.Websocket_V2.WebSocketManager
+import com.keikuethas.irlhideandseek.data.LobbyEvent
+import com.keikuethas.irlhideandseek.data.LobbyRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
-import com.keikuethas.irlhideandseek.network.ApiService
-import com.keikuethas.irlhideandseek.network.models.GameInfo
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.Error
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.InitState
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.PlayerJoined
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.PlayerQuit
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.PlayerReadyStatusSet
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.PlayerRoleChanged
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.QuitDialogStateSet
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.ReadyStatusSet
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.RoleChangeDialogStateSet
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.RoleChanged
+import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult.SetPlayerInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,8 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LobbyViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val apiService: ApiService,
-    private val webSocketManager: WebSocketManager
+    private val repository: LobbyRepository,
 ) : MVI_HiltViewModel<LobbyState, LobbyIntent, LobbyEffect, LobbyResult>(
     initialState = LobbyState(),
     savedStateHandle = savedStateHandle,
@@ -29,138 +37,150 @@ class LobbyViewModel @Inject constructor(
     private val gameId: String = savedStateHandle["gameId"] ?: error("gameId missing")
     private val playerId: String = savedStateHandle["playerId"] ?: error("playerId missing")
 
+
     init {
-        // Устанавливаем имя игрока и название комнаты в состояние (опционально)
-        dispatch(LobbyResult.SetPlayerInfo(playerName, roomName))
-        connectWebSocket()
+        dispatch(SetPlayerInfo(playerName, roomName))
+
+        // Запускаем наблюдение за событиями
+        observeLobbyEvents()
+
+        repository.connect(
+            scope = viewModelScope,
+            gameId = gameId,
+            playerId = playerId
+        )
     }
 
-    private fun connectWebSocket() {
+    private fun observeLobbyEvents() {
         viewModelScope.launch {
-            observeMessages()          // сначала подписываемся
-            val result = webSocketManager.connect(gameId, playerId)
-            if (result.isFailure) {
+            try {
+                repository.lobbyEvents.collect { event ->
+                    Log.d("LobbyVM", "Event received: $event")
+                    handleEvent(event)
+                }
+            } catch (e: Exception) {
+                Log.e("LobbyVM", "Error collecting events", e)
+                dispatch(Error("Ошибка подключения", e.message ?: "Unknown"))
+            }
+        }
+    }
+
+    private fun handleEvent(event: LobbyEvent) = with(event) {
+        when (this) {
+            is LobbyEvent.InitState -> {
+                val myId = player.id
                 dispatch(
-                    LobbyResult.Error(
-                        "Ошибка подключения",
-                        "Не удалось подключиться к серверу"
+                    InitState(
+                        roomName = game.name,
+                        playerName = player.name,
+                        playerRole = player.role_id,
+                        players = game.players.filterNot { it.id == myId },
+                        roles = game.roles,
+                        isReady = player.is_player_ready
                     )
                 )
             }
-        }
-    }
 
-    private fun observeMessages() {
-        viewModelScope.launch {
-            try {
-                webSocketManager.incomingMessages.collect { message ->
-                    Log.d("LobbyVM", "Raw message: $message")
-                    when (message) {
-                        is IncomingMessage.WebSocketConnectedPlayer -> {
-                            val game = message.data.game_data
-                            val player = message.data.player_data
-                            val roles = game.roles   // теперь List<RoleFull>
-                            val playersList = extractPlayersFromGame(game)
-                            dispatch(
-                                LobbyResult.InitState(
-                                    roomName = game.name,
-                                    playerName = player.name,
-                                    playerRole = player.role_id,
-                                    players = playersList,
-                                    roles = roles,
-                                    isReady = player.is_player_ready
-                                )
-                            )
-                        }
-
-                        is IncomingMessage.RoleChanged -> {
-                            val newRoleId = message.data.role_id
-                            // Предполагаем, что роль меняется у текущего игрока
-                            dispatch(LobbyResult.RoleChanged(state.value.playerName, newRoleId))
-                        }
-
-                        is IncomingMessage.ReadyStatusChanged -> {
-                            // Аналогично – обновляем статус готовности игрока в списке
-                            dispatch(LobbyResult.ReadyStatusChanged)
-                        }
-
-                        is IncomingMessage.PlayerOnline -> {
-                            dispatch(
-                                LobbyResult.PlayerJoined(
-                                    message.data.player_name,
-                                    message.data.role ?: "Без роли"
-                                )
-                            )
-                        }
-
-                        is IncomingMessage.PlayerOffline -> {
-                            dispatch(LobbyResult.PlayerQuit(message.data.player_id))
-                        }
-
-                        is IncomingMessage.Error -> {
-                            dispatch(LobbyResult.Error("Ошибка сервера", message.toString()))
-                        }
-                        // Другие сообщения (game_state, create_zone и т.д.) – для лобби не нужны
-                        else -> { /* игнорируем */
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("LobbyVM", "Fatal error in message collection", e)
-                dispatch(LobbyResult.Error("Ошибка", e.message ?: "Unknown"))
+            is LobbyEvent.RoleChanged -> {
+                dispatch(RoleChanged(newRoleId))
             }
+
+            is LobbyEvent.ReadyStatusChanged -> {
+                dispatch(ReadyStatusSet(ready))
+            }
+
+            is LobbyEvent.PlayerJoined -> {
+                dispatch(
+                    PlayerJoined(
+                        id = playerId,
+                        playerName = playerName,
+                        roleId = role ?: "Без роли"
+                    )
+                )
+            }
+
+            is LobbyEvent.PlayerQuit -> {
+                dispatch(PlayerQuit(playerId))
+            }
+
+            is LobbyEvent.Error -> {
+                dispatch(Error("Ошибка сервера", message))
+            }
+
+            is LobbyEvent.ConnectionFailed ->
+                dispatch(
+                    Error(
+                        title = "Ошибка подключения",
+                        message = message
+                    )
+                )
+
+            is LobbyEvent.PlayerRoleChanged -> dispatch(
+                PlayerRoleChanged(
+                    id = playerId,
+                    newRoleId = newRoleId
+                )
+            )
+
+            is LobbyEvent.PlayerReadyStatusChanged ->
+                dispatch(
+                    PlayerReadyStatusSet(
+                        playerId = playerId,
+                        ready = ready
+                    )
+                )
+
+            is LobbyEvent.StartTimerToHide ->
+                sendEffect(LobbyEffect.StartGame(duration))
+
         }
     }
+
 
     override fun onIntent(intent: LobbyIntent) {
         when (intent) {
             LobbyIntent.RequestRoleChangeDialog -> {
                 Log.d("LobbyVM", "RequestRoleChangeDialog received")
-                dispatch(LobbyResult.RoleChangeDialogStateSet(true))
+                dispatch(RoleChangeDialogStateSet(true))
             }
 
             LobbyIntent.ChangeReadyStatus -> {
                 val newStatus = !state.value.isReady
-                webSocketManager.sendChangeReadyStatus(newStatus)
-                // Оптимистичное обновление (сервер подтвердит)
-                dispatch(LobbyResult.ReadyStatusSet(newStatus))
+
+                viewModelScope.launch {
+                    repository.changeReadyStatus(newStatus)
+                }
             }
 
             is LobbyIntent.ChangeRole -> {
                 Log.d("LobbyVM", "Sending change_role for roleId: ${intent.roleId}")
-                webSocketManager.sendChangeRole(intent.roleId)
-                dispatch(LobbyResult.RoleChangeDialogStateSet(false))
+                viewModelScope.launch {
+                    repository.changeRole(intent.roleId)
+                }
             }
 
             LobbyIntent.DeclineRoleChange -> {
-                dispatch(LobbyResult.RoleChangeDialogStateSet(false))
+                dispatch(RoleChangeDialogStateSet(false))
             }
 
             is LobbyIntent.QuitDialogRespond -> {
                 if (intent.confirmed) {
-                    webSocketManager.disconnect()
+                    repository.disconnect()
                     sendEffect(LobbyEffect.Quit)
                 } else {
-                    dispatch(LobbyResult.QuitDialogStateSet(false))
+                    dispatch(QuitDialogStateSet(false))
                 }
             }
 
             LobbyIntent.QuitRequest -> {
-                dispatch(LobbyResult.QuitDialogStateSet(true))
+                dispatch(QuitDialogStateSet(true))
             }
 
-            LobbyIntent.DismissError -> dispatch(LobbyResult.Error("", ""))
+            LobbyIntent.DismissError -> dispatch(Error("", ""))
         }
     }
 
     override fun reduce(state: LobbyState, result: LobbyResult) =
         LobbyReducer.reduce(state, result)
 
-    // Вспомогательная функция для извлечения списка игроков из GameInfo
-    private fun extractPlayersFromGame(game: GameInfo): List<Pair<String, String>> {
-        // В вашем GameInfo из ответа сервера есть поле players? Если нет – можно временно вернуть пустой список,
-        // а реальных игроков будут добавлять сообщения player_online.
-        // Для простоты – возвращаем пустой список.
-        return emptyList()
-    }
 }

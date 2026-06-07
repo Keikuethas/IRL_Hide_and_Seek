@@ -16,8 +16,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
@@ -51,8 +54,8 @@ class WebSocketManager @Inject constructor() {
     )
     val incomingMessages: SharedFlow<IncomingMessage> = _incomingMessages.asSharedFlow()
 
-    private val _connectionStatus = MutableSharedFlow<ConnectionStatus>(replay = 1)
-    val connectionStatus: SharedFlow<ConnectionStatus> = _connectionStatus.asSharedFlow()
+    private val _connectionStatus = MutableStateFlow<ConnectionStatus>(ConnectionStatus.DISCONNECTED)
+    val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
 
     enum class ConnectionStatus {
         CONNECTING, CONNECTED, DISCONNECTED, RECONNECTING
@@ -166,7 +169,7 @@ class WebSocketManager @Inject constructor() {
         }
     }
 
-    // ---------- Публичные методы отправки (теперь в 1 строку!) ----------
+    // ---------- Публичные методы отправки ----------
 
     suspend fun sendPing() = sendMessage { OutgoingMessage.Ping() }
 

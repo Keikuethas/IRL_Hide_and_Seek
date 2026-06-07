@@ -1,66 +1,82 @@
 package com.keikuethas.irlhideandseek.mvi.lobby
 
-import com.keikuethas.irlhideandseek.mvi.lobby.LobbyResult
+import com.keikuethas.irlhideandseek.websocket.incoming.PlayerInfo
+import com.keikuethas.irlhideandseek.websocket.incoming.RoleInfo
 
 object LobbyReducer {
-    fun reduce(state: LobbyState, result: LobbyResult): LobbyState {
-        return when (result) {
-            LobbyResult.ReadyStatusChanged -> state.copy(isReady = !state.isReady)
+    fun reduce(state: LobbyState, result: LobbyResult): LobbyState = when (result) {
+        LobbyResult.ReadyStatusChanged -> state.copy(isReady = !state.isReady)
 
-            is LobbyResult.RoleChangeDialogStateSet -> state.copy(showRoleChangeDialog = result.open)
+        is LobbyResult.RoleChangeDialogStateSet -> state.copy(showRoleChangeDialog = result.open)
 
-            is LobbyResult.PlayerJoined -> state.copy(
-                players = state.players + (result.name to result.role)
+        is LobbyResult.PlayerJoined -> state.copy(
+            players = state.players + PlayerInfo(
+                id = result.id,
+                name = result.playerName,
+                health = getRoleById(state.roles, result.roleId)?.health!!,
+                is_alive = true,
+                location_lat = 0.0,
+                location_lng = 0.0,
+                role_id = result.roleId,
+                is_player_ready = false
             )
+        )
 
-            is LobbyResult.PlayerQuit -> state.copy(
-                players = state.players.filterNot { it.first == result.name }
-            )
+        is LobbyResult.PlayerQuit -> state.copy(
+            players = state.players.filterNot { it.id == result.id }
+        )
 
-            is LobbyResult.ReadyStatusSet -> state.copy(isReady = result.ready)
+        is LobbyResult.ReadyStatusSet -> state.copy(isReady = result.ready)
 
-            is LobbyResult.RoleChanged -> {
-                var newState = state
-                if (state.players.any { it.first == result.name }) {
-                    newState = state.copy(
-                        players = state.players.filterNot { it.first == result.name } + (result.name to result.role)
-                    )
-                }
-                if (result.name == state.playerName) {
-                    newState = newState.copy(playerRole = result.role)
-                }
-                newState
+        is LobbyResult.RoleChanged -> state.copy(
+            playerRole = getRoleById(state.roles, result.role)?.name ?: "?"
+        )
+
+        is LobbyResult.QuitDialogStateSet -> state.copy(showQuitDialog = result.open)
+
+        is LobbyResult.InitState -> state.copy(
+            roomName = result.roomName,
+            playerName = result.playerName,
+            playerRole = result.playerRole,
+            players = result.players,
+            roles = result.roles,
+            isReady = result.isReady,
+            isLoading = false,
+            error = null
+        )
+
+        is LobbyResult.Loading -> state.copy(isLoading = result.isLoading)
+
+        is LobbyResult.Error -> state.copy(
+            error = result.message,
+            isLoading = false
+        )
+
+        is LobbyResult.PlayerRoleChanged -> state.copy(
+            players = state.players.map {
+                if (it.id == result.id) it.copy(
+                    role_id = getRoleById(
+                        state.roles,
+                        result.newRoleId
+                    )?.name ?: "?"
+                ) else it
+            },
+        )
+
+        is LobbyResult.SetPlayerInfo -> state.copy(
+            playerName = result.playerName,
+            roomName = result.roomName
+        )
+
+        is LobbyResult.PlayerReadyStatusSet -> state.copy(
+            players = state.players.map {
+                if (it.id == result.playerId)
+                    it.copy(is_player_ready = result.ready)
+                else it
             }
-
-            is LobbyResult.QuitDialogStateSet -> state.copy(showQuitDialog = result.open)
-
-            is LobbyResult.InitState -> state.copy(
-                roomName = result.roomName,
-                playerName = result.playerName,
-                playerRole = result.playerRole,
-                players = result.players,
-                roles = result.roles,
-                isReady = result.isReady,
-                isLoading = false,
-                error = null
-            )
-
-            is LobbyResult.Loading -> state.copy(isLoading = result.isLoading)
-
-            // --- ДОБАВЛЕННЫЕ ВЕТКИ ---
-            is LobbyResult.Error -> state.copy(
-                error = result.message,
-                isLoading = false
-            )
-
-            is LobbyResult.PlayerRoleChanged -> state.copy(
-                playerRole = result.newRoleId
-            )
-
-            is LobbyResult.SetPlayerInfo -> state.copy(
-                playerName = result.playerName,
-                roomName = result.roomName
-            )
-        }
+        )
     }
 }
+
+private fun getRoleById(roles: List<RoleInfo>, id: String) =
+    roles.find { it.id == id }

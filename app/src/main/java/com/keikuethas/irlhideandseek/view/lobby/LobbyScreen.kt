@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.DoneOutline
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,9 +41,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.keikuethas.irlhideandseek.Ability
-import com.keikuethas.irlhideandseek.RoleType
-import com.keikuethas.irlhideandseek.Websocket_V2.RoleFull
+import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.model.VictoryCondition
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyEffect
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyIntent
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyState
@@ -54,13 +51,17 @@ import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import com.keikuethas.irlhideandseek.network.models.AbilityInfo
 import com.keikuethas.irlhideandseek.ui.theme.color
-import com.keikuethas.irlhideandseek.utils.adjustLightness
+import com.keikuethas.irlhideandseek.ui.theme.surfaceColor
+import com.keikuethas.irlhideandseek.view.Game
 import com.keikuethas.irlhideandseek.view.Home
 import com.keikuethas.irlhideandseek.view.components.AskingDialog
 import com.keikuethas.irlhideandseek.view.components.ErrorDialog
 import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
+import com.keikuethas.irlhideandseek.websocket.incoming.PlayerInfo
+import com.keikuethas.irlhideandseek.websocket.incoming.RoleInfo
 
 // Функция для преобразования AbilityInfo в AbilityState
+// Refactor no AbilityInfo here
 private fun abilityInfoToAbilityState(abilityInfo: AbilityInfo): AbilityState {
     // Собираем параметры: стандартные + дополнительные из data
     val params = mutableListOf<Pair<String, Number>>().apply {
@@ -69,24 +70,8 @@ private fun abilityInfoToAbilityState(abilityInfo: AbilityInfo): AbilityState {
         add("recharge_time" to abilityInfo.recharge_time)
         abilityInfo.data.forEach { (key, value) -> add(key to value) }
     }
-    // Получаем класс способности по типу (нужно реализовать функцию getAbilityClassByType)
-    val abilityClass = getAbilityClassByType(abilityInfo.ability_type)
-    return AbilityState(abilityClass, params)
-}
 
-// Временно заглушка для маппинга типа способности в KClass (можно добавить в отдельный объект)
-private fun getAbilityClassByType(type: String): kotlin.reflect.KClass<out Ability> {
-    return when (type) {
-        "SHIELD" -> com.keikuethas.irlhideandseek.Shield::class
-        "INTEL" -> com.keikuethas.irlhideandseek.Intel::class
-        "SCAN" -> com.keikuethas.irlhideandseek.Scan::class
-        "PERSONAL_BOMB" -> com.keikuethas.irlhideandseek.PersonalBomb::class
-        "TRAP" -> com.keikuethas.irlhideandseek.Trap::class
-        "SNARE" -> com.keikuethas.irlhideandseek.Snare::class
-        "SAFE_HOUSE" -> com.keikuethas.irlhideandseek.SafeHouse::class
-        "SAFE_MANSION" -> com.keikuethas.irlhideandseek.SafeMansion::class
-        else -> com.keikuethas.irlhideandseek.Shield::class
-    }
+    return AbilityState(abilityInfo.ability_type, params)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,6 +106,9 @@ fun LobbyScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 LobbyEffect.Quit -> navController.navigate(Home)
+
+                is LobbyEffect.StartGame ->
+                    navController.navigate(Game(effect.timeToHide))
             }
         }
     }
@@ -156,7 +144,8 @@ fun LobbyContent(
         val playerRoles = state.roles.map { roleFull ->
             RoleState(
                 roleName = roleFull.name,
-                type = if (roleFull.victory_condition == "SEEKER") RoleType.SEEKER else RoleType.HIDER,
+                // refactor no dubbing models
+                type = if (roleFull.victory_condition == VictoryCondition.Seeker) RoleType.SEEKER else RoleType.HIDER,
                 abilities = roleFull.abilities.map { abilityInfoToAbilityState(it) },
                 health = roleFull.health
             )
@@ -192,24 +181,16 @@ fun LobbyContent(
                     .padding(top = 12.dp),
                 name = state.playerName,
                 role = state.playerRole,
-                roleType = if (state.roles.find { it.id == state.playerRole }!!.victory_condition == "SEEKER") RoleType.SEEKER else RoleType.HIDER, //refactor make normal class or methods
+                //refactor no dubbing models
+                roleType = if (state.roles.find { it.id == state.playerRole }!!.victory_condition == VictoryCondition.Seeker) RoleType.SEEKER else RoleType.HIDER, //refactor make normal class or methods
+                onReadyClick = { onIntent(LobbyIntent.ChangeReadyStatus) },
+                onRoleClick = { onIntent(LobbyIntent.RequestRoleChangeDialog) }
             )
 
             DisplayPlayers(
                 playerList = state.players,
-                roleList = playerRoles,
                 playerName = state.playerName
             )
-
-            Button(
-                onClick = {
-                    Log.d("LobbyScreen", "RequestRoleChangeDialog clicked")
-                    onIntent(LobbyIntent.RequestRoleChangeDialog)
-                },
-                modifier = Modifier.padding(top = 10.dp)
-            ) {
-                Text("Сменить роль")
-            }
 
             ElevatedButton(
                 onClick = { onIntent(LobbyIntent.QuitRequest) },
@@ -231,7 +212,9 @@ private fun PlayerCard(
         .fillMaxWidth(0.9F)
         .fillMaxHeight(0.3F),
     ready: Boolean = !true,
-    cornerRadius: Dp = 24.dp
+    cornerRadius: Dp = 24.dp,
+    onReadyClick: () -> Unit,
+    onRoleClick: () -> Unit
 ) {
 
     val activeColor = if (ready) roleType.color else Color.Gray
@@ -244,8 +227,8 @@ private fun PlayerCard(
     ) {
         Surface(
             modifier = Modifier,
-            onClick = { TODO() },
-            color = if (ready) roleType.color.adjustLightness(-0.2F) else MaterialTheme.colorScheme.surfaceVariant,
+            onClick = onReadyClick,
+            color = if (ready) roleType.surfaceColor else MaterialTheme.colorScheme.surfaceVariant,
             tonalElevation = 8.dp,
             shadowElevation = 8.dp,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
@@ -264,7 +247,7 @@ private fun PlayerCard(
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 Icon(
-                    if (ready) Icons.Default.Done else Icons.Default.DoneOutline,
+                    Icons.Default.Done,
                     contentDescription = null,
                     tint = activeColor,
                     modifier = Modifier
@@ -279,7 +262,7 @@ private fun PlayerCard(
                     fontWeight = FontWeight.SemiBold,
                     color = if (ready) roleType.color else Color.Unspecified
 
-                    )
+                )
             }
         }
 
@@ -291,7 +274,7 @@ private fun PlayerCard(
 
         Surface(
             modifier = Modifier,
-            onClick = { TODO() },
+            onClick = onRoleClick,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
             shape = RoundedCornerShape(
                 topStart = 0.dp,
@@ -326,20 +309,20 @@ private fun PlayerCard(
     }
 }
 
-private class RoleTypeProvider : PreviewParameterProvider<String> {
-    override val values: Sequence<String> =
-        sequenceOf("SEEKER", "HIDER")
+private class RoleTypeProvider : PreviewParameterProvider<VictoryCondition> {
+    override val values =
+        VictoryCondition.entries.asSequence()
 }
 
-@Preview
+@Preview()
 @Composable
 fun LobbyContentPreview(
     @PreviewParameter(
         RoleTypeProvider::class,
         limit = 2
-    ) roleType: String
+    ) roleType: VictoryCondition
 ) {
-    val fakeRole = RoleFull(
+    val fakeRole = RoleInfo(
         id = "role1",
         name = "Роль1",
         health = 100,
@@ -347,18 +330,39 @@ fun LobbyContentPreview(
         abilities = emptyList(),
         events = emptyList()
     )
-    val fakeRole2 = RoleFull(
+    val fakeRole2 = RoleInfo(
         id = "role2",
         name = "Роль2",
         health = 100,
-        victory_condition = "SEEKER",
+        victory_condition = VictoryCondition.Seeker,
         abilities = emptyList(),
         events = emptyList()
     )
     val previewState = LobbyState(
         playerName = "Реально длинное имя",
         playerRole = "role1",
-        players = listOf("Игрок1" to "Роль1", "Игрок2" to "Роль2"),
+        players = listOf(
+            PlayerInfo(
+                id = "_",
+                name = "Игрок 1",
+                health = 100,
+                is_alive = true,
+                location_lat = 23.0,
+                location_lng = 42.0,
+                role_id = "role1",
+                is_player_ready = false
+            ),
+            PlayerInfo(
+                id = "__",
+                name = "Игрок 2",
+                health = 100,
+                is_alive = true,
+                location_lat = 23.0,
+                location_lng = 42.0,
+                role_id = "role2",
+                is_player_ready = true
+            )
+        ),
         roles = listOf(fakeRole, fakeRole2),
         showQuitDialog = false,
         showRoleChangeDialog = false,
