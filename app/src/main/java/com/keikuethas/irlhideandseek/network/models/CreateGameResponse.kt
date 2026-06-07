@@ -1,6 +1,11 @@
 package com.keikuethas.irlhideandseek.network.models
 
-import com.keikuethas.irlhideandseek.Websocket_V2.RoleFull
+import android.os.Parcelable
+import com.keikuethas.irlhideandseek.model.AbilityType
+import com.keikuethas.irlhideandseek.model.ActivationFrequency
+import com.keikuethas.irlhideandseek.websocket.incoming.PlayerInfo
+import com.keikuethas.irlhideandseek.websocket.incoming.RoleInfo
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -20,23 +25,26 @@ data class GameInfo(
     val zone_boundary_damage: Int,
     val current_safe_zone_id: String?,
     val last_shrink_at: String?,
-    val roles: List<RoleFull> = emptyList()
+    val roles: List<RoleInfo> = emptyList(),
+    val players: List<PlayerInfo> = emptyList()
 )
 
+@Parcelize
 @Serializable
 data class AbilityInfo(
     val id: String,
-    val ability_type: String,
+    val ability_type: AbilityType,
     val number_uses: Int,
     val recharge_time: Int,
     val duration_seconds: Int?,
     val data: Map<String, Double>
-)
+): Parcelable
 
+@Parcelize
 @Serializable
 data class EventInfo(
     val id: String,
     val type: String,
-    val activation_frequency: String,
+    val activation_frequency: ActivationFrequency,
     val event_data: Map<String, Double>
-)
+): Parcelable

@@ -21,7 +21,4 @@ interface ApiService {
         @Body request: JoinGameRequest
     ): JoinGameResponse
 
-    companion object {
-        fun joinGame(roomNameText: String, request: JoinGameRequest) {}
-    }
 }

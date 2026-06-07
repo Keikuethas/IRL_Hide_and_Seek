@@ -1,4 +1,3 @@
-// network/models/CreateGameRequest.kt
 package com.keikuethas.irlhideandseek.network.models
 
 import kotlinx.serialization.Serializable
@@ -8,15 +7,14 @@ data class CreateGameRequest(
     val name: String,
     val center_lat: Double,
     val center_lng: Double,
-    val safe_zone_radius: Double,
-    val min_zone_radius: Double,
+    val safe_zone_radius: Int, //concern int
+    val min_zone_radius: Int, //concern int
     val zone_shrink_interval: Int,
     val game_duration: Int,
     val time_to_hide: Int,
     val host_player: HostPlayer,
     val game_roles: Map<String, RoleParams>,
     val roles_abilities: Map<String, Map<String, AbilityParams>>,
-    val events: List<String>,
     val roles_events: Map<String, List<String>>,
     val events_configurations: Map<String, EventConfig>
 )
@@ -52,14 +50,4 @@ data class EventConfig(
 data class CreateGameResponse(
     val game: GameInfo,
     val host_player_id: String
-)
-
-@Serializable
-data class RoleFull(
-    val id: String,
-    val name: String,
-    val health: Int,
-    val victory_condition: String,
-    val abilities: List<AbilityInfo>,
-    val events: List<EventInfo>
 )
