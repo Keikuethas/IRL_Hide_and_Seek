@@ -1,15 +1,31 @@
-package com.keikuethas.irlhideandseek.Websocket_V2
+package com.keikuethas.irlhideandseek.websocket
 
 // WebSocketManager.kt
 import android.util.Log
-import kotlinx.coroutines.*
+import com.keikuethas.irlhideandseek.websocket.incoming.IncomingMessage
+import com.keikuethas.irlhideandseek.websocket.outgoing.ChangeReadyStatusData
+import com.keikuethas.irlhideandseek.websocket.outgoing.ChangeRoleData
+import com.keikuethas.irlhideandseek.websocket.outgoing.HunterFoundPlayerData
+import com.keikuethas.irlhideandseek.websocket.outgoing.LocationData
+import com.keikuethas.irlhideandseek.websocket.outgoing.OutgoingMessage
+import com.keikuethas.irlhideandseek.websocket.outgoing.UseAbilityData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
-import okhttp3.*
-import okio.ByteString
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -45,7 +61,7 @@ class WebSocketManager @Inject constructor() {
     private val json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
-        encodeDefaults = true   // ← добавьте эту строку
+        encodeDefaults = true
     }
 
     suspend fun connect(gameId: String, playerId: String): Result<Unit> {
@@ -125,43 +141,54 @@ class WebSocketManager @Inject constructor() {
     }
 
     // ---------- Отправка сообщений ----------
-    private inline fun <reified T : Any> send(message: T) {
-        try {
+    // Вспомогательный метод, который возвращает Boolean (успех отправки)
+    private suspend inline fun <reified T : Any> sendMessage(
+        logTag: String? = null,
+        crossinline buildMessage: () -> T,
+
+        ): Result<Unit> {
+        return try {
+            val message = buildMessage()
             val jsonString = json.encodeToString(message)
-            webSocket?.send(jsonString)
+
+            if (logTag != null) {
+                Log.d("WebSocket", "Sending $logTag: $jsonString")
+            }
+
+            if (webSocket?.send(jsonString) == true) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("WebSocket is closed"))
+            }
         } catch (e: Exception) {
-            Log.e("WebSocket", "Failed to serialize ${message::class.simpleName}: $message", e)
+            Log.e("WebSocket", "Failed to send ${T::class.simpleName}", e)
+            Result.failure(e)
         }
     }
 
-    fun sendPing() {
-        send(OutgoingPing())
+    // ---------- Публичные методы отправки (теперь в 1 строку!) ----------
+
+    suspend fun sendPing() = sendMessage { OutgoingMessage.Ping() }
+
+    suspend fun sendLocation(lat: Double, lng: Double) =
+        sendMessage { OutgoingMessage.UpdateLocation(LocationData(lat, lng)) }
+
+    suspend fun sendUseAbility(
+        abilityType: String,
+        centerLat: Double? = null,
+        centerLng: Double? = null
+    ) = sendMessage {
+        OutgoingMessage.UseAbility(UseAbilityData(abilityType, centerLat, centerLng))
     }
 
-    fun sendLocation(lat: Double, lng: Double) {
-        send(OutgoingUpdateLocation(data = LocationData(lat, lng)))
-    }
+    suspend fun sendChangeRole(roleId: String) =
+        sendMessage("change_role") { OutgoingMessage.ChangeRole(ChangeRoleData(roleId)) }
 
-    fun sendUseAbility(abilityType: String, centerLat: Double? = null, centerLng: Double? = null) {
-        send(OutgoingUseAbility(data = UseAbilityData(abilityType, centerLat, centerLng)))
-    }
+    suspend fun sendChangeReadyStatus(status: Boolean) =
+        sendMessage { OutgoingMessage.ChangeReadyStatus(ChangeReadyStatusData(status)) }
 
-    fun sendChangeRole(roleId: String) {
-        val message = OutgoingChangeRole(data = ChangeRoleData(roleId))
-        val jsonString = json.encodeToString(message)
-        Log.d("WebSocket", "Sending change_role: $jsonString")
-        webSocket?.send(jsonString)
-    }
+    suspend fun sendGetGameState() = sendMessage { OutgoingMessage.GetGameState() }
 
-    fun sendChangeReadyStatus(status: Boolean) {
-        send(OutgoingChangeReadyStatus(data = ChangeReadyStatusData(status)))
-    }
-
-    fun sendGetGameState() {
-        send(OutgoingGetGameState())
-    }
-
-    fun sendHunterFoundPlayer(foundedPlayerId: String) {
-        send(OutgoingHunterFoundPlayer(data = HunterFoundPlayerData(foundedPlayerId)))
-    }
+    suspend fun sendHunterFoundPlayer(foundedPlayerId: String) =
+        sendMessage { OutgoingMessage.HunterFoundPlayer(HunterFoundPlayerData(foundedPlayerId)) }
 }
