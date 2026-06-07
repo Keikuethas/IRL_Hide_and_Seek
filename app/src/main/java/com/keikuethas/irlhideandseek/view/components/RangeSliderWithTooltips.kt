@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek.view
+package com.keikuethas.irlhideandseek.view.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
@@ -46,7 +47,7 @@ fun RangeSliderWithTooltips(
     label: @Composable () -> Unit = {}
 ) {
     var activeThumb by remember { mutableStateOf<ActiveThumb?>(null) }
-    var sliderBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    var sliderBounds by remember { mutableStateOf<Rect?>(null) }
     var bubbleWidthPx by remember { mutableStateOf(0f) }
 
     val density = LocalDensity.current
@@ -123,7 +124,7 @@ fun RangeSliderWithTooltips(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .onSizeChanged { coords ->
-                    sliderBounds = androidx.compose.ui.geometry.Rect(0f, 0f, coords.width.toFloat(), coords.height.toFloat())
+                    sliderBounds = Rect(0f, 0f, coords.width.toFloat(), coords.height.toFloat())
                 },
             colors = SliderDefaults.colors(
                 thumbColor = colors.primary,

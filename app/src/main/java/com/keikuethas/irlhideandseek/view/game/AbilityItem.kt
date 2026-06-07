@@ -27,8 +27,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.keikuethas.irlhideandseek.Ability
-import com.keikuethas.irlhideandseek.SafeHouse
+import com.keikuethas.irlhideandseek.model.Ability
+import com.keikuethas.irlhideandseek.model.SafeHouse
 import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.makeGradientAbilityBrush
 import com.keikuethas.irlhideandseek.utils.name

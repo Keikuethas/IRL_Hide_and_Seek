@@ -1,24 +1,24 @@
 package com.keikuethas.irlhideandseek.mvi.game
 
 import android.os.Parcelable
-import com.keikuethas.irlhideandseek.Ability
-import com.keikuethas.irlhideandseek.RoleType
-import com.keikuethas.irlhideandseek.Websocket.AbilityType
-import com.keikuethas.irlhideandseek.Websocket.GameData
-import com.keikuethas.irlhideandseek.Websocket.ZoneType
+import com.keikuethas.irlhideandseek.model.AbilityType
+import com.keikuethas.irlhideandseek.model.DeathReason
+import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.model.ZoneType
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.view.map.YandexMapState
+import com.yandex.mapkit.geometry.Point
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
-import kotlin.reflect.KClass
 
 @Parcelize
 data class PlayerState(
+    val id: String,
     val name: String = "player",
     val roleName: String = "new role",
     val roleType: RoleType = RoleType.SEEKER,
-    val lat: Double = 0.0,
-    val lng: Double = 0.0
+    val location: @RawValue Point,
+    val isAlive: Boolean = true
 ): Parcelable
 
 @Parcelize
@@ -35,11 +35,12 @@ data class GameState(
     val roleType: RoleType = RoleType.SEEKER,
     val players: List<PlayerState> = emptyList(),
     val playerName: String = "me",
-    val itsTimeToHide: Boolean = false,
-    val usingAbilityOnMap: @RawValue KClass<out Ability>? = null,
-    val abilityListPage: Int? = null, //concern
+    val itsTimeToHide: Boolean = true,
+    val usingAbilityOnMap: @RawValue AbilityType? = null,
+    val abilityListOpen: Boolean = false,
     val playerListOpen: Boolean = false,
-    val mapState: @RawValue YandexMapState = YandexMapState()
+    val mapState: @RawValue YandexMapState = YandexMapState(),
+    val error: String? = null
 ): Parcelable
 
 
@@ -49,33 +50,61 @@ sealed interface GameIntent {
     data object PlayerListClose: GameIntent
     data object AbilityListOpen: GameIntent
     data object AbilityListClose: GameIntent
-    data class ScrollAbilityList(val right: Boolean): GameIntent
-    data class SelectAbility(val type: KClass<out Ability>): GameIntent
-    data class UseAbility(val lat: Double, val lng: Double): GameIntent
-    data class CatchPlayer(val name: String): GameIntent
+    data class SelectAbility(val type: AbilityType): GameIntent
+    data class UseAbility(val location: Point): GameIntent
+    data class CatchPlayer(val playerId: String): GameIntent
     data object ReportCameraMoved: GameIntent
 
-    // --- VM Intents (Websocket) ---
-    data class Initialize(val roleID: String, val gameData: GameData): GameIntent
-    data class UpdateLocation(val playerID: String, val lat: Double, val lng: Double): GameIntent
-    data class AddZone(val id:String, val type: ZoneType): GameIntent
-    data class DeleteZone(val id: String): GameIntent
-    data class AbilityUseRespond(val type: AbilityType, val result: Int): GameIntent
-    data object FinishHideTime: GameIntent
+    data object DismissError: GameIntent
+
 }
 
 sealed interface GameResult {
-    data class AbilitiesScrolled(val right: Boolean): GameResult
+
     data class AbilityListStateSet(val open: Boolean): GameResult
     data class PlayerListStateSet(val open: Boolean): GameResult
-    data class AbilitySelected(val type: KClass<out Ability>): GameResult
-    data class Initialized(val roleID: String, val gameData: GameData): GameResult
-    data class ZoneAdded(val type: ZoneType, val zoneID: String): GameResult
-    data class ZoneDeleted(val zoneID: String): GameResult
-    data object HideTimeFinished: GameResult
+    data class AbilitySelected(val type: AbilityType): GameResult
+
+    data class Initialized(
+        val secondsRemain: Int,
+        val abilities: List<AbilityState>,
+        val roleType: RoleType,
+        val players: List<PlayerState>,
+        val playerName: String,
+        val itsTimeToHide: Boolean
+    ): GameResult
+    data class ZoneAdded(
+        val zoneId: String,
+        val type: ZoneType,
+        val location: Point,
+        val radius: Float,
+        ): GameResult
+    data class ZoneDeleted(val zoneId: String): GameResult
     data object CameraStopped: GameResult
+
+    data class Error(val message: String): GameResult
+
+    data class PlayerDied(val playerId: String): GameResult
+
+    data class PlayerQuit(val playerId: String): GameResult
+
+    data class PlayerMoved(
+        val playerId: String,
+        val location: Point
+    ): GameResult
+
+    data class GameStarted(val duration: Int): GameResult
+
+    data class AbilityUsed(val type: AbilityType): GameResult
+
+    data object ErrorDismissed: GameResult
 }
 
 sealed interface GameEffect {
     data object GetDamage: GameEffect
+    data class EndGame(
+        val victory: Boolean,
+        val reason: DeathReason? = null,
+        val hunterId: String? = null
+    ): GameEffect
 }

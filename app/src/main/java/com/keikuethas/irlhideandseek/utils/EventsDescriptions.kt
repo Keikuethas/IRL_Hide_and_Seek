@@ -1,8 +1,7 @@
 package com.keikuethas.irlhideandseek.utils
 
-import com.keikuethas.irlhideandseek.FrequencyType
-import com.keikuethas.irlhideandseek.Websocket.EventType
-import java.security.InvalidParameterException
+import com.keikuethas.irlhideandseek.model.ActivationFrequency
+import com.keikuethas.irlhideandseek.model.EventType
 
 val EventType.Name: String get() = when(this) {
     EventType.BOMB -> "Бомба"
@@ -18,13 +17,8 @@ val EventType.Description: String get() = when(this) {
     EventType.REVEAL -> "На короткое время все игроки становятся видны на карте."
 }
 
-val FrequencyType.Name: String get() = when(this) {
-    FrequencyType.FREQUENT -> "Часто"
-    FrequencyType.RARE -> "Редко"
-    FrequencyType.COMMON -> "Обычно"
-}
-
-fun FrequencyTypeByName(name: String): FrequencyType {
-    FrequencyType.entries.forEach { if (it.Name == name) return it}
-    throw InvalidParameterException("Unknown frequency: $name")
+val ActivationFrequency.Name: String get() = when(this) {
+    ActivationFrequency.FREQUENT -> "Часто"
+    ActivationFrequency.RARE -> "Редко"
+    ActivationFrequency.COMMON -> "Обычно"
 }

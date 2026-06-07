@@ -34,9 +34,9 @@ import com.keikuethas.irlhideandseek.mvi.home.HomeEffect
 import com.keikuethas.irlhideandseek.mvi.home.HomeIntent
 import com.keikuethas.irlhideandseek.mvi.home.HomeState
 import com.keikuethas.irlhideandseek.mvi.home.HomeViewModel
-import com.keikuethas.irlhideandseek.view.ErrorDialog
 import com.keikuethas.irlhideandseek.view.Lobby
 import com.keikuethas.irlhideandseek.view.NewGame
+import com.keikuethas.irlhideandseek.view.components.ErrorDialog
 import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -21,38 +21,27 @@ fun AppNavigation() {
 
     NavHost(navController, startDestination = Home) {
 
-        composable<Home> {
-            HomeScreen(navController)
-        }
+        composable<Home> { HomeScreen(navController) }
 
-        composable<Lobby>{
-            LobbyScreen(navController)
-        }
+        composable<Lobby> { LobbyScreen(navController) }
 
-        composable<Game> {
-            GameScreen(navController)
-        }
+        composable<Game> { GameScreen(navController) }
 
         composable<NewGame> { backStackEntry ->
             val newGame = backStackEntry.toRoute<NewGame>()
             NewGameScreen(navController, newGame.playerName)
         }
 
-        composable<RolesSettings> {
-            RolesSettingsScreen(navController)
-        }
+        composable<RolesSettings> { RolesSettingsScreen(navController) }
 
-        composable<MapSettings> {
-            MapSettingsScreen(navController)
-        }
+        composable<MapSettings> { MapSettingsScreen(navController) }
 
-        composable<EventSettings> {
-            EventsSettingsScreen(navController)
-        }
+        composable<EventSettings> { EventsSettingsScreen(navController) }
 
-        composable<TimeSettings> {
-            TimeScreen(navController)
-        }
+        composable<TimeSettings> { TimeScreen(navController) }
+
+        composable<EndScreen> { EndScreen(navController)}
+
     }
 }
 

@@ -41,8 +41,8 @@ import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeType
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeViewModel
-import com.keikuethas.irlhideandseek.view.AskingDialog
-import com.keikuethas.irlhideandseek.view.CustomTimeInputDialog
+import com.keikuethas.irlhideandseek.view.components.AskingDialog
+import com.keikuethas.irlhideandseek.view.components.CustomTimeInputDialog
 import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale

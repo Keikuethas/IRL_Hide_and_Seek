@@ -1,5 +1,6 @@
 package com.keikuethas.irlhideandseek.websocket.outgoing
 
+import com.keikuethas.irlhideandseek.model.AbilityType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -10,7 +11,7 @@ data class LocationData(
 
 @Serializable
 data class UseAbilityData(
-    val ability_type: String,
+    val ability_type: AbilityType,
     val center_lat: Double? = null,
     val center_lng: Double? = null
 )

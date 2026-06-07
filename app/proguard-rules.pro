@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Или более общее правило для всего пакета websocket
+-keep class com.keikuethas.irlhideandseek.websocket.** { *; }

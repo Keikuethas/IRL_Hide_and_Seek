@@ -3,7 +3,7 @@ package com.keikuethas.irlhideandseek.mvi.newGame.main
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
+import com.keikuethas.irlhideandseek.data.NewGameRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.EmptyRoleCreated
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.EventsUpdated
@@ -13,16 +13,16 @@ import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.ResetDialogS
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.ResetState
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.RolesUpdated
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameResult.RoomNameChanged
-import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
+import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import com.keikuethas.irlhideandseek.network.ApiService
+import com.keikuethas.irlhideandseek.network.models.AbilityParams
 import com.keikuethas.irlhideandseek.network.models.CreateGameRequest
+import com.keikuethas.irlhideandseek.network.models.EventConfig
 import com.keikuethas.irlhideandseek.network.models.HostPlayer
 import com.keikuethas.irlhideandseek.network.models.RoleParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
-import com.keikuethas.irlhideandseek.RoleType
 
 @HiltViewModel
 class NewGameViewModel @Inject constructor(
@@ -38,19 +38,22 @@ class NewGameViewModel @Inject constructor(
     init {
         // Подписываемся на изменения в репозитории, чтобы обновлять главный экран
         viewModelScope.launch {
-            repository.newGameState.collect { val newRoles = it.rolesSettings
+            repository.newGameState.collect {
+                val newRoles = it.rolesSettings
                 dispatch(RolesUpdated(newRoles))
             }
         }
         viewModelScope.launch {
-            repository.newGameState.collect { val newEvents = it.eventSettings
+            repository.newGameState.collect {
+                val newEvents = it.eventSettings
                 dispatch(EventsUpdated(newEvents))
             }
         }
 
         viewModelScope.launch {
-            repository.newGameState.collect { val newMap = it.mapSettings
-            dispatch(NewGameResult.MapUpdated(newMap))
+            repository.newGameState.collect {
+                val newMap = it.mapSettings
+                dispatch(NewGameResult.MapUpdated(newMap))
             }
         }
     }
@@ -70,29 +73,60 @@ class NewGameViewModel @Inject constructor(
             )
         }
         Log.d("NewGameVM", "gameRoles: $gameRoles")
-        val events = currentState.eventSettings.events.map { it.type.name } // предполагаем, что событие имеет поле type
+        val events =
+            currentState.eventSettings.events.map { it.type.name } // предполагаем, что событие имеет поле type
         Log.d("NewGameVM", "events: $events")
 
-        return CreateGameRequest(
-            name = currentState.roomName,
-            center_lat = currentState.hostLocationLat,
-            center_lng = currentState.hostLocationLng,
-            safe_zone_radius = 500.0,
-            min_zone_radius = 50.0,
-            zone_shrink_interval = 120,
-            game_duration = 1800,
-            time_to_hide = 300,
-            host_player = HostPlayer(
-                host_name = currentState.hostName.ifEmpty { "Host" },
-                host_player_location_lat = currentState.hostLocationLat,
-                host_player_location_lng = currentState.hostLocationLng
-            ),
-            game_roles = gameRoles,
-            roles_abilities = emptyMap(),
-            events = events,
-            roles_events = emptyMap(),
-            events_configurations = emptyMap()
-        )
+        return with(currentState) {
+            CreateGameRequest(
+                name = roomName,
+                center_lat = mapSettings.location!!.latitude,
+                center_lng = mapSettings.location.longitude,
+                safe_zone_radius = mapSettings.safeZoneRadius,
+                min_zone_radius = mapSettings.minSafeZoneRadius,
+                zone_shrink_interval = 120,
+                game_duration = 1800,
+                time_to_hide = 300,
+                host_player = HostPlayer(
+                    host_name = currentState.hostName.ifEmpty { "Host" },
+                    host_player_location_lat = mapSettings.location.latitude,
+                    host_player_location_lng = mapSettings.location.longitude
+                ),
+                game_roles = gameRoles,
+                roles_abilities = rolesSettings.roles.run {
+                    val rolesMap = mutableMapOf<String, Map<String, AbilityParams>>()
+                    forEach { roleState ->
+                        rolesMap[roleState.roleName] = roleState.abilities.run {
+                            val abilitiesMap = mutableMapOf<String, AbilityParams>()
+                            forEach { abilityState ->
+                                abilitiesMap[abilityState.type.toString()] =
+                                    abilityState.ability.run {
+                                        AbilityParams(
+                                            duration_seconds = duration_seconds,
+                                            number_uses = number_uses,
+                                            recharge_time = recharge_time,
+                                            addition_data = additional_data
+                                        )
+                                    }
+                            }
+                            abilitiesMap.toMap()
+                        }
+                    }
+                    rolesMap.toMap()
+                },
+                roles_events = emptyMap(),
+                events_configurations = eventSettings.events.run {
+                    val eventConfigMap = mutableMapOf<String, EventConfig>()
+                    forEach {
+                        eventConfigMap[it.type.toString()] = EventConfig(
+                            activation_frequency = it.frequency.toString(),
+                            addition_data = it.additionData
+                        )
+                    }
+                    eventConfigMap.toMap()
+                }
+            )
+        }
     }
 
     override fun onIntent(intent: NewGameIntent) = when (intent) {
@@ -110,6 +144,7 @@ class NewGameViewModel @Inject constructor(
                 }
             }
         }
+
         is NewGameIntent.QuitDialogRespond -> if (intent.confirmed) sendEffect(NewGameEffect.Quit)
         else dispatch(QuitDialogStateSet(false))
 
@@ -119,6 +154,7 @@ class NewGameViewModel @Inject constructor(
             dispatch(RoomNameChanged(intent.roomName))
             repository.updateRoomName(intent.roomName)
         }
+
         is NewGameIntent.SelectPreset -> dispatch(PresetSelected(intent.presetName))
 
         NewGameIntent.ResetSettings -> dispatch(ResetDialogStateSet(true))

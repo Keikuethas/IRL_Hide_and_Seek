@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.keikuethas.irlhideandseek.LocationEvent
 import com.keikuethas.irlhideandseek.LocationProvider
-import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
+import com.keikuethas.irlhideandseek.data.NewGameRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapResult.CameraPositionChanged
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapResult.FollowStatusChanged

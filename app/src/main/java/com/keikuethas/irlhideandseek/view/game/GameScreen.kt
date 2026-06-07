@@ -1,26 +1,28 @@
 package com.keikuethas.irlhideandseek.view.game
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.BackHand
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,36 +31,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.keikuethas.irlhideandseek.RoleType
-import com.keikuethas.irlhideandseek.Shield
-import com.keikuethas.irlhideandseek.mvi.game.GameEffect
+import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.model.Shield
 import com.keikuethas.irlhideandseek.mvi.game.GameIntent
 import com.keikuethas.irlhideandseek.mvi.game.GameState
 import com.keikuethas.irlhideandseek.mvi.game.GameViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.utils.adjustLightness
+import com.keikuethas.irlhideandseek.utils.color
 import com.keikuethas.irlhideandseek.view.map.MapObjectState
 import com.keikuethas.irlhideandseek.view.map.MapObjectType
 import com.keikuethas.irlhideandseek.view.map.YandexMapState
 import com.keikuethas.irlhideandseek.view.map.YandexMapView
-import com.yandex.mapkit.MapKit
-import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.geometry.Circle
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.mapview.MapView
-import com.yandex.mapkit.user_location.UserLocationLayer
-import kotlinx.coroutines.flow.SharedFlow
 
 // TODO
 //  ф-я для меток игроков (картинки для игроков надо тоже)
@@ -72,7 +67,7 @@ private fun Header( //todo разные подписи к таймеру (+вы�
             state.run {
                 when {
                     itsTimeToHide && roleType == RoleType.HIDER -> "Время спрятаться:"
-                    else -> ""
+                    else -> "До конца раунда: "
                 }
             } + "${secs / 60}:${(secs % 60).toString().padStart(2, '0')}"
         )
@@ -90,8 +85,6 @@ fun GameScreen(
 
     GSUI(
         //state = state.value,
-        effectStream = gameViewModel.effect,
-        onNavigation = { navController.navigate(it) },
     ) { gameViewModel.onIntent(it) }
 
 }
@@ -100,7 +93,7 @@ val orange = Color(255, 152, 0, 255)
 val yellow = Color(238, 205, 0, 255)
 val grey = Color(77, 77, 77, 255)
 
-fun zone(color: Color, location:Point) = MapObjectState(
+fun zone(color: Color, location: Point) = MapObjectState(
     type = MapObjectType.Zone(
         strokeColor = color,
         fillColor = color.copy(alpha = 0.1F),
@@ -149,8 +142,6 @@ private fun GSUI(
         secondsRemain = 520
     ),
     // temp ------
-    effectStream: SharedFlow<GameEffect>? = null,
-    onNavigation: (Any) -> Unit = {},
     onIntent: (GameIntent) -> Unit = {},
 ) {
 
@@ -160,57 +151,41 @@ private fun GSUI(
         topBar = {
             CenterAlignedTopAppBar(title = { Header(state) })
         },
+        floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                @Composable
-                fun FAB(
-                    modifier: Modifier = Modifier,
-                    containerColor: Color = FloatingActionButtonDefaults.containerColor,
-                    tint: Color = Color.Unspecified,
-                    imageVector: ImageVector,
-                    text: String,
-                    textAlign: TextAlign? = null,
-                    style: TextStyle = LocalTextStyle.current,
-                    onClick: () -> Unit
-                ) {
-                    FloatingActionButton(
-                        onClick = onClick,
-                        containerColor = containerColor,
-                        modifier = modifier
+                FloatingActionButton(
+                    onClick = { onIntent(GameIntent.AbilityListOpen) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+
                     ) {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(imageVector, null, tint = tint)
-                            Text(
-                                text,
-                                textAlign = textAlign,
-                                style = style,
-                                modifier = Modifier.padding(horizontal = 5.dp)
-                            )
-                        }
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Default.AutoAwesome,
+                            null,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        Text(
+                            modifier = Modifier.padding(horizontal = 5.dp),
+                            text = "Способности",
+                            textAlign = TextAlign.Center,
+                            style = typography.labelLarge,
+                            autoSize = TextAutoSize.StepBased(maxFontSize = 18.sp),
+                            maxLines = 1
+                        )
                     }
                 }
-
-                FAB(
-                    containerColor = Color.Red.adjustLightness(-0.1F),
-                    imageVector = Icons.Default.BackHand,
-                    text = "Поймать",
-                    style = typography.labelSmall
-                ) { }
-
-                Spacer(Modifier.height(20.dp))
-
-                FAB(
-                    imageVector = Icons.Default.AutoAwesome,
-                    text = "Способности",
-                    style = typography.labelSmall
-                ) { }
             }
         }
     ) { innerPadding ->
@@ -233,7 +208,12 @@ private fun GSUI(
                 )
             }
 
+            if (state.abilityListOpen)
+                ModalBottomSheet(
+                    onDismissRequest = { onIntent(GameIntent.AbilityListClose) }
+                ) {
 
+                }
         }
     }
 }
@@ -259,44 +239,14 @@ private fun AbilityItem(
     modifier: Modifier = Modifier,
     ability: AbilityState = AbilityState(Shield())
 ) {
-
-}
-
-// refactor
-private fun addCircle(
-    mapView: MapView,
-    latitude: Double,
-    longitude: Double,
-    radius: Float,
-    context: Context,
-    _strokeColor: Int,
-    _fillColor: Int
-) {
-    val circle = Circle(
-        Point(latitude, longitude),
-        radius
-    )
-    mapView.mapWindow.map.mapObjects.addCircle(circle).apply {
-        strokeWidth = 2f
-        strokeColor = ContextCompat.getColor(context, _strokeColor)
-        fillColor = ContextCompat.getColor(context, _fillColor)
-    }
-}
-
-// refactor use placemark in VM instead
-private fun enableUserLocation(mapView: MapView, context: Context) {
-    val mapKit: MapKit = MapKitFactory.getInstance()
-    val userLocationLayer: UserLocationLayer = mapKit.createUserLocationLayer(mapView.mapWindow)
-
-    if (ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(2.dp, ability.type.color)
     ) {
-        userLocationLayer.apply {
-            isVisible = true
-            isHeadingEnabled = true
-        }
+
     }
 }
 

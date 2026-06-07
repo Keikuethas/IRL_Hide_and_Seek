@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
-import com.keikuethas.irlhideandseek.Ability
+import com.keikuethas.irlhideandseek.model.Ability
 
 fun Color.adjustLightness(delta: Float): Color {
     val hsl = FloatArray(3)

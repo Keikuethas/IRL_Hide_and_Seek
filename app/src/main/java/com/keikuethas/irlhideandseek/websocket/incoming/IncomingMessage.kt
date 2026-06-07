@@ -81,13 +81,27 @@ sealed interface IncomingMessage {
     @SerialName("start_timer_to_hide")
     data class StartTimerToHide(val data: TimerData) : IncomingMessage
 
-
+    @Serializable
+    @SerialName("ability_used")
+    data class AbilityUsed(val data: AbilityUsedData) : IncomingMessage
 
     @Serializable
     @SerialName("error")
     data class Error(
         val message: String
     ) : IncomingMessage
+
+@Serializable
+@SerialName("player_entered_zone")
+data class PlayerEnteredZone(val data: PlayerEnteredZoneData) : IncomingMessage
+
+@Serializable
+@SerialName("player_exited_zone")
+data class PlayerExitedZone(val data: PlayerExitedZoneData) : IncomingMessage
+
+@Serializable
+@SerialName("airdrop_collected")
+data class AirdropCollected(val data: AirdropCollectedData) : IncomingMessage
 
 
 

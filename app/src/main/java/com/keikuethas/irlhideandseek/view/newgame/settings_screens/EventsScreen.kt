@@ -63,9 +63,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.keikuethas.irlhideandseek.FrequencyType
 import com.keikuethas.irlhideandseek.R
-import com.keikuethas.irlhideandseek.Websocket.EventType
+import com.keikuethas.irlhideandseek.model.ActivationFrequency
+import com.keikuethas.irlhideandseek.model.EventType
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
@@ -76,8 +76,8 @@ import com.keikuethas.irlhideandseek.utils.Description
 import com.keikuethas.irlhideandseek.utils.Name
 import com.keikuethas.irlhideandseek.utils.dashedBorder
 import com.keikuethas.irlhideandseek.utils.paramName
-import com.keikuethas.irlhideandseek.view.AskingDialog
-import com.keikuethas.irlhideandseek.view.ValueInputDialog
+import com.keikuethas.irlhideandseek.view.components.AskingDialog
+import com.keikuethas.irlhideandseek.view.components.ValueInputDialog
 import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 
 // NOTE:
@@ -392,7 +392,7 @@ private fun EventCard(
     state: EventState,
     onParamValueClick: (type: EventType, name: String) -> Unit = { _, _ -> },
     onDeleteEvent: (type: EventType) -> Unit = {},
-    onFrequencyChanged: (newValue: FrequencyType) -> Unit = {}
+    onFrequencyChanged: (newValue: ActivationFrequency) -> Unit = {}
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -450,7 +450,7 @@ private fun EventCard(
                     expanded = isExpanded,
                     onDismissRequest = { isExpanded = false }
                 ) {
-                    FrequencyType.entries.forEach { type ->
+                    ActivationFrequency.entries.forEach { type ->
                         DropdownMenuItem(
                             text = { Text(type.Name) },
                             onClick = {

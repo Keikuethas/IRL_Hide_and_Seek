@@ -95,13 +95,13 @@ fun YandexMapView(
             cameraListenerRef.value = listener
         }
 
-        // 🔄 Синхронизация объектов (теперь полагается на точные координаты из редюсера)
+        // Синхронизация объектов
         LaunchedEffect(state.objects) {
             val collection = mapObjectsCollection.value ?: return@LaunchedEffect
             syncMapObjects(collection, state.objects, mapObjectsMap)
         }
 
-        // 📸 Программное движение камеры
+        // Движение камеры
         LaunchedEffect(state.cameraPosition, state.shouldMoveCamera, state.zoom) {
             if (state.shouldMoveCamera) {
                 state.cameraPosition?.let { point ->

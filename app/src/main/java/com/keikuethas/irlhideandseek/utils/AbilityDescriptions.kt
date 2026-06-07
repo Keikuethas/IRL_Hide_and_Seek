@@ -3,67 +3,67 @@ package com.keikuethas.irlhideandseek.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.keikuethas.irlhideandseek.Ability
-import com.keikuethas.irlhideandseek.Intel
-import com.keikuethas.irlhideandseek.PersonalBomb
 import com.keikuethas.irlhideandseek.R
-import com.keikuethas.irlhideandseek.SafeHouse
-import com.keikuethas.irlhideandseek.SafeMansion
-import com.keikuethas.irlhideandseek.Scan
-import com.keikuethas.irlhideandseek.Shield
-import com.keikuethas.irlhideandseek.Snare
-import com.keikuethas.irlhideandseek.Trap
-import kotlin.reflect.KClass
+import com.keikuethas.irlhideandseek.model.Ability
+import com.keikuethas.irlhideandseek.model.AbilityType
 
 @Composable
-fun KClass<out Ability>.name(): String = when (this) {
-    Intel::class -> stringResource(R.string.IntelName)
-    PersonalBomb::class -> stringResource(R.string.PersonalBombName)
-    SafeHouse::class -> stringResource(R.string.SafeHouseName)
-    SafeMansion::class -> stringResource(R.string.SafeMansionName)
-    Scan::class -> stringResource(R.string.ScanName)
-    Shield::class -> stringResource(R.string.ShieldName)
-    Snare::class -> stringResource(R.string.SnareName)
-    Trap::class -> stringResource(R.string.TrapName)
-    else -> this.toString()
+fun AbilityType.name(): String = when (this) {
+    AbilityType.INTEL -> stringResource(R.string.IntelName)
+    AbilityType.PERSONAL_BOMB -> stringResource(R.string.PersonalBombName)
+    AbilityType.SAFE_HOUSE -> stringResource(R.string.SafeHouseName)
+    AbilityType.SAFE_MANSION -> stringResource(R.string.SafeMansionName)
+    AbilityType.SCAN -> stringResource(R.string.ScanName)
+    AbilityType.SHIELD -> stringResource(R.string.ShieldName)
+    AbilityType.SNARE -> stringResource(R.string.SnareName)
+    AbilityType.TRAP -> stringResource(R.string.TrapName)
 }
 
 val Ability.name: String
     @Composable
-    get() = this::class.name()
+    get() = abilityType.name()
 
-fun KClass<out Ability>.description(): String = when (this) {
-    Intel::class -> null
-    PersonalBomb::class -> null
-    SafeHouse::class -> null
-    SafeMansion::class -> null
-    Scan::class -> null
-    Shield::class -> null
-    Snare::class -> null
-    Trap::class -> null
-    else -> null
+fun AbilityType.description(): String = when (this) {
+    AbilityType.INTEL -> null
+    AbilityType.PERSONAL_BOMB -> null
+    AbilityType.SAFE_HOUSE -> null
+    AbilityType.SAFE_MANSION -> null
+    AbilityType.SCAN -> null
+    AbilityType.SHIELD -> null
+    AbilityType.SNARE -> null
+    AbilityType.TRAP -> null
 } ?: "not implemented yet"
 
 // todo
 // resource
 val Ability.description: String
-    get() = this::class.description()
+    get() = abilityType.description()
 
 
-fun KClass<out Ability>.color(): Color = when (this) {
-    Intel::class -> null
-    PersonalBomb::class -> null
-    SafeHouse::class -> null
-    SafeMansion::class -> null
-    Scan::class -> null
-    Shield::class -> null
-    Snare::class -> null
-    Trap::class -> null
-    else -> null
+val AbilityType.color: Color get() = when (this) {
+    AbilityType.INTEL -> Color(0, 0,0)
+    AbilityType.PERSONAL_BOMB -> Color(0, 0,0)
+    AbilityType.SAFE_HOUSE -> Color(0, 0,0)
+    AbilityType.SAFE_MANSION -> Color(0, 0,0)
+    AbilityType.SCAN -> Color(0, 0,0)
+    AbilityType.SHIELD -> Color(139, 195, 74, 255)
+    AbilityType.SNARE -> Color(0, 0,0)
+    AbilityType.TRAP -> Color(0, 0,0)
+} ?: Color.Unspecified
+
+val AbilityType.surfaceColor: Color get() = when (this) {
+    AbilityType.INTEL -> Color(0, 0,0)
+    AbilityType.PERSONAL_BOMB -> Color(0, 0,0)
+    AbilityType.SAFE_HOUSE -> Color(0, 0,0)
+    AbilityType.SAFE_MANSION -> Color(0, 0,0)
+    AbilityType.SCAN -> Color(0, 0,0)
+    AbilityType.SHIELD -> Color(0, 0,0)
+    AbilityType.SNARE -> Color(0, 0,0)
+    AbilityType.TRAP -> Color(0, 0,0)
 } ?: Color.Unspecified
 
 val Ability.color: Color
-    get() = this::class.color()
+    get() = abilityType.color
 
 @Composable
 fun paramName(techName: String) = when (techName) {

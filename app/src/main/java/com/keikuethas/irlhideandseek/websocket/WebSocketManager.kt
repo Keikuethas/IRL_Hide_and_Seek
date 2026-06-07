@@ -1,7 +1,7 @@
 package com.keikuethas.irlhideandseek.websocket
 
-// WebSocketManager.kt
 import android.util.Log
+import com.keikuethas.irlhideandseek.model.AbilityType
 import com.keikuethas.irlhideandseek.websocket.incoming.IncomingMessage
 import com.keikuethas.irlhideandseek.websocket.outgoing.ChangeReadyStatusData
 import com.keikuethas.irlhideandseek.websocket.outgoing.ChangeRoleData
@@ -54,7 +54,8 @@ class WebSocketManager @Inject constructor() {
     )
     val incomingMessages: SharedFlow<IncomingMessage> = _incomingMessages.asSharedFlow()
 
-    private val _connectionStatus = MutableStateFlow<ConnectionStatus>(ConnectionStatus.DISCONNECTED)
+    private val _connectionStatus =
+        MutableStateFlow<ConnectionStatus>(ConnectionStatus.DISCONNECTED)
     val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
 
     enum class ConnectionStatus {
@@ -174,24 +175,24 @@ class WebSocketManager @Inject constructor() {
     suspend fun sendPing() = sendMessage { OutgoingMessage.Ping() }
 
     suspend fun sendLocation(lat: Double, lng: Double) =
-        sendMessage { OutgoingMessage.UpdateLocation(LocationData(lat, lng)) }
+        sendMessage { OutgoingMessage.UpdateLocation(data = LocationData(lat, lng)) }
 
     suspend fun sendUseAbility(
-        abilityType: String,
+        abilityType: AbilityType,
         centerLat: Double? = null,
         centerLng: Double? = null
     ) = sendMessage {
-        OutgoingMessage.UseAbility(UseAbilityData(abilityType, centerLat, centerLng))
+        OutgoingMessage.UseAbility(data = UseAbilityData(abilityType, centerLat, centerLng))
     }
 
     suspend fun sendChangeRole(roleId: String) =
-        sendMessage("change_role") { OutgoingMessage.ChangeRole(ChangeRoleData(roleId)) }
+        sendMessage("change_role") { OutgoingMessage.ChangeRole(data = ChangeRoleData(roleId)) }
 
     suspend fun sendChangeReadyStatus(status: Boolean) =
-        sendMessage { OutgoingMessage.ChangeReadyStatus(ChangeReadyStatusData(status)) }
+        sendMessage { OutgoingMessage.ChangeReadyStatus(data = ChangeReadyStatusData(status)) }
 
     suspend fun sendGetGameState() = sendMessage { OutgoingMessage.GetGameState() }
 
     suspend fun sendHunterFoundPlayer(foundedPlayerId: String) =
-        sendMessage { OutgoingMessage.HunterFoundPlayer(HunterFoundPlayerData(foundedPlayerId)) }
+        sendMessage { OutgoingMessage.HunterFoundPlayer(data = HunterFoundPlayerData(foundedPlayerId)) }
 }

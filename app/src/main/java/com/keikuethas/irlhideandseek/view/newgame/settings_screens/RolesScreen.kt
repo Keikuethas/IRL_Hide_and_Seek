@@ -58,14 +58,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.keikuethas.irlhideandseek.Ability
-import com.keikuethas.irlhideandseek.Intel
-import com.keikuethas.irlhideandseek.PersonalBomb
-import com.keikuethas.irlhideandseek.PlayerRole
 import com.keikuethas.irlhideandseek.R
-import com.keikuethas.irlhideandseek.RoleType
-import com.keikuethas.irlhideandseek.SafeHouse
-import com.keikuethas.irlhideandseek.Shield
+import com.keikuethas.irlhideandseek.model.AbilityType
+import com.keikuethas.irlhideandseek.model.Intel
+import com.keikuethas.irlhideandseek.model.PersonalBomb
+import com.keikuethas.irlhideandseek.model.PlayerRole
+import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.model.SafeHouse
+import com.keikuethas.irlhideandseek.model.Shield
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSIntent
@@ -79,10 +79,9 @@ import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.name
 import com.keikuethas.irlhideandseek.utils.paramName
 import com.keikuethas.irlhideandseek.utils.unitName
-import com.keikuethas.irlhideandseek.view.AskingDialog
-import com.keikuethas.irlhideandseek.view.RoleTypeLabel
-import com.keikuethas.irlhideandseek.view.ValueInputDialog
-import kotlin.reflect.KClass
+import com.keikuethas.irlhideandseek.view.components.AskingDialog
+import com.keikuethas.irlhideandseek.view.components.RoleTypeLabel
+import com.keikuethas.irlhideandseek.view.components.ValueInputDialog
 
 // TODO: padding у надписей, а то там кринж какой-то
 
@@ -257,8 +256,8 @@ fun RSSUI(
 @Composable
 fun AbilityAddDialog(
     onDismiss: () -> Unit,
-    onSelect: (KClass<out Ability>) -> Unit,
-    abilities: List<KClass<out Ability>>
+    onSelect: (AbilityType) -> Unit,
+    abilities: List<AbilityType>
 ) {
     Dialog(
         onDismissRequest = onDismiss
@@ -273,8 +272,8 @@ fun AbilityAddDialog(
 @Composable
 fun AADUI(
     onDismiss: () -> Unit = {},
-    onSelect: (KClass<out Ability>) -> Unit = {},
-    abilities: List<KClass<out Ability>> = listOf(Shield::class)
+    onSelect: (AbilityType) -> Unit = {},
+    abilities: List<AbilityType> = listOf(AbilityType.SHIELD)
 ) {
     OutlinedCard(
         modifier = Modifier.width(300.dp)
@@ -313,7 +312,7 @@ fun AADUI(
 @Composable
 private fun AbilityInfoCard(
     modifier: Modifier = Modifier,
-    type: KClass<out Ability> = Shield::class,
+    type: AbilityType = AbilityType.SHIELD,
     onClick: () -> Unit = {}
 ) {
     OutlinedCard(
@@ -382,11 +381,11 @@ fun RoleElement(
     ),
     onRoleNameClick: () -> Unit = {},
     onRoleTypeClick: () -> Unit = {},
-    onParamValueClick: (type: KClass<out Ability>, name: String) -> Unit = { _, _ -> },
+    onParamValueClick: (type: AbilityType, name: String) -> Unit = { _, _ -> },
     onDelete: () -> Unit = {},
     onAddAbility: () -> Unit = {},
     onHealthClick: () -> Unit = {},
-    onDeleteAbility: (KClass<out Ability>) -> Unit = {}
+    onDeleteAbility: (AbilityType) -> Unit = {}
 ) {
     Box(
         Modifier
@@ -548,8 +547,8 @@ private fun EmptyAbilityCard(
 private fun AbilityCard(
     modifier: Modifier = Modifier,
     state: AbilityState = AbilityState(Shield()),
-    onParamValueClick: (type: KClass<out Ability>, name: String) -> Unit = { _, _ -> },
-    onDeleteAbility: (KClass<out Ability>) -> Unit = {}
+    onParamValueClick: (type: AbilityType, name: String) -> Unit = { _, _ -> },
+    onDeleteAbility: (AbilityType) -> Unit = {}
 ) {
     OutlinedCard(
         modifier = modifier

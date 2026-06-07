@@ -3,9 +3,9 @@ package com.keikuethas.irlhideandseek.mvi.newGame.events
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
+import com.keikuethas.irlhideandseek.data.NewGameRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
-import com.keikuethas.irlhideandseek.view.DialogInputType
+import com.keikuethas.irlhideandseek.view.components.DialogInputType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException

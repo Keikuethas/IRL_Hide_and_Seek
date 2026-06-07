@@ -31,7 +31,7 @@ class HomeViewModel @Inject constructor(
 
     override fun onIntent(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.CreateGame -> createGame()
+            is HomeIntent.CreateGame -> sendEffect(HomeEffect.HostLobby)
             is HomeIntent.EditName -> dispatch(HomeResult.NameEdited(intent.value))
             is HomeIntent.EditRoomName -> {
                 dispatch(RoomNameEdited(intent.value))
@@ -51,56 +51,6 @@ class HomeViewModel @Inject constructor(
                 // а Compose сам перехватит этот Intent и вызовет launcher.
             }
         }
-    }
-
-    private fun createGame() {
-
-        sendEffect(HomeEffect.HostLobby)
-//        viewModelScope.launch {
-//            dispatch(HomeResult.Loading(true))
-//            val request = CreateGameRequest(
-//                name = state.value.roomNameText,
-//                center_lat = 55.751244,  // TODO: реальные координаты
-//                center_lng = 37.618423,
-//                safe_zone_radius = 500.0,
-//                min_zone_radius = 50.0,
-//                zone_shrink_interval = 120,
-//                game_duration = 1800,
-//                time_to_hide = 300,
-//                host_player = HostPlayer(
-//                    host_name = state.value.nameText,
-//                    host_player_location_lat = 55.751244,
-//                    host_player_location_lng = 37.618423
-//                ),
-//                game_roles = emptyMap(),
-//                roles_abilities = emptyMap(),
-//                events = emptyList(),
-//                roles_events = emptyMap(),
-//                events_configurations = emptyMap()
-//            )
-//            try {
-//                val response = apiService.createGame(request)
-//                dispatch(HomeResult.Loading(false))
-//                sendEffect(
-//                    HomeEffect.JoinLobby(
-//                        playerName = state.value.nameText,
-//                        roomName = state.value.roomNameText,
-//                        gameId = response.game.id,
-//                        playerId = response.host_player_id
-//                    )
-//                )
-//            } catch (e: HttpException) {
-//                dispatch(HomeResult.Loading(false))
-//                when (e.code()) {
-//                    400 -> dispatch(Error("Некорректный запрос", "Проверьте данные игры"))
-//                    409 -> dispatch(Error("Имя занято", "Игра с таким названием уже существует"))
-//                    else -> dispatch(Error("Ошибка", e.message() ?: "Неизвестная ошибка"))
-//                }
-//            } catch (e: Exception) {
-//                dispatch(HomeResult.Loading(false))
-//                dispatch(Error("Ошибка подключения", e.message ?: "Проверьте интернет-соединение"))
-//            }
-//        }
     }
 
     private fun joinGame() {

@@ -62,17 +62,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.keikuethas.irlhideandseek.RoleType
+import com.keikuethas.irlhideandseek.model.RoleType
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameState
 import com.keikuethas.irlhideandseek.mvi.newGame.main.NewGameViewModel
-import com.keikuethas.irlhideandseek.view.AskingDialog
 import com.keikuethas.irlhideandseek.view.EventSettings
 import com.keikuethas.irlhideandseek.view.Lobby
 import com.keikuethas.irlhideandseek.view.MapSettings
 import com.keikuethas.irlhideandseek.view.RolesSettings
 import com.keikuethas.irlhideandseek.view.TimeSettings
+import com.keikuethas.irlhideandseek.view.components.AskingDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

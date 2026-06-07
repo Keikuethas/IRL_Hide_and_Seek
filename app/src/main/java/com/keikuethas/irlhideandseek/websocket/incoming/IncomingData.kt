@@ -1,8 +1,9 @@
 package com.keikuethas.irlhideandseek.websocket.incoming
 
 import android.os.Parcelable
+import com.keikuethas.irlhideandseek.model.AbilityType
 import com.keikuethas.irlhideandseek.model.DeathReason
-import com.keikuethas.irlhideandseek.model.VictoryCondition
+import com.keikuethas.irlhideandseek.model.RoleType
 import com.keikuethas.irlhideandseek.model.ZoneType
 import com.keikuethas.irlhideandseek.network.models.AbilityInfo
 import com.keikuethas.irlhideandseek.network.models.EventInfo
@@ -55,13 +56,13 @@ data class RoleChangedData(
 
 @Serializable
 data class ReadyStatusChangedData(
-    val status: Boolean
+    val ready_status: Boolean
 )
 
 @Serializable
 data class PlayerReadyStatusChangedData(
     val player_id: String,
-    val status: Boolean
+    val ready_status: Boolean
 )
 
 @Serializable
@@ -72,8 +73,8 @@ data class GameStateData(
 
 @Serializable
 data class ZoneData(
-    val zone_id: ZoneType,
-    val zone_type: String,
+    val zone_id:String,
+    val zone_type: ZoneType,
     val center_lat: Double,
     val center_lng: Double,
     val radius: Float
@@ -114,7 +115,11 @@ data class GameFinishedData(val is_victory: Boolean)
 @Serializable
 data class ErrorData(val message: String)
 
-
+@Serializable
+data class AbilityUsedData(
+    val ability: AbilityType,
+    val result: Int
+)
 
 //refactor
 @Parcelize
@@ -123,7 +128,27 @@ data class RoleInfo(
     val id: String,
     val name: String,
     val health: Int,
-    val victory_condition: VictoryCondition,
+    val victory_condition: RoleType,
     val abilities: List<AbilityInfo>,
     val events: List<EventInfo?> = emptyList()
 ): Parcelable
+
+@Serializable
+data class PlayerEnteredZoneData(
+    val zone_id: String,
+    val zone_type: ZoneType,
+    val center_lat: Double,
+    val center_lng: Double,
+    val radius: Float
+)
+
+@Serializable
+data class PlayerExitedZoneData(
+    val zone_id: String,
+    val zone_type: ZoneType
+)
+
+@Serializable
+data class AirdropCollectedData(
+    val ability: AbilityInfo
+)

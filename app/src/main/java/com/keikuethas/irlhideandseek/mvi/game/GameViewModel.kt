@@ -1,16 +1,27 @@
 package com.keikuethas.irlhideandseek.mvi.game
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.keikuethas.irlhideandseek.Shield
-import com.keikuethas.irlhideandseek.Websocket.GameSessionService
-import com.keikuethas.irlhideandseek.Websocket.GameWebsocketClient
-import com.keikuethas.irlhideandseek.Websocket.OutgoingRequests
-import com.keikuethas.irlhideandseek.Websocket.ServerEvent
+import com.keikuethas.irlhideandseek.data.GameEvent
+import com.keikuethas.irlhideandseek.data.GameRepository
+import com.keikuethas.irlhideandseek.model.AbilityType
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
-import com.keikuethas.irlhideandseek.utils.toAbilityType
+import com.keikuethas.irlhideandseek.mvi.game.GameEffect.EndGame
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.AbilityListStateSet
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.AbilitySelected
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.AbilityUsed
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.CameraStopped
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.Error
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.ErrorDismissed
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.GameStarted
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.PlayerDied
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.PlayerListStateSet
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.PlayerMoved
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.PlayerQuit
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.ZoneAdded
+import com.keikuethas.irlhideandseek.mvi.game.GameResult.ZoneDeleted
+import com.yandex.mapkit.geometry.Point
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,142 +29,170 @@ import javax.inject.Inject
 @HiltViewModel
 class GameViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val wsClient: GameWebsocketClient // ✅ 1. Инжектим через Hilt
+    private val repository: GameRepository
 ) : MVI_HiltViewModel<GameState, GameIntent, GameEffect, GameResult>(
     initialState = GameState(),
     savedStateHandle = savedStateHandle,
     savedStateKey = "GameState"
 ) {
 
+    init {
+        repository.connect(viewModelScope)
+        observeGameEvents()
+    }
+
+    private fun observeGameEvents() {
+        viewModelScope.launch {
+            try {
+                repository.gameEvents.collect { event ->
+                    Log.d("LobbyVM", "Event received: $event")
+                    handleEvent(event)
+                }
+            } catch (e: Exception) {
+                Log.e("LobbyVM", "Error collecting events", e)
+                //dispatch(Error("Ошибка подключения", e.message ?: "Unknown"))
+            }
+        }
+    }
+
+    private fun handleEvent(event: GameEvent) = with(event) {
+        when (this) {
+            is GameEvent.ConnectionFailed ->
+                dispatch(Error("Ошибка подключения"))
+
+            is GameEvent.CreateZone ->
+                dispatch(
+                    ZoneAdded(
+                        type = zoneType,
+                        zoneId = zoneId,
+                        location = Point(centerLat, centerLng),
+                        radius = radius
+                    )
+                )
+
+            is GameEvent.DeleteZone ->
+                dispatch(ZoneDeleted(zoneId))
+
+            is GameEvent.Error ->
+                dispatch(Error(message))
+
+            is GameEvent.GameFinished -> {
+                repository.disconnect()
+                sendEffect(EndGame(victory))
+            }
+
+            is GameEvent.PlayerDied ->
+                dispatch(PlayerDied(playerId))
+
+            is GameEvent.PlayerQuit ->
+                dispatch(PlayerQuit(playerId))
+
+            is GameEvent.PlayerMoved ->
+                dispatch(
+                    PlayerMoved(
+                        playerId = playerId,
+                        location = Point(locationLat, locationLng)
+                    )
+                )
+
+            is GameEvent.StartTimerForGame ->
+                dispatch(GameStarted(duration))
+
+            is GameEvent.YouDied -> {
+                repository.disconnect()
+                sendEffect(
+                    EndGame(
+                        victory = false,
+                        reason = reason,
+                        hunterId = hunterId
+                    )
+                )
+            }
+
+            is GameEvent.AbilityUsed ->
+                if (result == 0)
+                    dispatch(AbilityUsed(ability))
+
+            is GameEvent.GameState ->
+            {/*idk*/}
+
+            GameEvent.LocationPermissionRevoked -> {/*todo*/}
+            GameEvent.LocationProvidersDisabled -> {/*todo*/}
+
+            is GameEvent.LocationUpdated ->
+                sendLocation(
+                    latitude = latitude,
+                    longitude = longitude
+                )
+
+            is GameEvent.AirdropCollected -> TODO()
+            is GameEvent.PlayerEnteredZone -> {}
+            is GameEvent.PlayerExitedZone -> {}
+        }
+    }
+
     override fun reduce(state: GameState, result: GameResult): GameState =
         GameReducer.reduce(state, result)
 
     override fun onIntent(intent: GameIntent) = when (intent) {
         GameIntent.AbilityListOpen ->
-            dispatch(GameResult.AbilityListStateSet(true))
+            dispatch(AbilityListStateSet(true))
 
         GameIntent.AbilityListClose ->
-            dispatch(GameResult.AbilityListStateSet(false))
+            dispatch(AbilityListStateSet(false))
 
-        is GameIntent.CatchPlayer -> TODO()
+        is GameIntent.CatchPlayer ->
+            sendCatchPlayer(playerId = intent.playerId)
 
         GameIntent.PlayerListOpen ->
-            dispatch(GameResult.PlayerListStateSet(true))
+            dispatch(PlayerListStateSet(true))
 
         GameIntent.PlayerListClose ->
-            dispatch(GameResult.PlayerListStateSet(false))
-
-        is GameIntent.ScrollAbilityList -> TODO()
+            dispatch(PlayerListStateSet(false))
 
         is GameIntent.SelectAbility -> {
             when (intent.type) {
-                Shield::class -> TODO() // отправка запроса
-                else -> dispatch(GameResult.AbilitySelected(intent.type))
+                AbilityType.SHIELD ->
+                    sendUseAbility(intent.type)// отправка запроса
+
+                else -> dispatch(AbilitySelected(intent.type))
             }
-            dispatch(GameResult.AbilityListStateSet(false))
+            dispatch(AbilityListStateSet(false))
         }
 
         is GameIntent.UseAbility ->
-            state.value.usingAbilityOnMap?.toAbilityType()?.let { type ->
-                wsClient.sendCommand(
-                    "use_ability",
-                    OutgoingRequests.useAbility(type, intent.lat, intent.lng)
-                )
-            } ?: Unit
-
-        is GameIntent.Initialize ->
-            with(intent) { dispatch(GameResult.Initialized(roleID, gameData)) }
-
-        is GameIntent.UpdateLocation -> TODO()
-
-        is GameIntent.AbilityUseRespond -> TODO()
-
-        is GameIntent.AddZone ->
-            with(intent) { dispatch(GameResult.ZoneAdded(type, id)) }
-
-        is GameIntent.DeleteZone ->
-            dispatch(GameResult.ZoneDeleted(intent.id))
-
-        GameIntent.FinishHideTime ->
-            dispatch(GameResult.HideTimeFinished)
+            sendUseAbility(
+                type = state.value.usingAbilityOnMap!!,
+                location = intent.location
+            )
 
         GameIntent.ReportCameraMoved ->
-            dispatch(GameResult.CameraStopped)
+            dispatch(CameraStopped)
+
+        GameIntent.DismissError ->
+            dispatch(ErrorDismissed)
     }
 
-    // ✅ 2. Убрали ручное создание: private val wsClient = GameWebsocketClient()
-
-    init {
-        // ✅ 3. Подписка только для UI. Отменится при уходе с экрана, но сокет останется жив.
+    fun sendCatchPlayer(playerId: String) =
         viewModelScope.launch {
-            wsClient.events.collect { event ->
-                handleServerEvent(event)
-            }
+            repository.catchPlayer(playerId = playerId)
         }
-    }
 
-    // ✅ 4. Управление подключением теперь через ForegroundService
-    fun startGameSession(context: Context, serverUrl: String) {
-        GameSessionService.startService(context, serverUrl)
-    }
-
-    fun stopGameSession(context: Context) {
-        GameSessionService.stopService(context)
-    }
-
-    // --- отправка команд (осталось без изменений) ---
-    fun sendMyCurrentLocation(lat: Double, lng: Double) {
-        wsClient.sendCommand("update_location", OutgoingRequests.updateLocation(lat, lng))
-    }
-
-    fun setReady(isReady: Boolean) {
-        wsClient.sendCommand("change_ready_status", OutgoingRequests.changeReadyStatus(isReady))
-    }
-
-    // ==================================================
-    // ПРИЕМ СОБЫТИЙ
-    // ==================================================
-    private fun handleServerEvent(event: ServerEvent) {
-        when (event) {
-            is ServerEvent.InitialConnected ->
-                with(event) { onIntent(GameIntent.Initialize(player.roleId, game)) }
-
-            is ServerEvent.PlayerMoved ->
-                with(event) { onIntent(GameIntent.UpdateLocation(playerId, lat, lng)) }
-
-            is ServerEvent.ZoneCreated ->
-                with(event) { onIntent(GameIntent.AddZone(zoneId, zoneType)) }
-
-            is ServerEvent.ZoneDeleted ->
-                onIntent(GameIntent.DeleteZone(event.zoneId))
-
-            is ServerEvent.AbilityUsed ->
-                with(event) { onIntent(GameIntent.AbilityUseRespond(ability, result)) }
-
-            is ServerEvent.FullGameState -> {
-                // Пришло полное обновление игры
-            }
-
-            is ServerEvent.ReadyStatusChanged -> {
-                // Обновить галочку "Готов" в интерфейсе
-            }
-
-            is ServerEvent.RoleChanged -> {
-                // Игрок сменил роль
-            }
-
-            is ServerEvent.Pong -> {
-                // Сервер ответил на пинг
-            }
-
-            ServerEvent.TimerToHideFinished ->
-                onIntent(GameIntent.FinishHideTime)
-
-            is ServerEvent.Unknown ->
-                Log.wtf("Websocket", "Unknown event: ${event.rawType}")
+    fun sendUseAbility(type: AbilityType, location: Point? = null) =
+        viewModelScope.launch {
+            repository.useAbility(
+                type = type,
+                centerLat = location?.latitude,
+                centerLng = location?.longitude
+            )
         }
-    }
 
-    // ✅ 5. Убрали onCleared { wsClient.disconnect() }
-    // Теперь сокет живет независимо от ViewModel и не рвётся при навигации
+    fun sendLocation(latitude: Double, longitude: Double) =
+        viewModelScope.launch {
+            repository.updateLocation(
+                latitude = latitude,
+                longitude = longitude
+            )
+        }
+
 }

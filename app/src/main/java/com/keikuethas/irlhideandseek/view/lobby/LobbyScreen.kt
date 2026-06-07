@@ -37,12 +37,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.keikuethas.irlhideandseek.model.RoleType
-import com.keikuethas.irlhideandseek.model.VictoryCondition
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyEffect
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyIntent
 import com.keikuethas.irlhideandseek.mvi.lobby.LobbyState
@@ -144,8 +144,8 @@ fun LobbyContent(
         val playerRoles = state.roles.map { roleFull ->
             RoleState(
                 roleName = roleFull.name,
-                // refactor no dubbing models
-                type = if (roleFull.victory_condition == VictoryCondition.Seeker) RoleType.SEEKER else RoleType.HIDER,
+
+                type = roleFull.victory_condition,
                 abilities = roleFull.abilities.map { abilityInfoToAbilityState(it) },
                 health = roleFull.health
             )
@@ -181,8 +181,8 @@ fun LobbyContent(
                     .padding(top = 12.dp),
                 name = state.playerName,
                 role = state.playerRole,
-                //refactor no dubbing models
-                roleType = if (state.roles.find { it.id == state.playerRole }!!.victory_condition == VictoryCondition.Seeker) RoleType.SEEKER else RoleType.HIDER, //refactor make normal class or methods
+                roleType = state.roles.find { it.name == state.playerRole }?.victory_condition ?: RoleType.SEEKER,
+                ready = state.isReady,
                 onReadyClick = { onIntent(LobbyIntent.ChangeReadyStatus) },
                 onRoleClick = { onIntent(LobbyIntent.RequestRoleChangeDialog) }
             )
@@ -217,7 +217,7 @@ private fun PlayerCard(
     onRoleClick: () -> Unit
 ) {
 
-    val activeColor = if (ready) roleType.color else Color.Gray
+    val activeColor = if (ready) roleType.color else MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(
         modifier = modifier
@@ -226,7 +226,7 @@ private fun PlayerCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(0.2F),
             onClick = onReadyClick,
             color = if (ready) roleType.surfaceColor else MaterialTheme.colorScheme.surfaceVariant,
             tonalElevation = 8.dp,
@@ -273,7 +273,7 @@ private fun PlayerCard(
         )
 
         Surface(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             onClick = onRoleClick,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
             shape = RoundedCornerShape(
@@ -296,7 +296,7 @@ private fun PlayerCard(
                 Text(
                     text = name,
                     style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    autoSize = TextAutoSize.StepBased(),
+                    autoSize = TextAutoSize.StepBased(maxFontSize = 36.sp),
                     maxLines = 1
                 )
 
@@ -309,9 +309,9 @@ private fun PlayerCard(
     }
 }
 
-private class RoleTypeProvider : PreviewParameterProvider<VictoryCondition> {
+private class RoleTypeProvider : PreviewParameterProvider<RoleType> {
     override val values =
-        VictoryCondition.entries.asSequence()
+        RoleType.entries.asSequence()
 }
 
 @Preview()
@@ -320,7 +320,7 @@ fun LobbyContentPreview(
     @PreviewParameter(
         RoleTypeProvider::class,
         limit = 2
-    ) roleType: VictoryCondition
+    ) roleType: RoleType
 ) {
     val fakeRole = RoleInfo(
         id = "role1",
@@ -334,7 +334,7 @@ fun LobbyContentPreview(
         id = "role2",
         name = "Роль2",
         health = 100,
-        victory_condition = VictoryCondition.Seeker,
+        victory_condition = RoleType.SEEKER,
         abilities = emptyList(),
         events = emptyList()
     )

@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek.view
+package com.keikuethas.irlhideandseek.view.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior

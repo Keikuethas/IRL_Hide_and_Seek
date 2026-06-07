@@ -1,4 +1,4 @@
-package com.keikuethas.irlhideandseek.view
+package com.keikuethas.irlhideandseek.view.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,8 +1,8 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.roles
 
-import com.keikuethas.irlhideandseek.PlayerRole
-import com.keikuethas.irlhideandseek.RoleType
-import com.keikuethas.irlhideandseek.getAbilityByType
+import com.keikuethas.irlhideandseek.model.PlayerRole
+import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.model.getAbilityByType
 
 object RolesReducer {
     fun reduce(state: RSState, result: RSResult): RSState =

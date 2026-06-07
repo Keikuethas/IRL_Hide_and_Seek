@@ -1,31 +1,25 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.roles
 
+//import com.keikuethas.irlhideandseek.model.RoleParams
 import android.os.Parcelable
-import com.keikuethas.irlhideandseek.Ability
-import com.keikuethas.irlhideandseek.Intel
-import com.keikuethas.irlhideandseek.PersonalBomb
-import com.keikuethas.irlhideandseek.PlayerRole
-//import com.keikuethas.irlhideandseek.RoleParams
-import com.keikuethas.irlhideandseek.RoleType
-import com.keikuethas.irlhideandseek.SafeHouse
-import com.keikuethas.irlhideandseek.SafeMansion
-import com.keikuethas.irlhideandseek.Scan
-import com.keikuethas.irlhideandseek.Shield
-import com.keikuethas.irlhideandseek.Snare
-import com.keikuethas.irlhideandseek.Trap
-import com.keikuethas.irlhideandseek.getAbilityByType
-import com.keikuethas.irlhideandseek.view.DialogInputType
+import com.keikuethas.irlhideandseek.model.Ability
+import com.keikuethas.irlhideandseek.model.AbilityType
+import com.keikuethas.irlhideandseek.model.PlayerRole
+import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.model.getAbilityByType
+import com.keikuethas.irlhideandseek.view.components.DialogInputType
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
-import kotlin.reflect.KClass
 
 @Parcelize
 data class AbilityState(
-    val type: @RawValue KClass<out Ability>, //concern если это будет ломаться, то сделать маппер на enum и забить
-    val params: List<Pair<String, Number>>
+    val type: AbilityType,
+    val params: List<Pair<String, Number>>,
+    val lastUse: Double? = null
 ) : Parcelable {
+
     constructor(ability: Ability) : this(
-        type = ability::class,
+        type = ability.abilityType,
         params = ability.run {
             val res: MutableList<Pair<String, Number>> = mutableListOf()
             ability.let {
@@ -76,34 +70,11 @@ data class RoleState(
             return PlayerRole(roleName, abils, type)
         }
 
-//    val params: RoleParams
-//        get() = RoleParams(health, type)
-
-    val remainingAbilities: List<KClass<out Ability>>
-        get() {
-            val res: MutableList<KClass<out Ability>> = mutableListOf()
-            abilityList.forEach { candidate ->
-                if (abilities.all { it.type != candidate })
-                    res.add(candidate)
-            }
-            return res.toList()
-        }
+    val remainingAbilities: List<AbilityType>
+        get() = AbilityType.entries - abilities.map { it.type }.toSet()
 
     val displayAbilityAdd: Boolean
         get() = remainingAbilities.isNotEmpty()
-
-    companion object {
-        val abilityList: List<KClass<out Ability>> = listOf(
-            Shield::class,
-            Intel::class,
-            Scan::class,
-            PersonalBomb::class,
-            Trap::class,
-            Snare::class,
-            SafeHouse::class,
-            SafeMansion::class
-        )
-    }
 }
 
 @Parcelize
@@ -111,7 +82,7 @@ data class AbilityVIDState( // Value Input Dialog State
     val initialValue: String = "",
     val inputType: DialogInputType = DialogInputType.STRING,
     val paramName: String,
-    val abilityType: @RawValue KClass<out Ability>? = null
+    val abilityType: @RawValue AbilityType? = null
 ) : Parcelable
 
 @Parcelize
@@ -133,7 +104,7 @@ sealed interface RSIntent {
     data object RoleTypeClick : RSIntent
     data class RoleTypeChangeAnswer(val changed: Boolean) : RSIntent
     data class ParamClick(
-        val type: KClass<out Ability>,
+        val type: AbilityType,
         val name: String
     ) : RSIntent
 
@@ -145,9 +116,9 @@ sealed interface RSIntent {
     data class RoleDeleteAnswer(val result: Boolean) : RSIntent
     data object AddAbilityRequest : RSIntent
     data object AddAbilityDismissed : RSIntent
-    data class AddAbility(val type: KClass<out Ability>) : RSIntent
+    data class AddAbility(val type: AbilityType) : RSIntent
     data object RoleHealthClick : RSIntent
-    data class DeleteAbility(val type: KClass<out Ability>) : RSIntent
+    data class DeleteAbility(val type: AbilityType) : RSIntent
 
     data class Initialize(val state: RSState) : RSIntent
 
@@ -165,9 +136,9 @@ sealed interface RSResult {
     data class ParameterChanged(val name: String, val newValue: Number) : RSResult
     data object RoleTypeChanged : RSResult
     data class RoleTypeDialogStateSet(val open: Boolean) : RSResult
-    data class AbilityAdded(val type: KClass<out Ability>) : RSResult
+    data class AbilityAdded(val type: AbilityType) : RSResult
     data class AddAbilityDialogStateSet(val open: Boolean) : RSResult
-    data class AbilityDeleted(val type: KClass<out Ability>) : RSResult
+    data class AbilityDeleted(val type: AbilityType) : RSResult
     data class Initialized(val state: RSState) : RSResult
 }
 

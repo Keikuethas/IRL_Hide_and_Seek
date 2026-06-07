@@ -1,7 +1,7 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.time
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.keikuethas.irlhideandseek.data.repository.NewGameRepository
+import com.keikuethas.irlhideandseek.data.NewGameRepository
 import com.keikuethas.irlhideandseek.mvi.MVI_HiltViewModel
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.PickerClosed
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeResult.PickerOpened

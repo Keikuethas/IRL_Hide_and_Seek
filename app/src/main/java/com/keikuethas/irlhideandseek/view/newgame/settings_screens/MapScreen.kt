@@ -33,8 +33,8 @@ import com.keikuethas.irlhideandseek.mvi.newGame.map.MapEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapState
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapViewModel
-import com.keikuethas.irlhideandseek.view.AskingDialog
-import com.keikuethas.irlhideandseek.view.RangeSliderWithTooltips
+import com.keikuethas.irlhideandseek.view.components.AskingDialog
+import com.keikuethas.irlhideandseek.view.components.RangeSliderWithTooltips
 import com.keikuethas.irlhideandseek.view.map.YandexMapView
 import com.keikuethas.irlhideandseek.view.topbar.SettingsTopAppBar
 import com.yandex.mapkit.mapview.MapView

@@ -1,15 +1,15 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.events
 
 import android.os.Parcelable
-import com.keikuethas.irlhideandseek.FrequencyType
-import com.keikuethas.irlhideandseek.Websocket.EventType
-import com.keikuethas.irlhideandseek.view.DialogInputType
+import com.keikuethas.irlhideandseek.model.ActivationFrequency
+import com.keikuethas.irlhideandseek.model.EventType
+import com.keikuethas.irlhideandseek.view.components.DialogInputType
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class EventState(
     val type: EventType,
-    val frequency: FrequencyType = FrequencyType.FREQUENT,
+    val frequency: ActivationFrequency = ActivationFrequency.FREQUENT,
     val params: List<Pair<String, Number>> = when (type) {
         EventType.REVEAL -> emptyList()
         EventType.BOMB -> listOf(
@@ -28,7 +28,13 @@ data class EventState(
             "damage" to 50
         )
     }
-) : Parcelable
+) : Parcelable {
+    val additionData: Map<String, Double> get() = params.run {
+        val map = mutableMapOf<String, Double>()
+        forEach { map[it.first] = it.second.toDouble() }
+        map.toMap()
+    }
+}
 
 @Parcelize
 data class EventVIDState( // Value Input Dialog State
@@ -64,7 +70,7 @@ sealed interface ESIntent {
     data object SaveSettings : ESIntent
     data object ResetSettings : ESIntent
     data object RequestQuit : ESIntent
-    data class ChangeFrequency(val type: EventType, val newValue: FrequencyType): ESIntent
+    data class ChangeFrequency(val type: EventType, val newValue: ActivationFrequency): ESIntent
 
     data class Initialize(val newState: ESState): ESIntent
 }
@@ -77,7 +83,7 @@ sealed interface ESResult {
     data class AddEventDialogStateSet(val open: Boolean) : ESResult
     data class EventDeleted(val type: EventType) : ESResult
     data object EventsCleared: ESResult
-    data class FrequencyChanged(val eventType: EventType, val newValue: FrequencyType): ESResult
+    data class FrequencyChanged(val eventType: EventType, val newValue: ActivationFrequency): ESResult
     data class Initialized(val newState: ESState): ESResult
 }
 

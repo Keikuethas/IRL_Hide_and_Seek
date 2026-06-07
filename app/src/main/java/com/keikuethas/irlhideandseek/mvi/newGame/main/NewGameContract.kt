@@ -1,7 +1,7 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.main
 
 import android.os.Parcelable
-import com.keikuethas.irlhideandseek.RoleType
+import com.keikuethas.irlhideandseek.model.RoleType
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
 import com.keikuethas.irlhideandseek.mvi.newGame.map.MapState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
@@ -22,8 +22,6 @@ data class NewGameState(
     val eventSettings: ESState = ESState(),
     val mapSettings: MapState = MapState(),
     val hostName: String = "",
-    val hostLocationLat: Double = 55.751244,
-    val hostLocationLng: Double = 37.618423,
     val error: String? = null
 ) : Parcelable {
     val mapConfigured get() = mapSettings.location != null
@@ -63,7 +61,6 @@ sealed interface NewGameResult {
     data class RolesUpdated(val newState: RSState) : NewGameResult
     data class EventsUpdated(val newState: ESState) : NewGameResult
     data class MapUpdated(val newState: MapState) : NewGameResult
-    data class MapUpdated(val newState: MSState) : NewGameResult
 
     data class Error(val message: String) : NewGameResult
 }
