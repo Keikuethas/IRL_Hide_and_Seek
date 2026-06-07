@@ -4,25 +4,25 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 fun getAbilityByType(type: AbilityType): Ability = when (type) {
-    AbilityType.Shield -> Shield()
-    AbilityType.Intel -> Intel()
-    AbilityType.Scan -> Scan()
-    AbilityType.PersonalBomb -> PersonalBomb()
-    AbilityType.Trap -> Trap()
-    AbilityType.Snare -> Snare()
-    AbilityType.SafeHouse -> SafeHouse()
-    AbilityType.SafeMansion -> SafeMansion()
+    AbilityType.SHIELD -> Shield()
+    AbilityType.INTEL -> Intel()
+    AbilityType.SCAN -> Scan()
+    AbilityType.PERSONAL_BOMB -> PersonalBomb()
+    AbilityType.TRAP -> Trap()
+    AbilityType.SNARE -> Snare()
+    AbilityType.SAFE_HOUSE -> SafeHouse()
+    AbilityType.SAFE_MANSION -> SafeMansion()
 }
 
 fun getAbilityByType(type: AbilityType, paramMap: Map<String, Number>): Ability = when (type) {
-    AbilityType.Shield -> Shield(paramMap)
-    AbilityType.Intel -> Intel(paramMap)
-    AbilityType.Scan -> Scan(paramMap)
-    AbilityType.PersonalBomb -> PersonalBomb(paramMap)
-    AbilityType.Trap -> Trap(paramMap)
-    AbilityType.Snare -> Snare(paramMap)
-    AbilityType.SafeHouse -> SafeHouse(paramMap)
-    AbilityType.SafeMansion -> SafeMansion(paramMap)
+    AbilityType.SHIELD -> Shield(paramMap)
+    AbilityType.INTEL -> Intel(paramMap)
+    AbilityType.SCAN -> Scan(paramMap)
+    AbilityType.PERSONAL_BOMB -> PersonalBomb(paramMap)
+    AbilityType.TRAP -> Trap(paramMap)
+    AbilityType.SNARE -> Snare(paramMap)
+    AbilityType.SAFE_HOUSE -> SafeHouse(paramMap)
+    AbilityType.SAFE_MANSION -> SafeMansion(paramMap)
 }
 
 @Serializable
@@ -67,7 +67,7 @@ data class Shield(
     number_uses,
     recharge_time,
 ) {
-    override val abilityType = AbilityType.Shield
+    override val abilityType = AbilityType.SHIELD
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),
@@ -85,7 +85,7 @@ class Intel(
     number_uses,
     recharge_time,
 ) {
-    override val abilityType = AbilityType.Intel
+    override val abilityType = AbilityType.INTEL
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),
@@ -103,7 +103,7 @@ class Scan(
     number_uses,
     recharge_time,
 ) {
-    override val abilityType = AbilityType.Scan
+    override val abilityType = AbilityType.SCAN
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),
@@ -128,7 +128,7 @@ class PersonalBomb(
         "damage" to damage.toDouble()
     ),
 ) {
-    override val abilityType = AbilityType.PersonalBomb
+    override val abilityType = AbilityType.PERSONAL_BOMB
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),
@@ -155,7 +155,7 @@ class Trap(
         "trap_duration_seconds" to trap_duration_seconds.toDouble()
     ),
 ) {
-    override val abilityType = AbilityType.Trap
+    override val abilityType = AbilityType.TRAP
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),
@@ -181,7 +181,7 @@ class Snare(
         "trap_duration_seconds" to trap_duration_seconds.toDouble()
     ),
 ) {
-    override val abilityType = AbilityType.Snare
+    override val abilityType = AbilityType.SNARE
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),
@@ -206,7 +206,7 @@ class SafeHouse(
         "radius" to radius,
     ),
 ) {
-    override val abilityType = AbilityType.SafeHouse
+    override val abilityType = AbilityType.SAFE_HOUSE
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),
@@ -230,7 +230,7 @@ class SafeMansion(
         "radius" to radius,
     ),
 ) {
-    override val abilityType = AbilityType.SafeMansion
+    override val abilityType = AbilityType.SAFE_MANSION
 
     constructor(params: Map<String, Number>) : this(
         duration_seconds = params["duration_seconds"]!!.toInt(),

@@ -4,11 +4,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.buildJsonObject
 
-enum class FrequencyType {FREQUENT, RARE, COMMON}
 
 @Serializable
 abstract class Event(
-    open var activation_frequency: FrequencyType,
+    open var activation_frequency: ActivationFrequency,
     @Transient val additionData: Map<String, Number> = emptyMap()
 ) {
     val addition_data get() = buildJsonObject {
@@ -17,7 +16,7 @@ abstract class Event(
 }
 
 class Bomb(
-    override var activation_frequency: FrequencyType,
+    override var activation_frequency: ActivationFrequency,
     duration_seconds: Int = 600,
     radius: Float = 10.0F,
     damage: Int = 100
@@ -31,7 +30,7 @@ class Bomb(
 )
 
 class Airdrop(
-    override var activation_frequency: FrequencyType,
+    override var activation_frequency: ActivationFrequency,
     radius: Float = 10.0F,
 ): Event(
     activation_frequency,
@@ -41,7 +40,7 @@ class Airdrop(
 )
 
 class Bombardment(
-    override var activation_frequency: FrequencyType,
+    override var activation_frequency: ActivationFrequency,
     duration_seconds: Int = 600,
     radius: Float = 5.0F,
     damage: Int = 50

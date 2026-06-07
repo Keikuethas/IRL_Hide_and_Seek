@@ -2,44 +2,46 @@ package com.keikuethas.irlhideandseek.model
 
 import kotlinx.serialization.SerialName
 
-enum class VictoryCondition {
-    @SerialName("SEEKER") Seeker,
-    @SerialName("HIDER") Hider,
-}
-
 enum class DeathReason {
-    @SerialName("HUNTER_FOUND_PLAYER") HunterFoundPlayer,
-    @SerialName("HP_ARE_OVER") HpAreOver,
+    @SerialName("HUNTER_FOUND_PLAYER") HUNTER_FOUND_PLAYER,
+    @SerialName("HP_ARE_OVER") HP_ARE_OVER,
 }
 
 enum class ZoneType {
-    @SerialName("SAFE") Safe,
-    @SerialName("Danger") Danger,
-    @SerialName("Warning") Warning,
-    @SerialName("AIRDROP") Airdrop,
-    @SerialName("SNARE") Snare,
-    @SerialName("TRAP") Trap,
-    @SerialName("SAFE_HOUSE") SafeHouse,
-    @SerialName("SAFE_MANSION") SafeMansion,
+    @SerialName("SAFE") SAFE,
+    @SerialName("DANGER") DANGER,
+    @SerialName("WARNING") WARNING,
+    @SerialName("AIRDROP") AIRDROP,
+    @SerialName("SNARE") SNARE,
+    @SerialName("TRAP") TRAP,
+    @SerialName("SAFE_HOUSE") SAFE_HOUSE,
+    @SerialName("SAFE_MANSION") SAFE_MANSION,
 }
 
 enum class AbilityType {
-    @SerialName("SHIELD") Shield,
-    @SerialName("INTEL") Intel,
-    @SerialName("SCAN") Scan,
-    @SerialName("SNARE") Snare,
-    @SerialName("PERSONAL_BOMB") PersonalBomb,
-    @SerialName("TRAP") Trap,
-    @SerialName("SAFE_HOUSE") SafeHouse,
-    @SerialName("SAFE_MANSION") SafeMansion,
+    @SerialName("SHIELD") SHIELD,
+    @SerialName("INTEL") INTEL,
+    @SerialName("SCAN") SCAN,
+    @SerialName("SNARE") SNARE,
+    @SerialName("PERSONAL_BOMB") PERSONAL_BOMB,
+    @SerialName("TRAP") TRAP,
+    @SerialName("SAFE_HOUSE") SAFE_HOUSE,
+    @SerialName("SAFE_MANSION") SAFE_MANSION,
 }
 
 enum class ActivationFrequency {
-    @SerialName("FREQUENT") Frequent,
-    @SerialName("COMMON") Common,
-    @SerialName("RARE") Rare,
+    @SerialName("FREQUENT") FREQUENT,
+    @SerialName("COMMON") COMMON,
+    @SerialName("RARE") RARE,
 }
 
 enum class GameStatus {
 
+}
+
+enum class EventType {
+    @SerialName("REVEAL") REVEAL,
+    @SerialName("BOMB") BOMB,
+    @SerialName("AIRDROP") AIRDROP,
+    @SerialName("BOMBARDMENT") BOMBARDMENT
 }
