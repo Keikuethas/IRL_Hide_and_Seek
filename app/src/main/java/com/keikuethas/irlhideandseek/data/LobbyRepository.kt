@@ -73,14 +73,14 @@ class LobbyRepository @Inject constructor(
 
 
                     is IncomingMessage.ReadyStatusChanged ->
-                        _lobbyEvents.emit(LobbyEvent.ReadyStatusChanged(data.status))
+                        _lobbyEvents.emit(LobbyEvent.ReadyStatusChanged(data.ready_status))
 
 
                     is IncomingMessage.PlayerReadyStatusChanged -> {
                         _lobbyEvents.emit(
                             LobbyEvent.PlayerReadyStatusChanged(
                                 data.player_id,
-                                data.status
+                                data.ready_status
                             )
                         )
                     }
