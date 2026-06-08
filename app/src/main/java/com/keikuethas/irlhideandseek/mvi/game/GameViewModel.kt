@@ -3,6 +3,7 @@ package com.keikuethas.irlhideandseek.mvi.game
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.keikuethas.irlhideandseek.LocationProvider
 import com.keikuethas.irlhideandseek.data.GameEvent
 import com.keikuethas.irlhideandseek.data.GameRepository
 import com.keikuethas.irlhideandseek.model.AbilityType
@@ -23,6 +24,8 @@ import com.keikuethas.irlhideandseek.mvi.game.GameResult.ZoneAdded
 import com.keikuethas.irlhideandseek.mvi.game.GameResult.ZoneDeleted
 import com.yandex.mapkit.geometry.Point
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +42,28 @@ class GameViewModel @Inject constructor(
     init {
         repository.connect(viewModelScope)
         observeGameEvents()
+
+        // refactor получать локацию в любом случае (как в map)
+        val loc = LocationProvider.lastKnownLocation
+        loc?.let {
+            dispatch(
+                GameResult.LocationSet(
+                    location = Point(it.latitude, it.longitude)
+                )
+            )
+        }
+
+        startCooldownTicker()
+    }
+
+    private fun startCooldownTicker() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(100)
+                if (state.value.abilities.any { it.cooldownProgress != 1F })
+                    dispatch(GameResult.CooldownUpdated)
+            }
+        }
     }
 
     private fun observeGameEvents() {
@@ -113,21 +138,35 @@ class GameViewModel @Inject constructor(
                 if (result == 0)
                     dispatch(AbilityUsed(ability))
 
-            is GameEvent.GameState ->
-            {/*idk*/}
+            is GameEvent.GameState -> {/*idk*/
+            }
 
-            GameEvent.LocationPermissionRevoked -> {/*todo*/}
-            GameEvent.LocationProvidersDisabled -> {/*todo*/}
+            GameEvent.LocationPermissionRevoked -> {/*todo*/
+            }
 
-            is GameEvent.LocationUpdated ->
+            GameEvent.LocationProvidersDisabled -> {/*todo*/
+            }
+
+            is GameEvent.LocationUpdated -> {
                 sendLocation(
                     latitude = latitude,
                     longitude = longitude
                 )
 
+                dispatch(
+                    GameResult.LocationChanged(
+                        location =
+                            Point(latitude, longitude)
+                    )
+                )
+            }
+
             is GameEvent.AirdropCollected -> TODO()
             is GameEvent.PlayerEnteredZone -> {}
             is GameEvent.PlayerExitedZone -> {}
+
+            is GameEvent.ApplyDamage ->
+                dispatch(GameResult.DamageApplied(damage))
         }
     }
 
@@ -163,14 +202,25 @@ class GameViewModel @Inject constructor(
         is GameIntent.UseAbility ->
             sendUseAbility(
                 type = state.value.usingAbilityOnMap!!,
-                location = intent.location
+                location = state.value.usingAbilityLocation!!
             )
 
-        GameIntent.ReportCameraMoved ->
+        GameIntent.ReportCameraMoveFinished ->
             dispatch(CameraStopped)
 
         GameIntent.DismissError ->
             dispatch(ErrorDismissed)
+
+        GameIntent.CancelUseAbility ->
+            dispatch(GameResult.AbilityUseCancelled)
+
+        GameIntent.SelectCatch ->
+            dispatch(GameResult.OpenPlayerList)
+
+        is GameIntent.ReportCameraPositionChanged ->
+            if (state.value.usingAbilityOnMap != null)
+                dispatch(GameResult.AbilityLocationUpdated(intent.location))
+            else Unit
     }
 
     fun sendCatchPlayer(playerId: String) =

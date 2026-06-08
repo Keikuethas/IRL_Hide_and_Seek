@@ -22,25 +22,21 @@ data class PlayerState(
 ): Parcelable
 
 @Parcelize
-data class ZoneState(
-    val id: String,
-    val boundaryColor: Int,
-    val fillColor: Int,
-): Parcelable
-
-@Parcelize
 data class GameState(
     val secondsRemain: Int = 600,
     val abilities: List<AbilityState> = emptyList(),
     val roleType: RoleType = RoleType.SEEKER,
     val players: List<PlayerState> = emptyList(),
     val playerName: String = "me",
+    val playerHealth: Int = 100,
     val itsTimeToHide: Boolean = true,
     val usingAbilityOnMap: @RawValue AbilityType? = null,
     val abilityListOpen: Boolean = false,
     val playerListOpen: Boolean = false,
     val mapState: @RawValue YandexMapState = YandexMapState(),
-    val error: String? = null
+    val usingAbilityLocation: @RawValue Point? = null,
+    val error: String? = null,
+    val usingCatch: Boolean = false
 ): Parcelable
 
 
@@ -51,11 +47,13 @@ sealed interface GameIntent {
     data object AbilityListOpen: GameIntent
     data object AbilityListClose: GameIntent
     data class SelectAbility(val type: AbilityType): GameIntent
-    data class UseAbility(val location: Point): GameIntent
+    data object UseAbility: GameIntent
+    data object CancelUseAbility: GameIntent
     data class CatchPlayer(val playerId: String): GameIntent
-    data object ReportCameraMoved: GameIntent
-
+    data object ReportCameraMoveFinished: GameIntent
     data object DismissError: GameIntent
+    data object SelectCatch: GameIntent
+    data class ReportCameraPositionChanged(val location: Point): GameIntent
 
 }
 
@@ -98,6 +96,19 @@ sealed interface GameResult {
     data class AbilityUsed(val type: AbilityType): GameResult
 
     data object ErrorDismissed: GameResult
+
+    data class DamageApplied(val damage: Int): GameResult
+
+    data class LocationSet(val location: Point): GameResult
+
+    data class LocationChanged(val location: Point): GameResult
+
+    data class AbilityLocationUpdated(val location: Point): GameResult
+
+    data object AbilityUseCancelled: GameResult
+
+    data object CooldownUpdated: GameResult
+    data object OpenPlayerList: GameResult
 }
 
 sealed interface GameEffect {

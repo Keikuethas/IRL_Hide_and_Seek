@@ -93,4 +93,8 @@ sealed interface GameEvent {
         val data: Map<String, Double>
 
     ): GameEvent
+
+    data class ApplyDamage(
+        val damage: Int
+    ): GameEvent
 }

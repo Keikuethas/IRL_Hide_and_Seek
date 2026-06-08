@@ -172,6 +172,13 @@ class GameRepository @Inject constructor(
                             )
                         )
 
+                    is IncomingMessage.ApplyDamage ->
+                        _gameEvents.emit(
+                            GameEvent.ApplyDamage(
+                                damage = data.damage
+                            )
+                        )
+
                     else -> {/*игнорируем неигровые события*/
                     }
                 }
