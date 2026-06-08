@@ -56,10 +56,7 @@ object LobbyReducer {
         is LobbyResult.PlayerRoleChanged -> state.copy(
             players = state.players.map {
                 if (it.id == result.id) it.copy(
-                    role_id = getRoleById(
-                        state.roles,
-                        result.newRoleId
-                    )?.name ?: "?"
+                    role_id = result.newRoleId
                 ) else it
             },
         )

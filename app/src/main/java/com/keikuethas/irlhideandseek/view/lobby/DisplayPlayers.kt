@@ -65,7 +65,7 @@ fun DisplayPlayers(
                     ) {
                         Text(item.name)
                     }
-                    Text(item.role_ref?.name ?: "?")
+                    Text(roles.find { item.role_id == it.id }?.name ?: "?")
                     Text(if (item.is_player_ready) "Готов" else "Не готов")
                 }
             }
