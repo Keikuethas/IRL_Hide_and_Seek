@@ -3,12 +3,9 @@ package com.keikuethas.irlhideandseek.view.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.RichTooltip
@@ -20,11 +17,16 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.keikuethas.irlhideandseek.model.RoleType
 import com.keikuethas.irlhideandseek.ui.theme.color
 import kotlinx.coroutines.launch
@@ -33,7 +35,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun RoleTypeTag(type: RoleType = RoleType.SEEKER) {
+fun RoleTypeTag(
+    type: RoleType = RoleType.SEEKER,
+    maxFontSize: TextUnit = 36.sp
+) {
     val toolTipState = rememberTooltipState(isPersistent = true, initialIsVisible = false)
     val coroutineScope = rememberCoroutineScope()
     TooltipBox(
@@ -44,17 +49,18 @@ fun RoleTypeTag(type: RoleType = RoleType.SEEKER) {
         tooltip = {
             RichTooltip(
                 title = {
-                    Row {
-                        Text(
-                            text = "Роль относится к типу ", //resource
-                            style = typography.titleMedium
-                        )
-                        Text(
-                            text = type.toString(),
-                            style = typography.titleMedium,
-                            color = type.color
-                        )
-                    }
+
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(SpanStyle()) {
+                                append("Роль относится к типу ")
+                            }
+                            withStyle(SpanStyle(color = type.color, fontWeight = FontWeight.Bold)) {
+                                append(type.toString())
+                            }
+                        },
+                        style = typography.titleMedium
+                    )
                 }
             ) {
                 Column(
@@ -70,31 +76,33 @@ fun RoleTypeTag(type: RoleType = RoleType.SEEKER) {
         state = toolTipState,
         modifier = Modifier
     ) {
-        RoleTypeLabel(type, onClick = { coroutineScope.launch { toolTipState.show() } })
+        RoleTypeLabel(
+            type = type,
+            maxFontSize = maxFontSize
+        ) { coroutineScope.launch { toolTipState.show() } }
     }
 }
 
 @Composable
-fun RoleTypeLabel(type: RoleType, onClick: () -> Unit = {}) {
+fun RoleTypeLabel(
+    type: RoleType,
+    maxFontSize: TextUnit = 36.sp,
+    onClick: () -> Unit = {},
+
+    ) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(2.dp, type.color),
         color = Color.White,
-        modifier = Modifier.padding(top = 5.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(
-                Modifier
-                    .width(10.dp)
-                    .height(20.dp)
-            )
-            Text(
-                type.toString(),
-                style = typography.labelLarge,
-                color = type.color
-            )
-            Spacer(Modifier.width(10.dp))
-        }
+        Text(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 10.dp),
+            text = type.toString(),
+            style = typography.labelLarge,
+            color = type.color,
+            autoSize = TextAutoSize.StepBased(maxFontSize = maxFontSize),
+            maxLines = 1
+        )
     }
 }
