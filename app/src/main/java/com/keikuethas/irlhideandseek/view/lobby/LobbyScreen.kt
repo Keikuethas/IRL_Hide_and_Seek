@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -137,9 +138,6 @@ fun LobbyContent(
             )
         }
 
-        // Находим имя текущей роли по ID
-        val currentRoleName = state.roles.find { it.id == state.playerRole }?.name ?: "Не выбрана"
-
         // Преобразуем RoleFull в RoleState для диалога (включая способности)
         val playerRoles = state.roles.map { roleFull ->
             RoleState(
@@ -154,7 +152,7 @@ fun LobbyContent(
         if (state.showRoleChangeDialog) {
             RoleChangeDialog(
                 roles = playerRoles,
-                playerRole = currentRoleName,
+                playerRole = state.playerRole,
                 onDismiss = { onIntent(LobbyIntent.DeclineRoleChange) },
                 onRoleSelect = { roleName ->
                     val selectedRole = state.roles.find { it.name == roleName }
@@ -186,10 +184,11 @@ fun LobbyContent(
                 onReadyClick = { onIntent(LobbyIntent.ChangeReadyStatus) },
                 onRoleClick = { onIntent(LobbyIntent.RequestRoleChangeDialog) }
             )
+            playerRoles
 
             DisplayPlayers(
                 playerList = state.players,
-                playerName = state.playerName
+                roles = state.roles
             )
 
             ElevatedButton(
@@ -302,7 +301,9 @@ private fun PlayerCard(
 
                 Text(
                     text = "Роль: $role",
-                    style = typography.bodyLarge
+                    style = typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

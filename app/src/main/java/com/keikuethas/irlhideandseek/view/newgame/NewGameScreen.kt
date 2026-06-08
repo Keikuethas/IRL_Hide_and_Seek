@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -58,6 +60,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -206,18 +209,36 @@ fun NGSUI(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     hasDrawer = state.missingRoles.isNotEmpty()
                 )
-                if (state.missingRoles.isNotEmpty())
+                if (state.missingRoles.isNotEmpty() || state.dubbingRoles)
                     ValidationDrawer(backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
-                        RoleValidationList(
-                            missingRoles = state.missingRoles,
-                            onCreateRole = { roleType ->
-                                onIntent(
-                                    NewGameIntent.CreateEmptyRole(
-                                        roleType
+                        if (state.missingRoles.isNotEmpty())
+                            RoleValidationList(
+                                missingRoles = state.missingRoles,
+                                onCreateRole = { roleType ->
+                                    onIntent(
+                                        NewGameIntent.CreateEmptyRole(
+                                            roleType
+                                        )
                                     )
+                                }
+                            )
+                        if (state.dubbingRoles)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Error,
+                                    null,
+                                    Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                                Text(
+                                    "Роли должны иметь уникальные имена",
+                                    style = typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
                                 )
                             }
-                        )
                     }
             }
 
@@ -266,7 +287,7 @@ fun NGSUI(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     hasDrawer = !state.mapConfigured
                 )
-                if (!state.mapConfigured){
+                if (!state.mapConfigured) {
                     ValidationDrawer(backgroundColor = MaterialTheme.colorScheme.surfaceVariant) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -434,12 +455,16 @@ private fun ActionCard(
                 Text(
                     text = title,
                     style = typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    color = contentColor
+                    color = contentColor,
+                    maxLines = 2,
+                    autoSize = TextAutoSize.StepBased(maxFontSize = 24.sp),
+//                    softWrap = false
                 )
                 Text(
                     text = description,
                     style = typography.bodyMedium,
-                    color = contentColor.copy(alpha = 0.7f)
+                    color = contentColor.copy(alpha = 0.7f),
+                    autoSize = TextAutoSize.StepBased(maxFontSize = 14.sp)
                 )
             }
 

@@ -43,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.keikuethas.irlhideandseek.model.Intel
@@ -153,16 +154,18 @@ fun RoleCard(
                 .padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            Column (
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                Box(Modifier)
+                { RoleTypeTag(role.type, maxFontSize = 14.sp) }
+
                 Text(
                     role.roleName,
                     style = typography.headlineMedium
                 )
 
-                RoleTypeTag(role.type)
             }
 
             IconButton(

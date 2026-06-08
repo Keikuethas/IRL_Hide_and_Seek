@@ -73,7 +73,7 @@ class LobbyViewModel @Inject constructor(
                     InitState(
                         roomName = game.name,
                         playerName = player.name,
-                        playerRole = player.role_id,
+                        playerRole = game.roles.find {  it.id == player.role_id }!!.name,
                         players = game.players.filterNot { it.id == myId },
                         roles = game.roles,
                         isReady = player.is_player_ready,
