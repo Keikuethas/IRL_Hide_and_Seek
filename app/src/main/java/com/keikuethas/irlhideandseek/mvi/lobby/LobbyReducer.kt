@@ -36,6 +36,7 @@ object LobbyReducer {
 
         is LobbyResult.InitState -> state.copy(
             roomName = result.roomName,
+            roomCode = result.roomCode,
             playerName = result.playerName,
             playerRole = result.playerRole,
             players = result.players,

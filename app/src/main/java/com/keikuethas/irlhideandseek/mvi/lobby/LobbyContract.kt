@@ -56,7 +56,8 @@ sealed interface LobbyResult {
         val playerRole: String,
         val players: List<PlayerInfo>,
         val roles: List<RoleInfo>,
-        val isReady: Boolean
+        val isReady: Boolean,
+        val roomCode: String
     ) : LobbyResult
 
     data class Error(val title: String, val message: String) : LobbyResult
