@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,22 +21,24 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -50,8 +54,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,6 +88,7 @@ import com.keikuethas.irlhideandseek.utils.unitName
 import com.keikuethas.irlhideandseek.view.components.AskingDialog
 import com.keikuethas.irlhideandseek.view.components.RoleTypeLabel
 import com.keikuethas.irlhideandseek.view.components.ValueInputDialog
+import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 
 // TODO: padding у надписей, а то там кринж какой-то
 
@@ -171,41 +178,32 @@ fun RSSUI(
     Scaffold(
         modifier = Modifier
             .padding(horizontal = 5.dp)
+
             .fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Person,
-                            null,
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Text(
-                            "Настройка ролей",
-                            style = typography.headlineLarge,
-                        )
-                    }
-                }
-            )
+            TextTopAppBar("Настройка ролей")
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
+                .padding(bottom = 24.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            Spacer(Modifier.weight(1F))
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.7F),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Surface(
+                    modifier = Modifier.weight(1 / 7f),
                     onClick = { onIntent(RSIntent.ArrowClick(false)) }
                 ) {
                     Icon(
@@ -214,21 +212,27 @@ fun RSSUI(
                     )
                 }
 
-                if (state.currentRole < state.roles.size)
-                    RoleElement(
-                        state.roles[state.currentRole],
-                        onRoleNameClick = { onIntent(RSIntent.RoleNameClick) },
-                        onRoleTypeClick = { onIntent(RSIntent.RoleTypeClick) },
-                        onParamValueClick = { type, name ->
-                            onIntent(RSIntent.ParamClick(type, name))
-                        },
-                        onDelete = { onIntent(RSIntent.RoleDeleteRequest) },
-                        onAddAbility = { onIntent(RSIntent.AddAbilityRequest) },
-                        onHealthClick = { onIntent(RSIntent.RoleHealthClick) },
-                        onDeleteAbility = { onIntent(RSIntent.DeleteAbility(it)) }
-                    ) else EmptyRoleElement { onIntent(RSIntent.RoleCreate) }
+                Box(
+                    modifier = Modifier.weight(5 / 7F)
+                ) {
+                    if (state.currentRole < state.roles.size)
+
+                        RoleElement(
+                            state.roles[state.currentRole],
+                            onRoleNameClick = { onIntent(RSIntent.RoleNameClick) },
+                            onRoleTypeClick = { onIntent(RSIntent.RoleTypeClick) },
+                            onParamValueClick = { type, name ->
+                                onIntent(RSIntent.ParamClick(type, name))
+                            },
+                            onDelete = { onIntent(RSIntent.RoleDeleteRequest) },
+                            onAddAbility = { onIntent(RSIntent.AddAbilityRequest) },
+                            onHealthClick = { onIntent(RSIntent.RoleHealthClick) },
+                            onDeleteAbility = { onIntent(RSIntent.DeleteAbility(it)) }
+                        ) else EmptyRoleElement { onIntent(RSIntent.RoleCreate) }
+                }
 
                 Surface(
+                    modifier = Modifier.weight(1 / 7F),
                     onClick = { onIntent(RSIntent.ArrowClick(true)) }
                 ) {
                     Icon(
@@ -238,16 +242,39 @@ fun RSSUI(
                 }
             }
 
-            Button(
-                onClick = { onIntent(RSIntent.Save) }
-            ) {
-                Text("Сохранить")
-            }
+            Spacer(modifier = Modifier.weight(1F))
 
-            OutlinedButton(
-                onClick = { onIntent(RSIntent.QuitRequest) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Отменить")
+                OutlinedButton(
+                    onClick = { onIntent(RSIntent.QuitRequest) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Cancel",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Отменить")
+                }
+
+                Button(
+                    onClick = { onIntent(RSIntent.Save) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Save",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Сохранить")
+                }
             }
         }
     }
@@ -389,16 +416,12 @@ fun RoleElement(
 ) {
     Box(
         Modifier
-            .width(320.dp)
-            .height(520.dp)
     )
     {
         ElevatedCard(
             Modifier
-                .height(500.dp)
-                .width(300.dp)
+                .fillMaxSize()
                 .padding(top = 10.dp)
-                .padding(end = 10.dp)
                 .align(Alignment.Center),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -406,34 +429,28 @@ fun RoleElement(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp)
+
+                RoleTypeLabel(
+                    state.type,
+                    maxFontSize = 18.sp,
+                    onClick = onRoleTypeClick
                 )
-                {
-                    Row(
-                        modifier = Modifier.align(Alignment.Center),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            state.roleName,
-                            modifier = Modifier.clickable(
-                                onClick = onRoleNameClick,
-                                indication = null,
-                                interactionSource = null,
-                            ),
-                            textAlign = TextAlign.Center,
-                            style = typography.headlineLarge,
-                            textDecoration = TextDecoration.Underline
-                        )
-                        RoleTypeLabel(state.type, onClick = onRoleTypeClick)
 
+                Text(
+                    state.roleName,
+                    modifier = Modifier.clickable(
+                        onClick = onRoleNameClick,
+                        indication = null,
+                        interactionSource = null,
+                    ),
+                    textAlign = TextAlign.Center,
+                    style = typography.headlineLarge,
+                    textDecoration = TextDecoration.Underline,
+                    autoSize = TextAutoSize.StepBased(maxFontSize = 36.sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-                    }
-
-                }
 
                 Surface(
                     onClick = onHealthClick,
@@ -491,18 +508,19 @@ fun RoleElement(
                 }
             }
         }
+
         Surface(
             onClick = onDelete,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .size(40.dp),
+                .size(40.dp)
+                .offset(x = 10.dp, y = (-10).dp),
             color = Color.Transparent
-        )
-        {
+        ) {
             Icon(
                 Icons.Default.DeleteForever,
                 null,
-                tint = Color.Red,
+                tint = MaterialTheme.colorScheme.error,
             )
         }
     }
@@ -552,7 +570,8 @@ private fun AbilityCard(
 ) {
     OutlinedCard(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(5.dp),
         border = BorderStroke(2.dp, Color.Black)
     ) {
         Row(
