@@ -312,7 +312,7 @@ fun AADUI(
             textAlign = TextAlign.Center
         )
         Surface(
-            color = BarelyGrey,
+            color = MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.height(400.dp)
         ) {
@@ -345,8 +345,12 @@ private fun AbilityInfoCard(
     OutlinedCard(
         modifier = modifier
             .fillMaxWidth(),
-        border = BorderStroke(2.dp, Color.Black),
-        onClick = onClick
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Text(
             type.name(),

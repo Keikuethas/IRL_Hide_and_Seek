@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,47 +27,51 @@ fun DisplayPlayers(
     playerList: List<PlayerInfo>,
     roles: List<RoleInfo>
 ) {
-    Column(
-        Modifier
-            .padding(top = 20.dp, bottom = 10.dp)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    )
-    {
-        val rowModifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = 20.dp)
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth().padding(10.dp)
+    ) {
+        Column(
+            Modifier
+                .padding(top = 20.dp, bottom = 10.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
+            val rowModifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(horizontal = 20.dp)
 
-        Row(
-            rowModifier.padding(bottom = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Имя")
-            Text("Роль")
-            Text("Готов")
-        }
+            Row(
+                rowModifier.padding(bottom = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Имя")
+                Text("Роль")
+                Text("Готов")
+            }
 
-        LazyColumn(
-            Modifier.scrollable(
-                orientation = Orientation.Vertical,
-                state = ScrollableState { 0.01F * it }
-            )
-        ) {
-            items(
-                items = playerList
-            ) { item ->
-                Row(
-                    rowModifier,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+            LazyColumn(
+                Modifier.scrollable(
+                    orientation = Orientation.Vertical,
+                    state = ScrollableState { 0.01F * it }
+                )
+            ) {
+                items(
+                    items = playerList
+                ) { item ->
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        rowModifier,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(item.name)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(item.name)
+                        }
+                        Text(roles.find { item.role_id == it.id }?.name ?: "?")
+                        Text(if (item.is_player_ready) "Готов" else "Не готов")
                     }
-                    Text(roles.find { item.role_id == it.id }?.name ?: "?")
-                    Text(if (item.is_player_ready) "Готов" else "Не готов")
                 }
             }
         }

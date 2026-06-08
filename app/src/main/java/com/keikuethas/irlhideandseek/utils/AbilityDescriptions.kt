@@ -24,14 +24,14 @@ val Ability.name: String
     get() = abilityType.name()
 
 fun AbilityType.description(): String = when (this) {
-    AbilityType.INTEL -> null
-    AbilityType.PERSONAL_BOMB -> null
-    AbilityType.SAFE_HOUSE -> null
-    AbilityType.SAFE_MANSION -> null
-    AbilityType.SCAN -> null
-    AbilityType.SHIELD -> null
-    AbilityType.SNARE -> null
-    AbilityType.TRAP -> null
+    AbilityType.INTEL -> "Показывает на карте ближайшего игрока с противоположным типом роли."
+    AbilityType.PERSONAL_BOMB -> "Создаёт красную зону, наносящую урон."
+    AbilityType.SAFE_HOUSE -> "Создаёт зелёную зону, наносящую урон игрокам с ролью противоположного типа."
+    AbilityType.SAFE_MANSION -> "Создаёт большую зелёную зону, наносящую урон игрокам с ролью противоположного типа."
+    AbilityType.SCAN -> "Показывает на карте всех игроков."
+    AbilityType.SHIELD -> "На время блокирует входящий урон."
+    AbilityType.SNARE -> "Создаёт серую зону. Попав в серую зону, игрок с ролью противоположного типа должен оставаться в ней, пока она не пропадёт."
+    AbilityType.TRAP -> "Создаёт чёрную зону. Попав в чёрную зону, игрок с ролью противоположного типа становится виден на карте и должен оставаться в зоне, пока зона не пропадёт."
 } ?: "not implemented yet"
 
 // todo
@@ -41,8 +41,8 @@ val Ability.description: String
 
 
 val AbilityType.color: Color get() = when (this) {
-    AbilityType.INTEL -> Color(0, 0,0)
-    AbilityType.PERSONAL_BOMB -> Color(0, 0,0)
+    AbilityType.INTEL -> Color(106, 204, 184, 255)
+    AbilityType.PERSONAL_BOMB -> Color(136, 5, 5, 255)
     AbilityType.SAFE_HOUSE -> Color(0, 0,0)
     AbilityType.SAFE_MANSION -> Color(0, 0,0)
     AbilityType.SCAN -> Color(0, 0,0)
@@ -52,12 +52,12 @@ val AbilityType.color: Color get() = when (this) {
 } ?: Color.Unspecified
 
 val AbilityType.surfaceColor: Color get() = when (this) {
-    AbilityType.INTEL -> Color(0, 0,0)
-    AbilityType.PERSONAL_BOMB -> Color(0, 0,0)
+    AbilityType.INTEL -> Color(150, 203, 192, 255)
+    AbilityType.PERSONAL_BOMB -> Color(215, 136, 136, 255)
     AbilityType.SAFE_HOUSE -> Color(0, 0,0)
     AbilityType.SAFE_MANSION -> Color(0, 0,0)
     AbilityType.SCAN -> Color(0, 0,0)
-    AbilityType.SHIELD -> Color(0, 0,0)
+    AbilityType.SHIELD -> Color(173, 194, 148, 255)
     AbilityType.SNARE -> Color(0, 0,0)
     AbilityType.TRAP -> Color(0, 0,0)
 } ?: Color.Unspecified
