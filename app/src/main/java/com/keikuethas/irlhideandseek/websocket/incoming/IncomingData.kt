@@ -87,7 +87,7 @@ data class DeleteZoneData(val zone_id: String)
 data class PlayerOnlineData(
     val player_id: String,
     val player_name: String,
-    val role: String?
+    val role_id: String
 )
 
 @Serializable

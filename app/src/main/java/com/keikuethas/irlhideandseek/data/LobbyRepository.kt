@@ -90,7 +90,7 @@ class LobbyRepository @Inject constructor(
                             LobbyEvent.PlayerJoined(
                                 playerId = data.player_id,
                                 playerName = data.player_name,
-                                role = data.role ?: "Без роли"
+                                role = data.role_id
                             )
                         )
                     }
