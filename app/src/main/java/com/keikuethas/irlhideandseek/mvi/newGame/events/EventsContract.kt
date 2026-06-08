@@ -11,7 +11,9 @@ data class EventState(
     val type: EventType,
     val frequency: ActivationFrequency = ActivationFrequency.FREQUENT,
     val params: List<Pair<String, Number>> = when (type) {
-        EventType.REVEAL -> emptyList()
+        EventType.REVEAL -> listOf(
+            "duration_seconds" to 30
+        )
         EventType.BOMB -> listOf(
             "duration_seconds" to 600,
             "radius" to 10F,
