@@ -8,8 +8,6 @@ import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeState
 import kotlinx.parcelize.Parcelize
 
-// CONCERN: нужно ли хранить состояния настроек, если они уже хранятся в репозитории?
-
 @Parcelize
 data class NewGameState(
     val quitDialogOpen: Boolean = false,
@@ -28,7 +26,11 @@ data class NewGameState(
 
     val eventsConfigured: Boolean get() = eventSettings.events.isNotEmpty()
     val missingRoles: List<RoleType> get() = RoleType.entries.filterNot {entry -> rolesSettings.roles.any {it.type == entry} }
-    val canCreateGame: Boolean get() = missingRoles.isEmpty() && eventsConfigured && mapConfigured
+    val dubbingRoles: Boolean get() {
+       val roleNames = rolesSettings.roles.map { it.roleName }
+        return roleNames.toSet().size != roleNames.size
+    }
+    val canCreateGame: Boolean get() = missingRoles.isEmpty() && mapConfigured && !dubbingRoles
 }
 
 sealed interface NewGameIntent {
