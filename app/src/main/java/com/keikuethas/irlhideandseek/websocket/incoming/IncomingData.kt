@@ -152,3 +152,8 @@ data class PlayerExitedZoneData(
 data class AirdropCollectedData(
     val ability: AbilityInfo
 )
+
+@Serializable
+data class ApplyDamageData(
+    val damage: Int
+)

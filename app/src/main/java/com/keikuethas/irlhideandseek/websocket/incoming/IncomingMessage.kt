@@ -27,7 +27,7 @@ sealed interface IncomingMessage {
 
     @Serializable
     @SerialName("player_role_changed")
-    data class PlayerRoleChanged(val data: PlayerRoleChangedData): IncomingMessage
+    data class PlayerRoleChanged(val data: PlayerRoleChangedData) : IncomingMessage
 
     @Serializable
     @SerialName("ready_status_changed")
@@ -91,18 +91,20 @@ sealed interface IncomingMessage {
         val message: String
     ) : IncomingMessage
 
-@Serializable
-@SerialName("player_entered_zone")
-data class PlayerEnteredZone(val data: PlayerEnteredZoneData) : IncomingMessage
+    @Serializable
+    @SerialName("player_entered_zone")
+    data class PlayerEnteredZone(val data: PlayerEnteredZoneData) : IncomingMessage
 
-@Serializable
-@SerialName("player_exited_zone")
-data class PlayerExitedZone(val data: PlayerExitedZoneData) : IncomingMessage
+    @Serializable
+    @SerialName("player_exited_zone")
+    data class PlayerExitedZone(val data: PlayerExitedZoneData) : IncomingMessage
 
-@Serializable
-@SerialName("airdrop_collected")
-data class AirdropCollected(val data: AirdropCollectedData) : IncomingMessage
+    @Serializable
+    @SerialName("airdrop_collected")
+    data class AirdropCollected(val data: AirdropCollectedData) : IncomingMessage
 
-
+    @Serializable
+    @SerialName("apply_damage")
+    data class ApplyDamage(val data: ApplyDamageData) : IncomingMessage
 
 }

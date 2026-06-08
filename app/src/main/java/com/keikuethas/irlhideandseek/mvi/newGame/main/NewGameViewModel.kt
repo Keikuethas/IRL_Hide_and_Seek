@@ -84,9 +84,9 @@ class NewGameViewModel @Inject constructor(
                 center_lng = mapSettings.location.longitude,
                 safe_zone_radius = mapSettings.safeZoneRadius,
                 min_zone_radius = mapSettings.minSafeZoneRadius,
-                zone_shrink_interval = 120,
-                game_duration = 1800,
-                time_to_hide = 300,
+                zone_shrink_interval = timeSettings.shrinkTime,
+                game_duration = timeSettings.seekTime,
+                time_to_hide = timeSettings.hideTime,
                 host_player = HostPlayer(
                     host_name = currentState.hostName.ifEmpty { "Host" },
                     host_player_location_lat = mapSettings.location.latitude,

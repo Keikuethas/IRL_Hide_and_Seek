@@ -142,6 +142,7 @@ class WebSocketManager @Inject constructor() {
         scope.launch {
             _connectionStatus.emit(ConnectionStatus.DISCONNECTED)
         }
+
     }
 
     // ---------- Отправка сообщений ----------
