@@ -1,6 +1,5 @@
 package com.keikuethas.irlhideandseek.mvi.newGame.roles
 
-//import com.keikuethas.irlhideandseek.model.RoleParams
 import android.os.Parcelable
 import com.keikuethas.irlhideandseek.model.Ability
 import com.keikuethas.irlhideandseek.model.AbilityType
@@ -15,8 +14,18 @@ import kotlinx.parcelize.RawValue
 data class AbilityState(
     val type: AbilityType,
     val params: List<Pair<String, Number>>,
-    val lastUse: Double? = null
+    val cooldownEndTime: Long = 0,
+    val remainingTime: Long = 0
 ) : Parcelable {
+
+    val rechargeTime: Int
+        get() = params.find {
+            it.first == "recharge_time"
+        }!!.second.toInt()
+
+    val cooldownProgress: Float
+        get() =
+            1F - (remainingTime.toFloat() / rechargeTime)
 
     constructor(ability: Ability) : this(
         type = ability.abilityType,
