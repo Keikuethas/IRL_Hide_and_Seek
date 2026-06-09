@@ -56,7 +56,6 @@ class GameViewModel @Inject constructor(
         repository.connect(viewModelScope)
         observeGameEvents()
 
-        // ✅ Исправлена опечатка: читаем кэш, который провайдер обновил сам
         val loc = LocationProvider.lastKnownLocation
         loc?.let {
             dispatch(
