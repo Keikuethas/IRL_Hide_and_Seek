@@ -289,7 +289,9 @@ private fun GSUI(
                         modifier = Modifier.align(Alignment.Center).padding(horizontal = 10.dp),
                         text = "Ждём, пока все спрячутся...",
                         style = typography.headlineMedium,
-                        color = RoleType.SEEKER.color
+                        color = RoleType.SEEKER.color,
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased()
                     )
 
 

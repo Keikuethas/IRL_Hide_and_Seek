@@ -16,12 +16,11 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,11 +29,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.keikuethas.irlhideandseek.model.DeathReason
-import com.keikuethas.irlhideandseek.model.RoleType
+import com.keikuethas.irlhideandseek.mvi.endscreen.EndEffect
 import com.keikuethas.irlhideandseek.mvi.endscreen.EndIntent
 import com.keikuethas.irlhideandseek.mvi.endscreen.EndState
 import com.keikuethas.irlhideandseek.mvi.endscreen.EndViewModel
-import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 
 
@@ -44,9 +42,17 @@ fun EndScreen(
     viewModel: EndViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
+    val effect = viewModel.effect
+
     EndContent(
         state = state.value,
     ) {viewModel.onIntent(it)}
+
+    LaunchedEffect(Unit) {
+        effect.collect { effect -> when(effect){
+            EndEffect.Quit -> navController.navigate(Home) {popUpTo(Home) }
+        } }
+    }
 }
 
 @Preview(showBackground = true)
@@ -105,11 +111,11 @@ fun EndContent(
                         text = buildAnnotatedString {
                             when (state.reason) {
                                 DeathReason.HUNTER_FOUND_PLAYER -> {
-                                    append("Вас нашёл ")
+                                    append("Вас нашли. ")
 
-                                    withStyle(SpanStyle(color = RoleType.SEEKER.color)) {
-                                        append("Охотник ${state.hunterName ?: "NULL"}.")
-                                    }
+//                                    withStyle(SpanStyle(color = RoleType.SEEKER.color)) {
+//                                        append("Охотник ${state.hunterName ?: "NULL"}.")
+//                                    }
                                 }
 
                                 DeathReason.HP_ARE_OVER -> append("Ваше здоровье на нуле.")
