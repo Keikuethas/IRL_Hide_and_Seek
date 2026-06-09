@@ -67,15 +67,14 @@ import com.keikuethas.irlhideandseek.mvi.game.GameViewModel
 import com.keikuethas.irlhideandseek.mvi.game.PlayerState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.ui.theme.color
-import com.keikuethas.irlhideandseek.utils.adjustLightness
 import com.keikuethas.irlhideandseek.utils.color
 import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.name
 import com.keikuethas.irlhideandseek.utils.surfaceColor
+import com.keikuethas.irlhideandseek.view.EndScreen
 import com.keikuethas.irlhideandseek.view.Home
 import com.keikuethas.irlhideandseek.view.map.MapObjectState
 import com.keikuethas.irlhideandseek.view.map.MapObjectType
-import com.keikuethas.irlhideandseek.view.map.YandexMapState
 import com.keikuethas.irlhideandseek.view.map.YandexMapView
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.mapview.MapView
@@ -84,15 +83,22 @@ import com.yandex.mapkit.mapview.MapView
 private fun Header( //todo разные подписи к таймеру (+выделение цветом)
     state: GameState
 ) {
-    state.secondsRemain.let { secs ->
-        Text(
-            state.run {
-                when {
-                    itsTimeToHide -> "Время спрятаться:"
-                    else -> "До конца раунда: "
-                }
-            } + "${secs / 60}:${(secs % 60).toString().padStart(2, '0')}"
-        )
+    Column (
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        state.secondsRemain.let { secs ->
+            Text(
+                state.run {
+                    when {
+                        itsTimeToHide -> "Время спрятаться:"
+                        else -> "До конца раунда: "
+                    }
+                } + "${secs / 60}:${(secs % 60).toString().padStart(2, '0')}"
+            )
+        }
+
+
     }
 }
 
@@ -112,8 +118,10 @@ fun GameScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is GameEffect.EndGame -> TODO()
-                GameEffect.GetDamage -> TODO()
+                is GameEffect.EndGame -> navController.navigate(EndScreen(
+                    effect.victory, effect.reason, effect.hunterName
+                ))
+                GameEffect.GetDamage -> {}
                 GameEffect.Quit -> navController.navigate(Home) {
                     popUpTo(Home)
                 }
@@ -145,36 +153,7 @@ fun gzone(lat: Double, lng: Double) = zone(grey, Point(lat, lng))
 @Composable
 private fun GSUI(
     preview: Boolean = false,
-
-    // temp for test
-    state: GameState = GameState(
-        mapState = YandexMapState(
-            objects = listOf(
-                MapObjectState(
-                    type = MapObjectType.Zone( //sz
-                        strokeColor = Color.Blue.adjustLightness(0.1F),
-                        fillColor = Color.Blue.copy(alpha = 0.05F),
-                        radius = 300F
-                    ),
-                    location = Point(55.660346, 37.474629),
-                ),
-                MapObjectState(
-                    //char
-                    type = MapObjectType.Marker(
-                        strokeColor = Color.Green,
-                        fillColor = RoleType.HIDER.color
-                    ),
-                    location = Point(55.660311, 37.472870),
-                ),
-                gzone(55.660644, 37.474967)
-            ),
-            cameraPosition = Point(55.660346, 37.474629),
-            zoom = 15.25f,
-            shouldMoveCamera = true
-        ),
-        secondsRemain = 520
-    ),
-    // temp ------
+    state: GameState,
     onIntent: (GameIntent) -> Unit = {},
 ) {
 

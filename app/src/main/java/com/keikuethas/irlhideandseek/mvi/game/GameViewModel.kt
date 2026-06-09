@@ -70,7 +70,6 @@ class GameViewModel @Inject constructor(
         startCooldownTicker()
         startTimer()
 
-        // ✅ Начинаем слушать координаты от Foreground Service
         observeServiceLocation()
     }
 
@@ -78,12 +77,12 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch {
             GameLocationService.currentLocation.collect { location ->
                 location?.let {
-                    // Отправляем координаты на сервер через ваш репозиторий
+                    // Отправляем координаты на сервер через репозиторий
                     sendLocation(it.latitude, it.longitude)
 
-                    // Обновляем UI (если нужно дублировать LocationSet, или используйте отдельный Result)
+                    // Обновляем UI
                     dispatch(
-                        GameResult.LocationSet(
+                        GameResult.LocationChanged(
                             location = Point(it.latitude, it.longitude)
                         )
                     )
@@ -134,7 +133,7 @@ class GameViewModel @Inject constructor(
                     ZoneAdded(
                         type = zoneType,
                         zoneId = zoneId,
-                        location = Point(centerLat, centerLng), // ✅ Исправлена опечатка centerL ng
+                        location = Point(centerLat, centerLng),
                         radius = radius
                     )
                 )
@@ -146,7 +145,7 @@ class GameViewModel @Inject constructor(
                 dispatch(Error(message))
 
             is GameEvent.GameFinished -> {
-                stopLocationTracking() // ✅ Останавливаем сервис
+                stopLocationTracking()
                 repository.disconnect()
                 sendEffect(EndGame(victory))
             }
@@ -171,7 +170,7 @@ class GameViewModel @Inject constructor(
             }
 
             is GameEvent.YouDied -> {
-                stopLocationTracking() // ✅ Останавливаем сервис
+                stopLocationTracking()
                 repository.disconnect()
                 sendEffect(
                     EndGame(
@@ -226,11 +225,8 @@ class GameViewModel @Inject constructor(
                 dispatch(Error("Включите GPS для продолжения игры"))
             }
 
-            // CONCERN
-            // Примечание: GameEvent.LocationUpdated теперь обрабатывается сервером,
-            // а локально мы получаем координаты из GameLocationService.currentLocation
             is GameEvent.LocationUpdated -> {
-                // Можно оставить для совместимости, если сервер присылает подтверждение
+                dispatch(GameResult.LocationChanged(Point(latitude, longitude)))
             }
 
             is GameEvent.AirdropCollected -> TODO()
@@ -245,10 +241,8 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    // ✅ Методы управления службой
     private fun startLocationTracking() {
         if (!(GameLocationService.currentLocation.value != null || !GameLocationService.isRunning)) {
-            // Простая проверка, можно добавить флаг isRunning в companion object сервиса
             GameLocationService.start(context)
         }
     }

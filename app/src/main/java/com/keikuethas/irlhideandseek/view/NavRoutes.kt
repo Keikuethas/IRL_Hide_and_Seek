@@ -1,5 +1,6 @@
 package com.keikuethas.irlhideandseek.view
 
+import com.keikuethas.irlhideandseek.model.DeathReason
 import kotlinx.serialization.Serializable
 
 @Serializable data object Home
@@ -10,7 +11,11 @@ import kotlinx.serialization.Serializable
     val playerId: String
 )
 @Serializable data class Game(val timeToHide: Int)
-@Serializable data object EndScreen
+@Serializable data class EndScreen(
+    val victory: Boolean,
+    val reason: DeathReason? = null,
+    val hunterId: String? = null
+)
 
 // --- экраны при создании игры ---
 @Serializable data class NewGame(val playerName: String)

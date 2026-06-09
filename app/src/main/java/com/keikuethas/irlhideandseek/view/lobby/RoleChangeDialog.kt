@@ -29,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
@@ -54,7 +55,6 @@ import com.keikuethas.irlhideandseek.model.SafeMansion
 import com.keikuethas.irlhideandseek.model.Shield
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.AbilityState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
-import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
 import com.keikuethas.irlhideandseek.utils.adjustLightness
 import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.name
@@ -100,7 +100,7 @@ fun RoleChangeDialog(
 
                 //content
                 Surface(
-                    color = BarelyGrey,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.height(700.dp)
                 ) {

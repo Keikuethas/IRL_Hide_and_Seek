@@ -9,16 +9,16 @@ data class EndState(
     val victory: Boolean = true,
     val reason: DeathReason? = null,
     val hunterName: String? = null
-): Parcelable
+) : Parcelable
 
 sealed interface EndIntent {
-
+    data object Quit : EndIntent
 }
 
 sealed interface EndResult {
-
+    data class Init(val state: EndState) : EndResult
 }
 
 sealed interface EndEffect {
-
+    data object Quit: EndEffect
 }

@@ -1,7 +1,6 @@
 package com.keikuethas.irlhideandseek.mvi.game
 
 import android.os.SystemClock.elapsedRealtime
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.keikuethas.irlhideandseek.model.ZoneType
 import com.keikuethas.irlhideandseek.ui.theme.color
@@ -133,7 +132,6 @@ object GameReducer {
             )
 
         is GameResult.GameStarted -> {
-            Log.i("GameReducer", "I started game no care")
             state.copy(
                 itsTimeToHide = false,
                 secondsRemain = result.duration
@@ -238,11 +236,10 @@ object GameReducer {
 
         is GameResult.SafeZoneRadiusChanged -> state.copy(
             mapState = state.mapState.copy(
-                objects = if (state.mapState.objects.any {it.id == "SafeZone"})
-                    state.mapState.objects.map {
-                        if (it.id == "SafeZone") it.copy(type = (it.type as Zone).copy(radius = result.radius))
-                        else it
-                    } else state.mapState.objects
+                objects = state.mapState.objects.map {
+                    if (it.id == "SafeZone") it.copy(type = (it.type as Zone).copy(radius = result.radius))
+                    else it
+                }
             )
         )
     }
