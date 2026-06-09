@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeEffect
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeIntent
+import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeState
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeType
 import com.keikuethas.irlhideandseek.mvi.newGame.time.TimeViewModel
 import com.keikuethas.irlhideandseek.view.components.AskingDialog
@@ -96,12 +97,9 @@ fun TimeScreen(
                 onEditClick = { viewModel.onIntent(TimeIntent.RequestTimeChange(TimeType.Shrink)) }
             )
 
-            //refactor to state
-            val minTimeSec = 30
-            val isHideTimeValid = state.hideTime >= minTimeSec
-            val isSeekTimeValid = state.seekTime >= minTimeSec
 
-            if (!isHideTimeValid || !isSeekTimeValid) {
+
+            if (!state.isSeekTimeValid) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -114,7 +112,7 @@ fun TimeScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Минимальное время раунда: ${minTimeSec / 60}м ${minTimeSec % 60}с",
+                        text = "Минимальное время раунда: ${TimeState.minRoundTime / 60}м ${TimeState.minRoundTime % 60}с",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.Medium
@@ -146,7 +144,7 @@ fun TimeScreen(
                     onClick = { viewModel.onIntent(TimeIntent.Save) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
-                    enabled = isHideTimeValid && isSeekTimeValid
+                    enabled = state.isSeekTimeValid
                 ) {
                     Icon(
                         Icons.Default.Check,

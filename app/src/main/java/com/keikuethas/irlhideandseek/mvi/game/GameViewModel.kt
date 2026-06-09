@@ -226,6 +226,7 @@ class GameViewModel @Inject constructor(
                 dispatch(Error("Включите GPS для продолжения игры"))
             }
 
+            // CONCERN
             // Примечание: GameEvent.LocationUpdated теперь обрабатывается сервером,
             // а локально мы получаем координаты из GameLocationService.currentLocation
             is GameEvent.LocationUpdated -> {

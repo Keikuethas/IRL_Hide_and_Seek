@@ -114,6 +114,7 @@ sealed interface GameResult {
     data object TimerTick: GameResult
     data class QuitDialogStateSet(val open: Boolean): GameResult
     data class SafeZoneRadiusChanged(val radius: Float): GameResult
+
 }
 
 sealed interface GameEffect {

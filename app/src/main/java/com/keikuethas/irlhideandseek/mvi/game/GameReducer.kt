@@ -1,6 +1,7 @@
 package com.keikuethas.irlhideandseek.mvi.game
 
 import android.os.SystemClock.elapsedRealtime
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.keikuethas.irlhideandseek.model.ZoneType
 import com.keikuethas.irlhideandseek.ui.theme.color
@@ -131,11 +132,13 @@ object GameReducer {
                 error = result.message
             )
 
-        is GameResult.GameStarted ->
+        is GameResult.GameStarted -> {
+            Log.i("GameReducer", "I started game no care")
             state.copy(
                 itsTimeToHide = false,
                 secondsRemain = result.duration
             )
+        }
 
         is GameResult.PlayerDied ->
             state.copy(
