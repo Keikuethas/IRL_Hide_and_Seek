@@ -46,7 +46,6 @@ class MapViewModel @Inject constructor(
                     return@launch
                 }
 
-                Log.d("MapVM", "⏳ Cache empty. Subscribing to observeLocation()...")
                 try {
                     LocationProvider.observeLocation()
                         .filterIsInstance<LocationEvent.Update>()

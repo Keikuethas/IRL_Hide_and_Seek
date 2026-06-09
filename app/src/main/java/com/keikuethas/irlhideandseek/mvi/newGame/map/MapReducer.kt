@@ -88,15 +88,10 @@ object MapReducer {
         }
 
         is MapResult.CameraPositionChanged -> with(state) {
-            // 🔄 Ключевое исправление: обновляем координаты объектов в стейте, если они привязаны к камере
-            val updatedObjects =
-                yandexMapState.objects.map { if (it.followCamera) it.copy(location = result.position) else it }
-
-
             copy(
                 yandexMapState = yandexMapState.copy(
                     cameraPosition = result.position,
-                    objects = updatedObjects
+                    objects = yandexMapState.objects.map { if (it.followCamera) it.copy(location = result.position) else it }
                 )
             )
         }

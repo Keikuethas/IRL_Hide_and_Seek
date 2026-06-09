@@ -200,7 +200,12 @@ object GameReducer {
         )
 
         is GameResult.AbilityLocationUpdated -> state.copy(
-            usingAbilityLocation = result.location
+            usingAbilityLocation = result.location,
+            mapState = state.mapState.copy(
+                objects = state.mapState.objects.map {
+                    if (it.followCamera) it.copy(location = result.location) else it
+                }
+            )
         )
 
         GameResult.AbilityUseCancelled -> state.copy(
