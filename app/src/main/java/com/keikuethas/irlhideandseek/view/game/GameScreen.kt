@@ -84,7 +84,7 @@ private fun Header( //todo разные подписи к таймеру (+вы�
     state: GameState
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         state.secondsRemain.let { secs ->
@@ -98,6 +98,7 @@ private fun Header( //todo разные подписи к таймеру (+вы�
             )
         }
 
+        Text("Здоровье: ${state.playerHealth}")
 
     }
 }
@@ -555,7 +556,6 @@ private fun GamePreview() {
     GSUI(
         preview = true,
         state = GameState(
-            abilityListOpen = true
         )
     )
 }
