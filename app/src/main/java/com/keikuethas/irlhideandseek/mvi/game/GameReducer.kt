@@ -2,6 +2,7 @@ package com.keikuethas.irlhideandseek.mvi.game
 
 import android.os.SystemClock.elapsedRealtime
 import androidx.compose.ui.graphics.Color
+import com.keikuethas.irlhideandseek.model.ZoneType
 import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.utils.color
 import com.keikuethas.irlhideandseek.utils.fillColor
@@ -33,7 +34,7 @@ object GameReducer {
                                         .params.find { it.first == "radius" }!!
                                         .second.toFloat()
                                 ),
-                                location = Point(0.0, 0.0),
+                                location = state.usingAbilityLocation ?: Point(0.0, 0.0),
                                 isVisible = true,
                                 followCamera = true
                             )
@@ -45,8 +46,27 @@ object GameReducer {
                 mapState = state.mapState.copy(shouldMoveCamera = false)
             )
 
-        is GameResult.Initialized ->
-            TODO()
+        is GameResult.Initialized -> state.copy(
+            secondsRemain = result.secondsRemain,
+            abilities = result.abilities,
+            players = result.players,
+            playerHealth = result.playerHealth,
+            roleType = result.roleType,
+            mapState = state.mapState.copy(
+                objects = state.mapState.objects +
+                        MapObjectState(
+                            id = "SafeZone",
+                            type = Zone(
+                                strokeColor = ZoneType.SAFE.strokeColor,
+                                fillColor = ZoneType.SAFE.fillColor,
+                                radius = result.safeZoneRadius
+                            ),
+                            location = result.safeZoneCenter,
+                            isVisible = true,
+                            followCamera = false
+                        )
+            )
+        )
 
         is GameResult.PlayerListStateSet ->
             state.copy(
@@ -100,7 +120,10 @@ object GameReducer {
 
             mapState = state.mapState.copy(
                 objects = state.mapState.objects.filterNot { it.id == "ZonePreview" }
-            )
+            ),
+
+            abilityListOpen = false,
+            usingAbilityOnMap = null
         )
 
         is GameResult.Error ->
@@ -181,7 +204,6 @@ object GameReducer {
 
         GameResult.AbilityUseCancelled -> state.copy(
             usingAbilityOnMap = null,
-            usingAbilityLocation = null,
             abilityListOpen = false,
             playerListOpen = false,
             mapState = state.mapState.copy(
@@ -201,6 +223,24 @@ object GameReducer {
         GameResult.OpenPlayerList -> state.copy(
             abilityListOpen = false,
             playerListOpen = true
+        )
+
+        is GameResult.QuitDialogStateSet -> state.copy(
+            showQuitDialog = result.open
+        )
+
+        GameResult.TimerTick -> state.copy(
+            secondsRemain = state.secondsRemain - 1
+        )
+
+        is GameResult.SafeZoneRadiusChanged -> state.copy(
+            mapState = state.mapState.copy(
+                objects = if (state.mapState.objects.any {it.id == "SafeZone"})
+                    state.mapState.objects.map {
+                        if (it.id == "SafeZone") it.copy(type = (it.type as Zone).copy(radius = result.radius))
+                        else it
+                    } else state.mapState.objects
+            )
         )
     }
 }

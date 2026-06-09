@@ -67,8 +67,8 @@ data class PlayerReadyStatusChangedData(
 
 @Serializable
 data class GameStateData(
-    val game_info: GameInfo,
-    val player_info: PlayerInfo
+    val game_data: GameInfo,
+    val player_data: PlayerInfo
 )
 
 @Serializable
@@ -156,4 +156,10 @@ data class AirdropCollectedData(
 @Serializable
 data class ApplyDamageData(
     val damage: Int
+)
+
+@Serializable
+data class UpdateSafeZoneData(
+    val safe_zone_id: String,
+    val new_radius: Float
 )

@@ -107,4 +107,9 @@ sealed interface IncomingMessage {
     @SerialName("apply_damage")
     data class ApplyDamage(val data: ApplyDamageData) : IncomingMessage
 
+    @Serializable
+    @SerialName("update_safe_zone")
+    data class UpdateSafeZone(val data: UpdateSafeZoneData) : IncomingMessage
+
+
 }

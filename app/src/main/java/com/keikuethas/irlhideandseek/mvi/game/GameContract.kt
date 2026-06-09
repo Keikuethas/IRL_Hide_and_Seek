@@ -15,7 +15,6 @@ import kotlinx.parcelize.RawValue
 data class PlayerState(
     val id: String,
     val name: String = "player",
-    val roleName: String = "new role",
     val roleType: RoleType = RoleType.SEEKER,
     val location: @RawValue Point,
     val isAlive: Boolean = true
@@ -27,7 +26,6 @@ data class GameState(
     val abilities: List<AbilityState> = emptyList(),
     val roleType: RoleType = RoleType.SEEKER,
     val players: List<PlayerState> = emptyList(),
-    val playerName: String = "me",
     val playerHealth: Int = 100,
     val itsTimeToHide: Boolean = true,
     val usingAbilityOnMap: @RawValue AbilityType? = null,
@@ -36,7 +34,8 @@ data class GameState(
     val mapState: @RawValue YandexMapState = YandexMapState(),
     val usingAbilityLocation: @RawValue Point? = null,
     val error: String? = null,
-    val usingCatch: Boolean = false
+    val usingCatch: Boolean = false,
+    val showQuitDialog: Boolean = false
 ): Parcelable
 
 
@@ -54,7 +53,9 @@ sealed interface GameIntent {
     data object DismissError: GameIntent
     data object SelectCatch: GameIntent
     data class ReportCameraPositionChanged(val location: Point): GameIntent
-
+data object RequestQuit: GameIntent
+    data object QuitConfirmed: GameIntent
+    data object QuitDeclined: GameIntent
 }
 
 sealed interface GameResult {
@@ -68,8 +69,9 @@ sealed interface GameResult {
         val abilities: List<AbilityState>,
         val roleType: RoleType,
         val players: List<PlayerState>,
-        val playerName: String,
-        val itsTimeToHide: Boolean
+        val playerHealth: Int,
+        val safeZoneRadius: Float,
+        val safeZoneCenter: Point
     ): GameResult
     data class ZoneAdded(
         val zoneId: String,
@@ -109,6 +111,9 @@ sealed interface GameResult {
 
     data object CooldownUpdated: GameResult
     data object OpenPlayerList: GameResult
+    data object TimerTick: GameResult
+    data class QuitDialogStateSet(val open: Boolean): GameResult
+    data class SafeZoneRadiusChanged(val radius: Float): GameResult
 }
 
 sealed interface GameEffect {
@@ -118,4 +123,6 @@ sealed interface GameEffect {
         val reason: DeathReason? = null,
         val hunterId: String? = null
     ): GameEffect
+
+    data object Quit: GameEffect
 }
