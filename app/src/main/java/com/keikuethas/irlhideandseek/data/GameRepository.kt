@@ -94,8 +94,8 @@ class GameRepository @Inject constructor(
                     is IncomingMessage.GameState ->
                         _gameEvents.emit(
                             GameEvent.GameState(
-                                game = data.game_info,
-                                player = data.player_info
+                                game = data.game_data,
+                                player = data.player_data
                             )
                         )
 
@@ -179,6 +179,14 @@ class GameRepository @Inject constructor(
                             )
                         )
 
+                    is IncomingMessage.UpdateSafeZone ->
+                        _gameEvents.emit(
+                            GameEvent.SafeZoneUpdated(
+                                zoneId = data.safe_zone_id,
+                                radius = data.new_radius
+                            )
+                        )
+
                     else -> {/*игнорируем неигровые события*/
                     }
                 }
@@ -210,5 +218,8 @@ class GameRepository @Inject constructor(
             lat = latitude,
             lng = longitude
         )
+
+    suspend fun getGameState() =
+        webSocketManager.sendGetGameState()
 
 }

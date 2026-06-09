@@ -97,4 +97,9 @@ sealed interface GameEvent {
     data class ApplyDamage(
         val damage: Int
     ): GameEvent
+
+    data class SafeZoneUpdated(
+        val zoneId: String,
+        val radius: Float
+    ): GameEvent
 }
