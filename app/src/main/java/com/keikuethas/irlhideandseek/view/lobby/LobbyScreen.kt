@@ -184,7 +184,6 @@ fun LobbyContent(
                 onReadyClick = { onIntent(LobbyIntent.ChangeReadyStatus) },
                 onRoleClick = { onIntent(LobbyIntent.RequestRoleChangeDialog) }
             )
-            playerRoles
 
             DisplayPlayers(
                 playerList = state.players,
