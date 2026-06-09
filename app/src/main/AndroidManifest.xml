@@ -45,7 +45,7 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
-        <service android:name=".Websocket.GameSessionService"
+        <service android:name="ForegroundService"
             android:foregroundServiceType="dataSync|location"
             android:exported="false" />
 
