@@ -327,16 +327,14 @@ fun LobbyContentPreview(
         name = "Роль1",
         health = 100,
         victory_condition = roleType,
-        abilities = emptyList(),
-        events = emptyList()
+        abilities = emptyList()
     )
     val fakeRole2 = RoleInfo(
         id = "role2",
         name = "Роль2",
         health = 100,
         victory_condition = RoleType.SEEKER,
-        abilities = emptyList(),
-        events = emptyList()
+        abilities = emptyList()
     )
     val previewState = LobbyState(
         playerName = "Реально длинное имя",
