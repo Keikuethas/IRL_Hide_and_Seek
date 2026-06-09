@@ -154,7 +154,7 @@ fun RoleCard(
                 .padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column (
+            Column(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -181,30 +181,32 @@ fun RoleCard(
                 Icon(if (enabled) Icons.Default.Start else Icons.Default.Check, null)
             }
         }
-        Box(
-            Modifier.fillMaxWidth()
-        ) {
-            ElevatedButton(
-                onClick = { expanded.value = !expanded.value },
-                modifier = Modifier.align(Alignment.Center),
-                elevation = ButtonDefaults.elevatedButtonElevation(
-                    defaultElevation = 5.dp
-                )
+        if (role.abilities.isNotEmpty())
+            Box(
+                Modifier.fillMaxWidth()
             ) {
-                Text(
-                    "Способности",
-                    style = typography.labelLarge,
-                    textAlign = TextAlign.Center
-                )
-                Icon(
-                    if (expanded.value) Icons.Default.KeyboardArrowUp
-                    else Icons.Default.KeyboardArrowDown,
-                    null
-                )
+                ElevatedButton(
+                    onClick = { expanded.value = !expanded.value },
+                    modifier = Modifier.align(Alignment.Center),
+                    elevation = ButtonDefaults.elevatedButtonElevation(
+                        defaultElevation = 5.dp
+                    )
+                ) {
+                    Text(
+                        "Способности",
+                        style = typography.labelLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Icon(
+                        if (expanded.value) Icons.Default.KeyboardArrowUp
+                        else Icons.Default.KeyboardArrowDown,
+                        null
+                    )
+                }
             }
-        }
         AnimatedVisibility(
-            expanded.value
+            expanded.value,
+            modifier = Modifier.height(300.dp)
         ) {
             LazyColumn(
                 Modifier.padding(horizontal = 10.dp)
@@ -285,11 +287,13 @@ private fun AbilityCardPreview() {
 @Composable
 private fun RoleCardPreview() {
     RoleCard(
-        RoleState(PlayerRole(
-            "Охотник",
-            listOf(Shield(), Intel(), PersonalBomb()), RoleType.SEEKER
-        ), 100
-    ))
+        RoleState(
+            PlayerRole(
+                "Охотник",
+                listOf(Shield(), Intel(), PersonalBomb()), RoleType.SEEKER
+            ), 100
+        )
+    )
 }
 
 @Preview
