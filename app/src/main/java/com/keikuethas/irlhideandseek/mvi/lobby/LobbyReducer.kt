@@ -13,7 +13,7 @@ object LobbyReducer {
             players = state.players + PlayerInfo(
                 id = result.id,
                 name = result.playerName,
-                health = getRoleById(state.roles, result.roleId)?.health!!,
+                health = 100,
                 is_alive = true,
                 location_lat = 0.0,
                 location_lng = 0.0,
