@@ -165,7 +165,7 @@ class GameViewModel @Inject constructor(
 
             is GameEvent.StartTimerForGame -> {
                 dispatch(GameStarted(duration))
-                startLocationTracking() // ✅ Запускаем сервис, когда игра началась
+                startLocationTracking()
             }
 
             is GameEvent.YouDied -> {

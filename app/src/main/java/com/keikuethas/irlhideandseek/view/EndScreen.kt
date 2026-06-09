@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.keikuethas.irlhideandseek.model.DeathReason
@@ -36,14 +37,16 @@ import com.keikuethas.irlhideandseek.mvi.endscreen.EndViewModel
 import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.view.topbar.TextTopAppBar
 
-//TODO экран конца игры (победа/поражение)
 
 @Composable
 fun EndScreen(
     navController: NavController = rememberNavController(),
-    viewMode: EndViewModel = hiltViewModel()
+    viewModel: EndViewModel = hiltViewModel()
 ) {
-
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    EndContent(
+        state = state.value,
+    ) {viewModel.onIntent(it)}
 }
 
 @Preview(showBackground = true)

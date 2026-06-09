@@ -40,7 +40,7 @@ fun AppNavigation() {
 
         composable<TimeSettings> { TimeScreen(navController) }
 
-        composable<EndScreen> { EndScreen(navController)}
+        composable<EndScreen> { EndScreen(navController) }
 
     }
 }

@@ -286,7 +286,7 @@ private fun GSUI(
                         )
                 } else
                     Text(
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier.align(Alignment.Center).padding(horizontal = 10.dp),
                         text = "Ждём, пока все спрячутся...",
                         style = typography.headlineMedium,
                         color = RoleType.SEEKER.color
