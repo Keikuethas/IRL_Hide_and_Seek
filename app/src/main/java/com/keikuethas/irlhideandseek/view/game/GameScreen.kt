@@ -72,6 +72,7 @@ import com.keikuethas.irlhideandseek.utils.color
 import com.keikuethas.irlhideandseek.utils.description
 import com.keikuethas.irlhideandseek.utils.name
 import com.keikuethas.irlhideandseek.utils.surfaceColor
+import com.keikuethas.irlhideandseek.view.Home
 import com.keikuethas.irlhideandseek.view.map.MapObjectState
 import com.keikuethas.irlhideandseek.view.map.MapObjectType
 import com.keikuethas.irlhideandseek.view.map.YandexMapState
@@ -87,7 +88,7 @@ private fun Header( //todo разные подписи к таймеру (+вы�
         Text(
             state.run {
                 when {
-                    itsTimeToHide && roleType == RoleType.HIDER -> "Время спрятаться:"
+                    itsTimeToHide -> "Время спрятаться:"
                     else -> "До конца раунда: "
                 }
             } + "${secs / 60}:${(secs % 60).toString().padStart(2, '0')}"
@@ -110,9 +111,12 @@ fun GameScreen(
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
-            when(effect) {
+            when (effect) {
                 is GameEffect.EndGame -> TODO()
                 GameEffect.GetDamage -> TODO()
+                GameEffect.Quit -> navController.navigate(Home) {
+                    popUpTo(Home)
+                }
             }
         }
     }
@@ -185,78 +189,80 @@ private fun GSUI(
             Box(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (state.usingAbilityOnMap == null)
-                    FloatingActionButton(
-                        modifier = Modifier.align(Alignment.Center),
-                        onClick = { onIntent(GameIntent.AbilityListOpen) },
-                        containerColor = MaterialTheme.colorScheme.primary,
-
-                        ) {
-                        Column(
-                            modifier = Modifier.padding(10.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                Icons.Default.AutoAwesome,
-                                null,
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-
-                            Spacer(modifier = Modifier.height(5.dp))
-
-                            Text(
-                                modifier = Modifier.padding(horizontal = 5.dp),
-                                text = "Способности",
-                                textAlign = TextAlign.Center,
-                                style = typography.labelLarge,
-                                autoSize = TextAutoSize.StepBased(maxFontSize = 18.sp),
-                                maxLines = 1
-                            )
-                        }
-                    }
-                else
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 96.dp)
-                            .padding(horizontal = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
+                if (!state.itsTimeToHide) {
+                    if (state.usingAbilityOnMap == null)
                         FloatingActionButton(
-                            modifier = Modifier.aspectRatio(1F),
-                            onClick = { onIntent(GameIntent.CancelUseAbility) },
-                            shape = RoundedCornerShape(24.dp),
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .aspectRatio(1F)
-                                    .padding(5.dp),
-                                imageVector = Icons.Default.Close,
-                                tint = MaterialTheme.colorScheme.error,
-                                contentDescription = null
-                            )
-                        }
+                            modifier = Modifier.align(Alignment.Center),
+                            onClick = { onIntent(GameIntent.AbilityListOpen) },
+                            containerColor = MaterialTheme.colorScheme.primary,
 
-                        FloatingActionButton(
-                            modifier = Modifier.aspectRatio(1F),
-                            onClick = { onIntent(GameIntent.UseAbility) },
-                            shape = RoundedCornerShape(24.dp),
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .aspectRatio(1F)
-                                    .padding(5.dp),
-                                imageVector = Icons.Default.Check,
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                contentDescription = null
-                            )
+                            ) {
+                            Column(
+                                modifier = Modifier.padding(10.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.AutoAwesome,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+
+                                Spacer(modifier = Modifier.height(5.dp))
+
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 5.dp),
+                                    text = "Способности",
+                                    textAlign = TextAlign.Center,
+                                    style = typography.labelLarge,
+                                    autoSize = TextAutoSize.StepBased(maxFontSize = 18.sp),
+                                    maxLines = 1
+                                )
+                            }
                         }
-                    }
+                    else
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 96.dp)
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            FloatingActionButton(
+                                modifier = Modifier.aspectRatio(1F),
+                                onClick = { onIntent(GameIntent.CancelUseAbility) },
+                                shape = RoundedCornerShape(24.dp),
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            ) {
+                                Icon(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .aspectRatio(1F)
+                                        .padding(5.dp),
+                                    imageVector = Icons.Default.Close,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    contentDescription = null
+                                )
+                            }
+
+                            FloatingActionButton(
+                                modifier = Modifier.aspectRatio(1F),
+                                onClick = { onIntent(GameIntent.UseAbility) },
+                                shape = RoundedCornerShape(24.dp),
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ) {
+                                Icon(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .aspectRatio(1F)
+                                        .padding(5.dp),
+                                    imageVector = Icons.Default.Check,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                }
             }
         }
     ) { innerPadding ->
@@ -267,52 +273,68 @@ private fun GSUI(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Green)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
-                if (!preview)
-                    YandexMapView(
-                        modifier = Modifier.fillMaxSize(),
-                        state = state.mapState,
-                        onMapCreated = { map ->
-                            mapView.value = map
-                        },
-                        onCameraMoveFinished = { onIntent(GameIntent.ReportCameraMoveFinished) },
-                        onCameraPositionChanged = { onIntent(GameIntent.ReportCameraPositionChanged(it)) }
-                    )
-
-                if (state.usingAbilityOnMap != null)
-                    Icon(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(48.dp),
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = state.usingAbilityOnMap.color
-                    )
-            }
-
-            if (state.abilityListOpen || state.usingCatch)
-                ModalBottomSheet(
-                    onDismissRequest = { onIntent(GameIntent.AbilityListClose) },
-                    sheetState = rememberModalBottomSheetState(
-                        skipPartiallyExpanded = true
-                    ),
-                    dragHandle = {}
-                ) {
-                    if (state.abilityListOpen)
-                        AbilityList(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 30.dp),
-                            abilities = state.abilities,
-                            onAbilitySelected = { onIntent(GameIntent.SelectAbility(it)) },
-                            onCatchSelected = { onIntent(GameIntent.SelectCatch) }
+                if (!state.itsTimeToHide || state.roleType == RoleType.HIDER) {
+                    if (!preview)
+                        YandexMapView(
+                            modifier = Modifier.fillMaxSize(),
+                            state = state.mapState,
+                            onMapCreated = { map ->
+                                mapView.value = map
+                            },
+                            onCameraMoveFinished = { onIntent(GameIntent.ReportCameraMoveFinished) },
+                            onCameraPositionChanged = {
+                                onIntent(
+                                    GameIntent.ReportCameraPositionChanged(
+                                        it
+                                    )
+                                )
+                            }
                         )
-                    else
-                        HidersList(
-                            hiders = state.players.filter { it.roleType == RoleType.HIDER && it.isAlive }
-                        ) { onIntent(GameIntent.CatchPlayer(it)) }
-                }
+
+                    if (state.usingAbilityOnMap != null)
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(48.dp),
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = state.usingAbilityOnMap.color
+                        )
+                } else
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = "Ждём, пока все спрячутся...",
+                        style = typography.headlineMedium,
+                        color = RoleType.SEEKER.color
+                    )
+
+
+                if (state.abilityListOpen || state.usingCatch)
+                    ModalBottomSheet(
+                        onDismissRequest = { onIntent(GameIntent.AbilityListClose) },
+                        sheetState = rememberModalBottomSheetState(
+                            skipPartiallyExpanded = true
+                        ),
+                        dragHandle = {}
+                    ) {
+                        if (state.abilityListOpen)
+                            AbilityList(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(top = 30.dp),
+                                showCatch = state.roleType == RoleType.SEEKER,
+                                abilities = state.abilities,
+                                onAbilitySelected = { onIntent(GameIntent.SelectAbility(it)) },
+                                onCatchSelected = { onIntent(GameIntent.SelectCatch) }
+                            )
+                        else
+                            HidersList(
+                                hiders = state.players.filter { it.roleType == RoleType.HIDER && it.isAlive }
+                            ) { onIntent(GameIntent.CatchPlayer(it)) }
+                    }
+            }
         }
     }
 }
@@ -361,7 +383,7 @@ private fun HidersList(
                 ) { item ->
                     HiderItem(
                         hider = item
-                    ) {onSelected(item.id)}
+                    ) { onSelected(item.id) }
                 }
             }
         }
@@ -389,18 +411,18 @@ private fun HiderItem(
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
-       Row (
-           modifier = Modifier.padding(10.dp),
-           verticalAlignment = Alignment.CenterVertically,
-           horizontalArrangement = Arrangement.spacedBy(4.dp)
-       ) {
+        Row(
+            modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
 
-           Icon(
-               modifier = Modifier.size(24.dp),
-               imageVector = Icons.Default.Person,
-               tint = RoleType.HIDER.color,
-               contentDescription = null
-           )
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = Icons.Default.Person,
+                tint = RoleType.HIDER.color,
+                contentDescription = null
+            )
 
             Text(
                 text = hider.name,
@@ -419,6 +441,7 @@ private fun HiderItem(
 @Composable
 private fun AbilityList(
     modifier: Modifier = Modifier.fillMaxWidth(),
+    showCatch: Boolean = true,
     abilities: List<AbilityState> = listOf(
         AbilityState(Shield()),
         AbilityState(PersonalBomb())
