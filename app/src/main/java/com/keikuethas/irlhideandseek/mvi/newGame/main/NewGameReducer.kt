@@ -33,5 +33,6 @@ object NewGameReducer {
             )
             is NewGameResult.Error -> state.copy(error = result.message)
             is NewGameResult.SetHostName -> state.copy(hostName = result.hostName)
+            is NewGameResult.TimeUpdated -> state.copy(timeSettings = result.newState)
         }
 }

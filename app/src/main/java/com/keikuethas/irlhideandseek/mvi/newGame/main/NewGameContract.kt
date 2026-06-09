@@ -63,6 +63,7 @@ sealed interface NewGameResult {
     data class RolesUpdated(val newState: RSState) : NewGameResult
     data class EventsUpdated(val newState: ESState) : NewGameResult
     data class MapUpdated(val newState: MapState) : NewGameResult
+    data class TimeUpdated(val newState: TimeState): NewGameResult
 
     data class Error(val message: String) : NewGameResult
 }

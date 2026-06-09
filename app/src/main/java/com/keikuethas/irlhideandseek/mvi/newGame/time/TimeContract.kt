@@ -10,7 +10,12 @@ data class TimeState(
     val shrinkTime: Int = 60,
     val editingType: TimeType? = null,
     val showQuitDialog: Boolean = false
-) : Parcelable
+) : Parcelable {
+    val isSeekTimeValid get() = seekTime >= minRoundTime
+    companion object {
+        const val minRoundTime: Int = 30
+    }
+}
 
 sealed interface TimeIntent {
     data class RequestTimeChange(val type: TimeType) : TimeIntent

@@ -102,4 +102,6 @@ sealed interface GameEvent {
         val zoneId: String,
         val radius: Float
     ): GameEvent
+
+//    data object TimerToHideFinished: GameEvent
 }

@@ -187,6 +187,11 @@ class GameRepository @Inject constructor(
                             )
                         )
 
+//                    is IncomingMessage.TimerToHideFinished ->
+//                        _gameEvents.emit(
+//                            GameEvent.TimerToHideFinished
+//                        )
+
                     else -> {/*игнорируем неигровые события*/
                     }
                 }

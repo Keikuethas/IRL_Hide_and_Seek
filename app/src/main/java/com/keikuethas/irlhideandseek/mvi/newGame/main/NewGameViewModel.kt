@@ -35,25 +35,15 @@ class NewGameViewModel @Inject constructor(
     savedStateHandle
 ) {
 
+    // refactor
     init {
         // Подписываемся на изменения в репозитории, чтобы обновлять главный экран
         viewModelScope.launch {
             repository.newGameState.collect {
-                val newRoles = it.rolesSettings
-                dispatch(RolesUpdated(newRoles))
-            }
-        }
-        viewModelScope.launch {
-            repository.newGameState.collect {
-                val newEvents = it.eventSettings
-                dispatch(EventsUpdated(newEvents))
-            }
-        }
-
-        viewModelScope.launch {
-            repository.newGameState.collect {
-                val newMap = it.mapSettings
-                dispatch(NewGameResult.MapUpdated(newMap))
+                dispatch(RolesUpdated(it.rolesSettings))
+                dispatch(EventsUpdated(it.eventSettings))
+                dispatch(NewGameResult.MapUpdated(it.mapSettings))
+                dispatch(NewGameResult.TimeUpdated(it.timeSettings))
             }
         }
     }
