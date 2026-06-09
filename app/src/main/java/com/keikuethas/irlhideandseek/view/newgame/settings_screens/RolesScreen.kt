@@ -78,7 +78,6 @@ import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RSState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RoleState
 import com.keikuethas.irlhideandseek.mvi.newGame.roles.RolesViewModel
-import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
 import com.keikuethas.irlhideandseek.ui.theme.color
 import com.keikuethas.irlhideandseek.utils.dashedBorder
 import com.keikuethas.irlhideandseek.utils.description
@@ -177,7 +176,6 @@ fun RSSUI(
 
     Scaffold(
         modifier = Modifier
-            .padding(horizontal = 5.dp)
 
             .fillMaxSize(),
         topBar = {
@@ -188,6 +186,7 @@ fun RSSUI(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(bottom = 24.dp)
+                .padding(horizontal = 5.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -208,7 +207,7 @@ fun RSSUI(
                 ) {
                     Icon(
                         Icons.Default.ChevronLeft, null,
-                        tint = Color.Blue,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
 
@@ -237,7 +236,7 @@ fun RSSUI(
                 ) {
                     Icon(
                         Icons.Default.ChevronRight, null,
-                        tint = Color.Blue
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -371,7 +370,7 @@ fun EmptyRoleElement(
 ) {
     Card(
         modifier = Modifier
-            .dashedBorder(4.dp, Color.Black, 5.dp, 5.dp, 16.dp)
+            .dashedBorder(4.dp, MaterialTheme.colorScheme.outline, 5.dp, 5.dp, 16.dp)
             .padding(8.dp)
             .height(480.dp)
             .width(280.dp)
@@ -390,10 +389,13 @@ fun EmptyRoleElement(
             {
                 Text(
                     stringResource(R.string.CreateRole),
-                    style = typography.bodyLarge
+                    style = typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.outline
                 )
                 Icon(
-                    Icons.Default.Add, null
+                    Icons.Default.Add,
+                    null,
+                    tint = MaterialTheme.colorScheme.outline
                 )
             }
         }
@@ -479,7 +481,7 @@ fun RoleElement(
                     Spacer(Modifier.height(10.dp))
                     Surface(
                         modifier = Modifier.padding(5.dp),
-                        color = BarelyGrey,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         LazyColumn(
@@ -537,7 +539,7 @@ private fun EmptyAbilityCard(
 ) {
     Card(
         modifier = modifier
-            .dashedBorder(2.dp, Color.Black, 4.dp, 4.dp, 16.dp)
+            .dashedBorder(2.dp, MaterialTheme.colorScheme.outline, 4.dp, 4.dp, 16.dp)
             .padding(4.dp)
             .fillMaxWidth()
             .height(200.dp),
@@ -555,10 +557,13 @@ private fun EmptyAbilityCard(
             {
                 Text(
                     "Добавить способность",
-                    style = typography.bodyLarge
+                    style = typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.outline
                 )
                 Icon(
-                    Icons.Default.Add, null
+                    Icons.Default.Add,
+                    null,
+                    tint = MaterialTheme.colorScheme.outline
                 )
             }
         }
@@ -596,7 +601,7 @@ private fun AbilityCard(
                 Icon(
                     Icons.Default.DeleteForever,
                     null,
-                    tint = Color.Red,
+                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(30.dp)
                 )
             }
@@ -715,7 +720,9 @@ fun RTCDUI(
             Row(
                 Modifier
                     .height(100.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(5.dp)
+                    .padding(horizontal = 5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -724,7 +731,8 @@ fun RTCDUI(
                 Text(
                     "При смене условия победы настройки способностей не будут сброшены.",
                     style = typography.bodyLarge,
-                    textAlign = TextAlign.Justify
+                    textAlign = TextAlign.Justify,
+                    color = Color.Black
                 )
             }
         }

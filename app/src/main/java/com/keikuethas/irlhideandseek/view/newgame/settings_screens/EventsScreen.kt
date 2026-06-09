@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -490,7 +492,6 @@ private fun EventCard(
     }
 }
 
-// Заглушка для отображения параметров (если функция не импортирована из другого файла)
 @Composable
 fun ParamInfo(
     name: String,
@@ -503,18 +504,25 @@ fun ParamInfo(
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(4.dp)
+            .padding(horizontal = 5.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(_name, style = typography.bodyMedium)
+        Text(
+            modifier = Modifier.fillMaxWidth(2/3F),
+            text = _name,
+            style = typography.bodyMedium
+        )
         TextButton(
             onClick = onValueClick
         ) {
             Text(
-                "$value $_unit",
+                "${value.toInt()} $_unit",
                 style = typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(maxFontSize = 14.sp)
             )
         }
     }
