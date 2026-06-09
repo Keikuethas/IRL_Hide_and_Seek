@@ -29,7 +29,8 @@ object LobbyReducer {
         is LobbyResult.ReadyStatusSet -> state.copy(isReady = result.ready)
 
         is LobbyResult.RoleChanged -> state.copy(
-            playerRole = getRoleById(state.roles, result.role)?.name ?: "?"
+            playerRole = getRoleById(state.roles, result.role)?.name ?: "?",
+            showRoleChangeDialog = false
         )
 
         is LobbyResult.QuitDialogStateSet -> state.copy(showQuitDialog = result.open)
