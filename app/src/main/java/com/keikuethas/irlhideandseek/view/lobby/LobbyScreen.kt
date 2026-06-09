@@ -187,7 +187,8 @@ fun LobbyContent(
             playerRoles
 
             DisplayPlayers(
-                playerList = state.players
+                playerList = state.players,
+                roles = state.roles
             )
 
             ElevatedButton(
