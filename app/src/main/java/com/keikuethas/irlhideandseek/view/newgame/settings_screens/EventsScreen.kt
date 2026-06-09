@@ -302,7 +302,7 @@ fun EADUI(
             textAlign = TextAlign.Center
         )
         Surface(
-            color = BarelyGrey,
+            color = MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.height(400.dp)
         ) {

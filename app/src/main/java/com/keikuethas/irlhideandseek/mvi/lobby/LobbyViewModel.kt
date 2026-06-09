@@ -80,6 +80,8 @@ class LobbyViewModel @Inject constructor(
                         roomCode = game.game_code
                     )
                 )
+
+                Log.i("LobbyVM", "I have ${state.value.roles.size} roles.")
             }
 
             is LobbyEvent.RoleChanged -> {
