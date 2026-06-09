@@ -177,7 +177,7 @@ class GameViewModel @Inject constructor(
                     EndGame(
                         victory = false,
                         reason = reason,
-                        hunterId = hunterId
+                        hunterName = state.value.players.find { it.id == hunterId }?.name
                     )
                 )
             }

@@ -122,7 +122,7 @@ sealed interface GameEffect {
     data class EndGame(
         val victory: Boolean,
         val reason: DeathReason? = null,
-        val hunterId: String? = null
+        val hunterName: String? = null
     ): GameEffect
 
     data object Quit: GameEffect

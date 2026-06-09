@@ -6,7 +6,6 @@ import com.keikuethas.irlhideandseek.model.DeathReason
 import com.keikuethas.irlhideandseek.model.RoleType
 import com.keikuethas.irlhideandseek.model.ZoneType
 import com.keikuethas.irlhideandseek.network.models.AbilityInfo
-import com.keikuethas.irlhideandseek.network.models.EventInfo
 import com.keikuethas.irlhideandseek.network.models.GameInfo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -122,7 +121,7 @@ data class AbilityUsedData(
     val result: Int
 )
 
-//refactor
+//refactor move to a different file
 @Parcelize
 @Serializable
 data class RoleInfo(
@@ -131,7 +130,6 @@ data class RoleInfo(
     val health: Int,
     val victory_condition: RoleType,
     val abilities: List<AbilityInfo>,
-    val events: List<EventInfo?> = emptyList()
 ): Parcelable
 
 @Serializable
