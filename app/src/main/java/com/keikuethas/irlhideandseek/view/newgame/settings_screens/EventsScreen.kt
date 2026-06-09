@@ -73,7 +73,6 @@ import com.keikuethas.irlhideandseek.mvi.newGame.events.ESIntent
 import com.keikuethas.irlhideandseek.mvi.newGame.events.ESState
 import com.keikuethas.irlhideandseek.mvi.newGame.events.EventState
 import com.keikuethas.irlhideandseek.mvi.newGame.events.EventsViewModel
-import com.keikuethas.irlhideandseek.ui.theme.BarelyGrey
 import com.keikuethas.irlhideandseek.utils.Description
 import com.keikuethas.irlhideandseek.utils.Name
 import com.keikuethas.irlhideandseek.utils.dashedBorder
@@ -159,7 +158,7 @@ fun ESUI(
                 modifier = Modifier
                     .padding(5.dp)
                     .weight(0.75f),
-                color = BarelyGrey,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(16.dp)
             ) {
                 LazyColumn {

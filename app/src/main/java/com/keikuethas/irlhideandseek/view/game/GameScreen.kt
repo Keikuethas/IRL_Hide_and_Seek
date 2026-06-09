@@ -83,10 +83,10 @@ import com.yandex.mapkit.mapview.MapView
 private fun Header( //todo разные подписи к таймеру (+выделение цветом)
     state: GameState
 ) {
-    Column (
+    Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         state.secondsRemain.let { secs ->
             Text(
                 state.run {
@@ -118,9 +118,12 @@ fun GameScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is GameEffect.EndGame -> navController.navigate(EndScreen(
-                    effect.victory, effect.reason, effect.hunterName
-                ))
+                is GameEffect.EndGame -> navController.navigate(
+                    EndScreen(
+                        effect.victory, effect.reason, effect.hunterName
+                    )
+                )
+
                 GameEffect.GetDamage -> {}
                 GameEffect.Quit -> navController.navigate(Home) {
                     popUpTo(Home)
@@ -290,7 +293,7 @@ private fun GSUI(
                     )
 
 
-                if (state.abilityListOpen || state.usingCatch)
+                if (state.abilityListOpen || state.playerListOpen)
                     ModalBottomSheet(
                         onDismissRequest = { onIntent(GameIntent.AbilityListClose) },
                         sheetState = rememberModalBottomSheetState(

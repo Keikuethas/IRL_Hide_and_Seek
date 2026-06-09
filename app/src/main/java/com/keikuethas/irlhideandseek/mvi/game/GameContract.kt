@@ -34,7 +34,6 @@ data class GameState(
     val mapState: @RawValue YandexMapState = YandexMapState(),
     val usingAbilityLocation: @RawValue Point? = null,
     val error: String? = null,
-    val usingCatch: Boolean = false,
     val showQuitDialog: Boolean = false
 ): Parcelable
 

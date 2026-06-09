@@ -43,6 +43,7 @@ object MapReducer {
 
         is MapResult.Initialized -> with (result.state) {
             copy(
+                location = location,
                 followCamera = location == null,
                 yandexMapState = yandexMapState.copy(
                     shouldMoveCamera = true,
@@ -90,7 +91,6 @@ object MapReducer {
         is MapResult.CameraPositionChanged -> with(state) {
             copy(
                 yandexMapState = yandexMapState.copy(
-                    cameraPosition = result.position,
                     objects = yandexMapState.objects.map { if (it.followCamera) it.copy(location = result.position) else it }
                 )
             )
@@ -104,7 +104,6 @@ object MapReducer {
             copy(
                 location = result.location,
                 yandexMapState = yandexMapState.copy(
-                    cameraPosition = result.location,
                     objects = updatedObjects
                 )
             )

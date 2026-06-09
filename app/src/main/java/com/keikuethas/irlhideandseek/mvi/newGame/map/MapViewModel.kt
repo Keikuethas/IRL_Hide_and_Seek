@@ -70,9 +70,7 @@ class MapViewModel @Inject constructor(
             MapIntent.ChangeFollowStatus -> dispatch(FollowStatusChanged)
             MapIntent.ReportCameraMoveFinished -> dispatch(StopCameraMovement)
             is MapIntent.ReportCameraPositionChanged -> {
-                // 📍 Всегда обновляем центр карты (чтобы UI и LaunchedEffect работали)
                 dispatch(CameraPositionChanged(pos))
-                // 🎮 Игровую локацию обновляем только если включена привязка
                 if (state.value.followCamera) dispatch(LocationUpdated(pos))
             }
             MapIntent.RequestQuit -> dispatch(QuitDialogStateSet(true))
