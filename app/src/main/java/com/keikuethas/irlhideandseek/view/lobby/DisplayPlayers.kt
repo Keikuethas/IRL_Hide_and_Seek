@@ -24,8 +24,7 @@ import com.keikuethas.irlhideandseek.websocket.incoming.RoleInfo
 // upgrade
 @Composable
 fun DisplayPlayers(
-    playerList: List<PlayerInfo>,
-    roles: List<RoleInfo>
+    playerList: List<PlayerInfo>
 ) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth().padding(10.dp)
@@ -69,7 +68,7 @@ fun DisplayPlayers(
                         ) {
                             Text(item.name)
                         }
-                        Text(roles.find { item.role_id == it.id }?.name ?: "?")
+                        Text(item.role_ref!!.name)
                         Text(if (item.is_player_ready) "Готов" else "Не готов")
                     }
                 }
